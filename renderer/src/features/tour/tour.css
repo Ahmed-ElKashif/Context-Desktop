@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Context — Product Tour (driver.js overrides)
+   Matches the Context design system: Indigo primary, glassmorphism,
+   rounded corners, and full dark-mode support.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay ─────────────────────────────────────────────────────── */
+.driver-overlay {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ── Popover Container ───────────────────────────────────────────── */
+.driver-popover {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(79, 70, 229, 0.08) !important;
+  padding: 0 !important;
+  max-width: 360px !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  overflow: hidden !important;
+}
+
+.dark .driver-popover {
+  background: #18181b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(139, 92, 246, 0.15) !important;
+}
+
+/* ── Title ───────────────────────────────────────────────────────── */
+.driver-popover-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  padding: 20px 20px 4px !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.dark .driver-popover-title {
+  color: #ffffff !important;
+}
+
+/* ── Description ─────────────────────────────────────────────────── */
+.driver-popover-description {
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  color: #64748b !important;
+  padding: 4px 20px 16px !important;
+  margin: 0 !important;
+}
+
+.dark .driver-popover-description {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ── Footer (progress + buttons) ─────────────────────────────────── */
+.driver-popover-footer {
+  padding: 12px 20px !important;
+  border-top: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+.dark .driver-popover-footer {
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Progress Text ───────────────────────────────────────────────── */
+.driver-popover-progress-text {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  font-family: 'JetBrains Mono Variable', monospace !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.dark .driver-popover-progress-text {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* ── Shared Button Styles ────────────────────────────────────────── */
+.driver-popover-prev-btn,
+.driver-popover-next-btn {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  border-radius: 10px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  text-shadow: none !important;
+}
+
+/* ── Previous Button ─────────────────────────────────────────────── */
+.driver-popover-prev-btn {
+  background: transparent !important;
+  color: #64748b !important;
+  padding: 8px 12px !important;
+}
+
+.driver-popover-prev-btn:hover {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+.dark .driver-popover-prev-btn {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dark .driver-popover-prev-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* ── Next / Done Button ──────────────────────────────────────────── */
+.driver-popover-next-btn {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
+}
+
+.driver-popover-next-btn:hover {
+  background: #4338ca !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dark .driver-popover-next-btn {
+  background: #8b5cf6 !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25) !important;
+}
+
+.dark .driver-popover-next-btn:hover {
+  background: #a78bfa !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35) !important;
+}
+
+/* ── Close Button ────────────────────────────────────────────────── */
+.driver-popover-close-btn {
+  color: #94a3b8 !important;
+  font-size: 18px !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+  top: 14px !important;
+  right: 14px !important;
+}
+
+.driver-popover-close-btn:hover {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+.dark .driver-popover-close-btn {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.dark .driver-popover-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* ── Arrow ───────────────────────────────────────────────────────── */
+.driver-popover-arrow {
+  border: 8px solid transparent !important;
+}
+
+.driver-popover-arrow-side-left {
+  border-right-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-right {
+  border-left-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-top {
+  border-bottom-color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-bottom {
+  border-top-color: #ffffff !important;
+}
+
+.dark .driver-popover-arrow-side-left {
+  border-right-color: #18181b !important;
+}
+
+.dark .driver-popover-arrow-side-right {
+  border-left-color: #18181b !important;
+}
+
+.dark .driver-popover-arrow-side-top {
+  border-bottom-color: #18181b !important;
+}
+
+.dark .driver-popover-arrow-side-bottom {
+  border-top-color: #18181b !important;
+}
+
+/* ── Highlighted Element ─────────────────────────────────────────── */
+.driver-active-element {
+  border-radius: 12px !important;
+}

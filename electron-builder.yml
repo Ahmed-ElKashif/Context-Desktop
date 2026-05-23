@@ -1,0 +1,15 @@
+appId: com.context.ai
+productName: Context
+directories:
+  output: release
+  buildResources: build
+win:
+  target: nsis
+  icon: build/icon.png
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  include: build/installer.nsh
+  license: build/license.txt
+  createDesktopShortcut: always

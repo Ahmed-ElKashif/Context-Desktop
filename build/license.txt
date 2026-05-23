@@ -1,0 +1,16 @@
+Context AI Document Intelligence - End User License Agreement (EULA)
+
+1. ACCEPTANCE OF TERMS
+By installing and using Context, you agree to these terms.
+
+2. LICENSE GRANT
+We grant you a non-exclusive, non-transferable license to use this software.
+
+3. RESTRICTIONS
+You may not reverse engineer, decompile, or disassemble the software.
+
+4. DATA PRIVACY
+We respect your privacy and only process data you explicitly upload to the AI engines.
+
+5. TERMINATION
+This license is effective until terminated by you or us.
