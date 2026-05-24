@@ -2,8 +2,8 @@ import { useAppSelector } from "../../../store/hooks";
 import { DocumentHeader } from "./populated/DocumentHeader";
 import { ExecutiveSummary } from "./populated/ExecutiveSummary";
 import { AIChatSidebar } from "./populated/AIChatSidebar";
-import { Icon } from "../../../components/ui/Icons"; // Assuming you have your Icon component
 import { PopulatedDashboardSkeleton } from "./populated/PopulatedDashboardSkeleton";
+import { DesktopHomeView } from "./populated/DesktopHomeView";
 
 export const PopulatedDashboard = ({
   isRestoring = false,
@@ -18,23 +18,7 @@ export const PopulatedDashboard = ({
     if (isRestoring) {
       return <PopulatedDashboardSkeleton />;
     }
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center h-full text-light-text/50 dark:text-white/40 animate-in fade-in zoom-in-95 duration-300">
-        <div className="w-20 h-20 bg-light-bg dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner border border-light-border dark:border-white/10">
-          <Icon
-            name="quick_reference_all"
-            className="text-4xl text-light-primary/50 dark:text-dark-primary/50"
-          />
-        </div>
-        <h2 className="text-2xl font-black text-light-text dark:text-white mb-2 tracking-tight">
-          Select a Document
-        </h2>
-        <p className="text-sm font-medium max-w-sm text-center">
-          Open a file from your Library to view its AI summary, extracted
-          metadata, and chat with the context engine.
-        </p>
-      </div>
-    );
+    return <DesktopHomeView />;
   }
 
   return (

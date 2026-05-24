@@ -7,6 +7,7 @@ import { notify } from "../components/ui/ToastEngine";
 
 import { AppearanceSection } from "../features/settings/components/AppearanceSection";
 import { IntelligenceSection } from "../features/settings/components/IntelligenceSection";
+import { DesktopSection } from "../features/settings/components/DesktopSection";
 import { DangerZoneSection } from "../features/settings/components/DangerZoneSection";
 import { BillingSection } from "../features/settings/components/BillingSection";
 
@@ -85,6 +86,7 @@ export default function Settings() {
         <div className="space-y-16 pb-16">
           {/* Standard Sections */}
           <div className="max-w-3xl mx-auto w-full space-y-16">
+            <DesktopSection />
             <AppearanceSection />
             <IntelligenceSection />
           </div>

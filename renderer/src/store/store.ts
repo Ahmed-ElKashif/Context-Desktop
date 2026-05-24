@@ -7,7 +7,7 @@ import settingsReducer from './settingsSlice';
 import selectionReducer from './selectionSlice';
 import libraryUIReducer from './libraryUISlice';
 import themeReducer from './themeSlice';
-
+import notificationReducer from './notificationSlice';
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -18,6 +18,7 @@ const appReducer = combineReducers({
   selection: selectionReducer,
   libraryUI: libraryUIReducer,
   theme: themeReducer,
+  notifications: notificationReducer,
 });
 
 const rootReducer = (state: any, action: any) => {

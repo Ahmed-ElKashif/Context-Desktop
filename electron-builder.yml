@@ -13,3 +13,7 @@ nsis:
   include: build/installer.nsh
   license: build/license.txt
   createDesktopShortcut: always
+publish:
+  provider: github
+  owner: Ahmed-ElKashif
+  repo: Context-Desktop

@@ -54,10 +54,11 @@ export const FolderRow = ({
     <tr
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      className={`group cursor-pointer border-b border-light-border dark:border-white/5 transition-colors select-none ${isSelected
+      className={`group cursor-pointer border-b border-light-border dark:border-white/5 transition-colors select-none ${
+        isSelected
           ? "bg-black/5 dark:bg-white/10"
           : "hover:bg-black/5 dark:hover:bg-white/5"
-        }`}
+      }`}
     >
       <td className="py-1 pl-3 pr-1 w-8" onClick={(e) => e.stopPropagation()}>
         <input
@@ -108,75 +109,83 @@ export const FolderRow = ({
               isMenuOpen
                 ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white"
                 : "opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-light-text/70 dark:text-white/70"
-              }`}
+            }`}
           >
-            <span className="material-symbols-rounded text-[18px]">more_vert</span>
+            <span className="material-symbols-rounded text-[18px]">
+              more_vert
+            </span>
           </button>
         </div>
 
-        {isMenuOpen && menuRect && (() => {
-          const isNearBottom = menuRect.bottom + 150 > window.innerHeight;
-          return createPortal(
-            <div
-              ref={portalRef}
-              className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
-                isNearBottom ? "origin-bottom-right" : "origin-top-right"
-              }`}
-              style={{
-                top: isNearBottom ? undefined : menuRect.top,
-                bottom: isNearBottom ? window.innerHeight - menuRect.bottom : undefined,
-                right: window.innerWidth - menuRect.left + 8 // Position to the LEFT of the button since it's on the right edge
-              }}
-            >
-            {!folder.isAIGenerated && folder.name !== "Random Files" && (
-              <>
+        {isMenuOpen &&
+          menuRect &&
+          (() => {
+            const isNearBottom = menuRect.bottom + 150 > window.innerHeight;
+            return createPortal(
+              <div
+                ref={portalRef}
+                className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
+                  isNearBottom ? "origin-bottom-right" : "origin-top-right"
+                }`}
+                style={{
+                  top: isNearBottom ? undefined : menuRect.top,
+                  bottom: isNearBottom
+                    ? window.innerHeight - menuRect.bottom
+                    : undefined,
+                  right: window.innerWidth - menuRect.left + 8, // Position to the LEFT of the button since it's on the right edge
+                }}
+              >
+                {!folder.isAIGenerated &&
+                  folder.name?.toLowerCase() !== "random files" && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRename?.();
+                        }}
+                        className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                      >
+                        <span className="material-symbols-rounded text-[18px] text-blue-500">
+                          edit
+                        </span>
+                        Rename
+                      </button>
+                      <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
+                    </>
+                  )}
+                {folder.isAIGenerated && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDownload?.();
+                      }}
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                    >
+                      <span className="material-symbols-rounded text-[18px] text-green-500">
+                        download
+                      </span>
+                      Download
+                    </button>
+                    <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
+                  </>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRename?.();
+                    onDelete?.();
                   }}
-                  className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                  className="w-full px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                 >
-                  <span className="material-symbols-rounded text-[18px] text-blue-500">
-                    edit
+                  <span className="material-symbols-rounded text-[18px]">
+                    delete
                   </span>
-                  Rename
+                  Delete
                 </button>
-                <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-              </>
-            )}
-            {(folder.isAIGenerated || folder.name === "Random Files") && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDownload?.();
-                  }}
-                  className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-                >
-                  <span className="material-symbols-rounded text-[18px] text-green-500">
-                    download
-                  </span>
-                  Download
-                </button>
-                <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-              </>
-            )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.();
-              }}
-              className="w-full px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
-            >
-              <span className="material-symbols-rounded text-[18px]">
-                delete
-              </span>
-              Delete
-            </button>
-          </div>,
-          document.body
-        );})()}
+              </div>,
+              document.body,
+            );
+          })()}
       </td>
     </tr>
   );

@@ -45,8 +45,9 @@ export const useUploadModal = ({
   const activeFiles = externalFiles.length > 0 ? externalFiles : localFiles;
   const activePaths = externalPaths.length > 0 ? externalPaths : localPaths;
 
-  // Batch Folder Progress State
-  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; currentFileName: string } | null>(null);
+  // New Batch Ingestion State
+  const [batchFolderPath, setBatchFolderPath] = useState<string | null>(null);
+  const [batchFiles, setBatchFiles] = useState<any[]>([]);
 
   const hiddenFolderInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,36 +58,13 @@ export const useUploadModal = ({
     setPastedText("");
     setSnippetTitle("");
     setIsSnippetLoading(false);
-    setBatchProgress(null);
+    setBatchFolderPath(null);
+    setBatchFiles([]);
     onClearExternal?.();
     onClose();
   };
 
-  const startSequentialUpload = async (files: any[], folderPath: string) => {
-    const electronAPI = (window as any).electronAPI;
-    setBatchProgress({ current: 0, total: files.length, currentFileName: "" });
-
-    // Sequential process to prevent memory overload
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      setBatchProgress({ current: i + 1, total: files.length, currentFileName: file.name });
-      
-      try {
-        const buffer = await electronAPI.localFiles.readFileBuffer(file.path);
-        const browserFile = new File([buffer], file.name, { type: file.mimeType });
-        
-        await dispatch(
-          uploadBatchDocuments({ files: [browserFile], clientPaths: [file.clientPath] })
-        ).unwrap();
-      } catch (fileErr: any) {
-        console.error(`Failed to upload ${file.name}:`, fileErr);
-      }
-    }
-
-    notify(`Successfully ingested ${files.length} files from ${folderPath}`, "success");
-    onSuccess?.();
-    handleClose();
-  };
+  // Removing startSequentialUpload since we are handling this in BatchIngestionView
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -99,7 +77,8 @@ export const useUploadModal = ({
         try {
           const result = await electronAPI.localFiles.processDroppedPaths(paths);
           if (result && result.files && result.files.length > 0) {
-            await startSequentialUpload(result.files, "Dropped Context");
+            setBatchFolderPath("Dropped Context");
+            setBatchFiles(result.files);
             return;
           }
         } catch (e) {
@@ -226,12 +205,12 @@ export const useUploadModal = ({
       if (!result || !result.files || result.files.length === 0) return;
 
       const { files, folderPath } = result;
-      await startSequentialUpload(files, folderPath);
+      setBatchFolderPath(folderPath);
+      setBatchFiles(files);
 
     } catch (err: any) {
       console.error("Native folder select error:", err);
       notify("Failed to read folder recursively.", "error");
-      setBatchProgress(null);
     }
   };
 
@@ -273,6 +252,8 @@ export const useUploadModal = ({
     activeFiles,
     activePaths,
     wordCount,
+    batchFolderPath,
+    batchFiles,
 
     // Handlers
     handleClose,
@@ -285,7 +266,6 @@ export const useUploadModal = ({
 
     // Refs
     hiddenFolderInputRef,
-    batchProgress,
 
     // Dropzone state & handlers
     dropzone,
