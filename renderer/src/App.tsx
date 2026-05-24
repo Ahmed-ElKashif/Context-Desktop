@@ -11,6 +11,7 @@ import Library from "./pages/Smartlibrary";
 import Reader from "./pages/read/Reader";
 import Compare from "./pages/compare";
 import Settings from "./pages/settings";
+import QuickCapture from "./pages/QuickCapture";
 import { ContextToaster } from "./components/ui/ToastEngine";
 import Profile from "./pages/profile";
 import AdminPage from "./pages/admin";
@@ -46,7 +47,6 @@ function App() {
     window.addEventListener("server-down", handleServerDown);
     window.addEventListener("auth-expired", handleAuthExpired);
 
-    // Setup Context Menu IPC Listener
     const cleanupContextMenu = (window as any).electronAPI?.app?.onContextMenuOrganize?.((filePath: string) => {
       navigate(`/organize-local?path=${encodeURIComponent(filePath)}`);
     });
@@ -55,11 +55,18 @@ function App() {
       navigate(`/summary-local?id=${encodeURIComponent(documentId)}`);
     });
 
+    const cleanupNotificationClick = (window as any).electronAPI?.app?.onNotificationClicked?.((payload: any) => {
+      if (payload && payload.route) {
+        navigate(payload.route);
+      }
+    });
+
     return () => {
       window.removeEventListener("server-down", handleServerDown);
       window.removeEventListener("auth-expired", handleAuthExpired);
       if (cleanupContextMenu) cleanupContextMenu();
       if (cleanupSummarizeMenu) cleanupSummarizeMenu();
+      if (cleanupNotificationClick) cleanupNotificationClick();
     };
   }, [dispatch, navigate]);
 
@@ -84,6 +91,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route element={<AuthGuard />}>
+          <Route path="/quick-capture" element={<QuickCapture />} />
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/library" element={<Library />} />

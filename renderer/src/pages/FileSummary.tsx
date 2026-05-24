@@ -86,30 +86,32 @@ export const FileSummary = () => {
         
         {/* Header Section */}
         <div className="bg-white dark:bg-[#0A0A0C] border border-light-border dark:border-white/10 rounded-2xl p-6 lg:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-light-primary/10 dark:bg-dark-primary/10 rounded-xl">
+          <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
+            <div className="p-3 bg-light-primary/10 dark:bg-dark-primary/10 rounded-xl shrink-0">
               <Icon name="insert_drive_file" className="text-3xl text-light-primary dark:text-dark-primary" />
             </div>
-            <div>
-              <h1 className="text-2xl font-black text-light-text dark:text-white leading-tight mb-2">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-black text-light-text dark:text-white leading-tight mb-3 break-words">
                 {document.title}
               </h1>
               
               <div className="flex flex-wrap items-center gap-3">
                 {/* Cognitive Load Badge */}
-                <div className="flex items-center gap-2 bg-light-bg dark:bg-white/5 px-3 py-1 rounded-full border border-light-border dark:border-white/10">
+                <div className="flex items-center gap-2 bg-light-bg dark:bg-white/5 px-3 py-1 rounded-full border border-light-border dark:border-white/10 shrink-0">
                   <div className={`w-2 h-2 rounded-full ${getLoadColor(document.cognitiveLoad)} animate-pulse-slow`} />
-                  <span className="text-xs font-bold text-light-text dark:text-white">
+                  <span className="text-xs font-bold text-light-text dark:text-white whitespace-nowrap">
                     {document.cognitiveLoad || "Unknown"} Load
                   </span>
                 </div>
 
                 {/* Tags */}
-                {document.tags && document.tags.slice(0, 3).map((tag, i) => (
-                  <span key={i} className="text-xs font-semibold px-2 py-1 bg-light-bg dark:bg-white/5 text-light-text/70 dark:text-white/70 rounded-md border border-light-border dark:border-white/10">
-                    #{tag}
-                  </span>
-                ))}
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  {document.tags && document.tags.slice(0, 3).map((tag, i) => (
+                    <span key={i} className="text-xs font-semibold px-2 py-1 bg-light-bg dark:bg-white/5 text-light-text/70 dark:text-white/70 rounded-md border border-light-border dark:border-white/10 truncate max-w-[120px]">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

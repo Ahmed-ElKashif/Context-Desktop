@@ -1,5 +1,4 @@
 import { createPortal } from "react-dom";
-import { Icon } from "../../../components/ui/Icons";
 import { EngineRouterSkeleton } from "../../../components/ui/EngineRouterSkeleton";
 import {
   useUploadModal,
@@ -8,6 +7,7 @@ import {
 import { AISplitScreenView } from "./upload-modal/views/AISplitScreenView";
 import { StagedFilesView } from "./upload-modal/views/StagedFilesView";
 import { DefaultDropzoneView } from "./upload-modal/views/DefaultDropzoneView";
+import { BatchIngestionView } from "./upload-modal/views/BatchIngestionView";
 
 export const UploadModal = ({
   isOpen,
@@ -23,24 +23,19 @@ export const UploadModal = ({
   // ==========================================
   // VIEW Z: Batch Native Folder Progress
   // ==========================================
-  if (uploadState.batchProgress) {
+  if (uploadState.batchFolderPath && uploadState.batchFiles.length > 0) {
     canCloseOnBackdrop = false;
     modalContent = (
-      <div className="w-full max-w-md bg-white dark:bg-[#0A0A0C] p-8 rounded-2xl border border-light-border dark:border-white/10 shadow-xl flex flex-col items-center">
-         <Icon name="folder_sync" className="text-light-primary dark:text-dark-primary text-5xl mb-4 animate-pulse" />
-         <h2 className="text-xl font-bold text-light-text dark:text-white mb-2">Ingesting Directory</h2>
-         <p className="text-light-text/60 dark:text-white/60 mb-6 text-center text-sm font-semibold">
-           Processing {uploadState.batchProgress.current} of {uploadState.batchProgress.total} files...
-         </p>
-         <div className="w-full bg-light-bg dark:bg-white/10 h-2 rounded-full overflow-hidden">
-           <div 
-             className="bg-light-primary dark:bg-dark-primary h-full transition-all duration-300" 
-             style={{ width: `${(uploadState.batchProgress.current / Math.max(1, uploadState.batchProgress.total)) * 100}%` }}
-           ></div>
-         </div>
-         <p className="text-xs text-light-text/40 dark:text-white/40 mt-4 truncate w-full text-center font-mono">
-           {uploadState.batchProgress.currentFileName || "Scanning..."}
-         </p>
+      <div className="w-full max-w-4xl bg-white dark:bg-[#0A0A0C] rounded-2xl border border-light-border dark:border-white/10 shadow-xl overflow-hidden">
+        <BatchIngestionView
+          folderPath={uploadState.batchFolderPath}
+          files={uploadState.batchFiles}
+          onBack={() => uploadState.handleClose()}
+          onSuccess={() => {
+            uploadState.handleClose();
+            props.onSuccess?.();
+          }}
+        />
       </div>
     );
   }
