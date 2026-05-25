@@ -1,46 +1,66 @@
-import { exec } from 'child_process';
 import { app } from 'electron';
+import Registry from 'winreg';
 
-const DIR_KEY_PATH = 'HKCU\\Software\\Classes\\Directory\\shell\\ContextApp';
-const FILE_KEY_PATH = 'HKCU\\Software\\Classes\\*\\shell\\ContextAppFile';
+const DIR_KEY_PATH = '\\Software\\Classes\\Directory\\shell\\ContextApp';
+const FILE_KEY_PATH = '\\Software\\Classes\\*\\shell\\ContextAppFile';
 
-function runRegCmd(cmd: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (err) => {
-      if (err) return reject(err);
-      resolve();
+function regKeyExists(keyPath: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const regKey = new Registry({
+      hive: Registry.HKCU,
+      key: keyPath
     });
+    regKey.keyExists((err, exists) => {
+      resolve(!err && exists);
+    });
+  });
+}
+
+function regSet(keyPath: string, name: string, type: string, value: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const regKey = new Registry({
+      hive: Registry.HKCU,
+      key: keyPath
+    });
+    regKey.create((err) => {
+      if (err) return reject(err);
+      regKey.set(name, type, value, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  });
+}
+
+function regDelete(keyPath: string): Promise<void> {
+  return new Promise((resolve) => {
+    const regKey = new Registry({
+      hive: Registry.HKCU,
+      key: keyPath
+    });
+    regKey.destroy(() => resolve()); // Ignore errors if it doesn't exist
   });
 }
 
 export async function getContextMenuStatus(): Promise<boolean> {
   if (process.platform !== 'win32') return false;
-  try {
-    await runRegCmd(`reg query "${DIR_KEY_PATH}"`);
-    return true; // Key exists
-  } catch (err) {
-    return false; // Key does not exist
-  }
+  return await regKeyExists(DIR_KEY_PATH);
 }
 
 export async function registerFolderContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
 
   const iconPath = process.execPath;
-  const commandStr = `\\"${process.execPath}\\" --action=organize --path=\\"%V\\"`;
+  const commandStr = `"${process.execPath}" --action=upload --path="%V"`;
 
-  await runRegCmd(`reg add "${DIR_KEY_PATH}" /ve /t REG_SZ /d "Organize with Context" /f`);
-  await runRegCmd(`reg add "${DIR_KEY_PATH}" /v "Icon" /t REG_SZ /d "\\"${iconPath}\\",0" /f`);
-  await runRegCmd(`reg add "${DIR_KEY_PATH}\\command" /ve /t REG_SZ /d "${commandStr}" /f`);
+  await regSet(DIR_KEY_PATH, '', Registry.REG_SZ, 'Upload to Context');
+  await regSet(DIR_KEY_PATH, 'Icon', Registry.REG_SZ, `"${iconPath}",0`);
+  await regSet(`${DIR_KEY_PATH}\\command`, '', Registry.REG_SZ, commandStr);
 }
 
 export async function unregisterFolderContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
-  try {
-    await runRegCmd(`reg delete "${DIR_KEY_PATH}" /f`);
-  } catch (err) {
-    // Ignore error if key doesn't exist
-  }
+  await regDelete(DIR_KEY_PATH);
 }
 
 const SUPPORTED_EXTENSIONS = [
@@ -52,16 +72,16 @@ export async function registerFileContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
 
   const iconPath = process.execPath;
-  const commandStr = `\\"${process.execPath}\\" --action=summarize --path=\\"%1\\"`;
+  const commandStr = `"${process.execPath}" --action=upload --path="%1"`;
 
   // Clean up legacy global registration
-  try { await runRegCmd(`reg delete "HKCU\\Software\\Classes\\*\\shell\\ContextAppFile" /f`); } catch (e) {}
+  await regDelete('\\Software\\Classes\\*\\shell\\ContextAppFile');
 
   for (const ext of SUPPORTED_EXTENSIONS) {
-    const keyPath = `HKCU\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
-    await runRegCmd(`reg add "${keyPath}" /ve /t REG_SZ /d "Summarize with Context" /f`);
-    await runRegCmd(`reg add "${keyPath}" /v "Icon" /t REG_SZ /d "\\"${iconPath}\\",0" /f`);
-    await runRegCmd(`reg add "${keyPath}\\command" /ve /t REG_SZ /d "${commandStr}" /f`);
+    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
+    await regSet(keyPath, '', Registry.REG_SZ, 'Upload to Context');
+    await regSet(keyPath, 'Icon', Registry.REG_SZ, `"${iconPath}",0`);
+    await regSet(`${keyPath}\\command`, '', Registry.REG_SZ, commandStr);
   }
 }
 
@@ -69,14 +89,10 @@ export async function unregisterFileContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
   
   // Clean up legacy global registration
-  try { await runRegCmd(`reg delete "HKCU\\Software\\Classes\\*\\shell\\ContextAppFile" /f`); } catch (e) {}
+  await regDelete('\\Software\\Classes\\*\\shell\\ContextAppFile');
 
   for (const ext of SUPPORTED_EXTENSIONS) {
-    const keyPath = `HKCU\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
-    try {
-      await runRegCmd(`reg delete "${keyPath}" /f`);
-    } catch (err) {
-      // Ignore error if key doesn't exist
-    }
+    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
+    await regDelete(keyPath);
   }
 }

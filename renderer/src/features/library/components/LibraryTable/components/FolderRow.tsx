@@ -12,10 +12,11 @@ interface FolderRowProps {
   onToggleMenu: (e: React.MouseEvent) => void;
   onCloseMenu: () => void;
   onDoubleClick: () => void;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
   onRename?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
+  onOrganizeFolder?: () => void;
 }
 
 export const FolderRow = ({
@@ -30,6 +31,7 @@ export const FolderRow = ({
   onRename,
   onDelete,
   onDownload,
+  onOrganizeFolder,
 }: FolderRowProps) => {
   const folderName = folder.name || "Folder";
   const menuRef = useRef<HTMLTableCellElement>(null);
@@ -54,6 +56,10 @@ export const FolderRow = ({
     <tr
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      onContextMenu={(e) => {
+        if (onClick) onClick();
+        onToggleMenu(e);
+      }}
       className={`group cursor-pointer border-b border-light-border dark:border-white/5 transition-colors select-none ${
         isSelected
           ? "bg-black/5 dark:bg-white/10"
@@ -135,6 +141,23 @@ export const FolderRow = ({
                   right: window.innerWidth - menuRect.left + 8, // Position to the LEFT of the button since it's on the right edge
                 }}
               >
+                {onOrganizeFolder && !folder.isAIGenerated && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOrganizeFolder();
+                      }}
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                    >
+                      <span className="material-symbols-rounded text-[18px] text-purple-500">
+                        auto_awesome
+                      </span>
+                      Organize with AI
+                    </button>
+                    <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
+                  </>
+                )}
                 {!folder.isAIGenerated &&
                   folder.name?.toLowerCase() !== "random files" && (
                     <>

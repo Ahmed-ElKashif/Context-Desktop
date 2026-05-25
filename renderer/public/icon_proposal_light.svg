@@ -1,0 +1,60 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Light polished background gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F1F5F9" />
+    </linearGradient>
+
+
+
+    <!-- Soft Drop Shadow for the squircle background -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="15" stdDeviation="25" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- Node Drop Shadow (Used instead of glow for light themes) -->
+    <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#103766" flood-opacity="0.2"/>
+    </filter>
+    
+    <!-- Core Drop Shadow -->
+    <filter id="coreShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#103766" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect x="64" y="64" width="896" height="896" rx="224" fill="url(#bgGradient)" filter="url(#dropShadow)" />
+  
+  <!-- Glassmorphic Inner Borders -->
+  <rect x="64" y="64" width="896" height="896" rx="224" fill="none" stroke="#E2E8F0" stroke-width="4" />
+  <rect x="66" y="66" width="892" height="892" rx="222" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8" />
+
+  <!-- Logo Group -->
+  <g transform="translate(212, 212) scale(6)">
+    <!-- Path 1 (Top Left to Core) -->
+    <path d="M30 30 C 30 30, 45 45, 50 50" stroke="#475569" stroke-width="3" stroke-linecap="round" fill="none" opacity="1" />
+    
+    <!-- Path 2 (Top Right to Core) -->
+    <path d="M70 30 C 70 30, 55 45, 50 50" stroke="#475569" stroke-width="3" stroke-linecap="round" fill="none" opacity="1" />
+    
+    <!-- Path 3 (Bottom to Core) -->
+    <path d="M50 80 C 50 80, 50 65, 50 50" stroke="#FF7E5F" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9" />
+
+    <!-- Top Left Node -->
+    <circle cx="30" cy="30" r="6" fill="#334155" filter="url(#nodeShadow)"/>
+
+    <!-- Top Right Node -->
+    <circle cx="70" cy="30" r="6" fill="#334155" filter="url(#nodeShadow)"/>
+
+    <!-- Bottom Node -->
+    <circle cx="50" cy="80" r="6" fill="#FF7E5F" filter="url(#nodeShadow)"/>
+
+    <!-- Central Core Outer Ring (matching radius 11 from the dark proposal) -->
+    <circle cx="50" cy="50" r="11" stroke="#103766" stroke-width="2.5" fill="none" opacity="0.5" />
+
+    <!-- Central Core Inner Solid (matching radius 6.5 from the dark proposal) -->
+    <circle cx="50" cy="50" r="6.5" fill="#103766" filter="url(#coreShadow)"/>
+  </g>
+</svg>

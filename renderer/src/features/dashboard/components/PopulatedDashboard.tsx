@@ -3,7 +3,7 @@ import { DocumentHeader } from "./populated/DocumentHeader";
 import { ExecutiveSummary } from "./populated/ExecutiveSummary";
 import { AIChatSidebar } from "./populated/AIChatSidebar";
 import { PopulatedDashboardSkeleton } from "./populated/PopulatedDashboardSkeleton";
-import { DesktopHomeView } from "./populated/DesktopHomeView";
+import { LibraryFeature } from "../../library/LibraryFeature";
 
 export const PopulatedDashboard = ({
   isRestoring = false,
@@ -18,7 +18,11 @@ export const PopulatedDashboard = ({
     if (isRestoring) {
       return <PopulatedDashboardSkeleton />;
     }
-    return <DesktopHomeView />;
+    return (
+      <div className="h-full w-full m-0 flex flex-col">
+        <LibraryFeature />
+      </div>
+    );
   }
 
   return (

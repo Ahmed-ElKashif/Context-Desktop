@@ -12,6 +12,29 @@
   "repository": "https://github.com/example/repo",
   "license": "ISC",
   "type": "commonjs",
+  "build": {
+    "appId": "com.contexters.context",
+    "productName": "Context",
+    "copyright": "Copyright © 2026 Context",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "license": "build/license.txt",
+      "include": "build/installer.nsh"
+    }
+  },
   "devDependencies": {
     "@types/form-data": "^2.2.1",
     "@types/mime-types": "^3.0.1",

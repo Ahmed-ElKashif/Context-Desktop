@@ -123,7 +123,7 @@ export const DesktopSection = () => {
           <div>
             <p className="font-extrabold text-light-text dark:text-white">Windows Context Menu</p>
             <p className="text-xs font-medium text-light-text/80 dark:text-dark-text/60 mt-1">
-              Add "Summarize with Context" when you right-click files.
+              Add "Upload to Context" when you right-click files and folders.
             </p>
           </div>
           <button

@@ -52,6 +52,31 @@ export const AIChatSidebar = ({
     }
   }, [messages, isTyping]);
 
+  // Global Ctrl+S listener
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault(); // Prevent browser save dialog
+        
+        // Find the last assistant message
+        const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
+        if (lastAssistantMsg) {
+          try {
+            await documentService.processText(lastAssistantMsg.content, `AI Note: ${activeDocument?.title || 'Chat'}`);
+            notify("Saved AI response to Library!", "success");
+          } catch (error) {
+            notify("Failed to save AI response.", "error");
+          }
+        } else {
+          notify("No AI response to save.", "info");
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [messages, activeDocument]);
+
   const handleSendMessage = async (overrideText?: string) => {
     if (!activeDocument) return;
     const textToSend = overrideText || chatInput;
@@ -218,7 +243,7 @@ export const AIChatSidebar = ({
               value={chatInput}
               onChange={handleInputResize}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                   e.preventDefault();
                   handleSendMessage();
                 }

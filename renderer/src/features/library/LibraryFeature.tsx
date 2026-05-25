@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -10,6 +10,7 @@ import {
   toggleDocSelection,
   toggleFolderSelection,
   toggleAllVisibleSelection,
+  setSelection,
 } from "../../store/selectionSlice";
 import { Icon } from "../../components/ui/Icons";
 import { useLibraryUI } from "./hooks/useLibraryUI";
@@ -109,6 +110,27 @@ export const LibraryFeature = () => {
   };
   const folderToRename = ui.folderRenameModal.path ? findFolderById(globalFolderTree, ui.folderRenameModal.path) : null;
 
+  // Keyboard Delete listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      
+      if (e.key === 'Delete') {
+        if (selectedDocIds.length + selectedFolderIds.length > 1) {
+          ui.bulkDeleteModal.open();
+        } else if (selectedDocIds.length === 1) {
+          const doc = documentsList.find(d => d._id === selectedDocIds[0]);
+          if (doc) ui.deleteModal.open(doc);
+        } else if (selectedFolderIds.length === 1) {
+          ui.folderDeleteModal.open(selectedFolderIds[0]);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedDocIds, selectedFolderIds, documentsList, ui.bulkDeleteModal, ui.deleteModal, ui.folderDeleteModal]);
+
   return (
     <div
       {...getRootProps()}
@@ -183,6 +205,14 @@ export const LibraryFeature = () => {
                   onShareClick={(doc) => handleShareClick(doc.cloudinaryUrl)}
                   onRenameClick={ui.renameModal.open}
                   onDeleteClick={ui.deleteModal.open}
+                  onSummarizeClick={(doc) => navigate(`/summary-local?id=${doc._id}`)}
+                  onCompareClick={() => navigate(`/compare`)}
+                  onRevealClick={(doc) => {
+                    if (doc.originalClientPath && (window as any).electronAPI?.localFiles?.showItemInFolder) {
+                      (window as any).electronAPI.localFiles.showItemInFolder(doc.originalClientPath);
+                    }
+                  }}
+                  onOrganizeFolderClick={() => actions.executeAIOrganization()}
                   sortBy={ui.sorting.sortBy}
                   sortOrder={ui.sorting.sortOrder}
                   onSort={ui.sorting.handleSort}
@@ -202,6 +232,9 @@ export const LibraryFeature = () => {
                     folders: visibleFolders,
                     isAllVisibleSelected: isAllSelected
                   }))}
+                  onSelectRange={(docs, folders) => {
+                    dispatch(setSelection({ docs, folders }));
+                  }}
                 />
               )}
             </div>

@@ -6,6 +6,7 @@ import {
   setActiveDocument,
   setDocumentError,
 } from "../../../store/documentSlice";
+import { addNotification } from "../../../store/notificationSlice";
 import { notify } from "../../../components/ui/ToastEngine";
 import { api } from "../../../lib/axios";
 
@@ -58,10 +59,9 @@ export const useDocumentStatusPolling = () => {
             console.log(`[useDocumentStatusPolling] SSE Update:`, parsed);
 
             if (parsed.aiStatus === "Analyzed" && parsed.document) {
-              notify(
-                "AI analysis is complete. Your dashboard is ready.",
-                "success",
-              );
+              const successMsg = "AI analysis is complete. Your dashboard is ready.";
+              notify(successMsg, "success");
+              dispatch(addNotification(successMsg));
               dispatch(reloadDocumentThunk(parsed.document._id));
               dispatch(setActiveDocument(parsed.document));
 
@@ -69,7 +69,9 @@ export const useDocumentStatusPolling = () => {
               eventSourceRef.current = null;
             } else if (parsed.aiStatus === "Failed") {
               console.error(`[useDocumentStatusPolling] AI Analysis failed.`);
-              notify("AI analysis failed to process this document.", "error");
+              const errorMsg = "AI analysis failed to process this document.";
+              notify(errorMsg, "error");
+              dispatch(addNotification(errorMsg));
               dispatch(setDocumentError("AI analysis failed."));
 
               es.close();
