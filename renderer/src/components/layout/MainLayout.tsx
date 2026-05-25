@@ -5,7 +5,9 @@ import { TopNav } from './TopNav';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { reloadDocumentThunk } from '../../store/documentSlice';
 import { fetchSettings } from '../../store/settingsSlice';
+import { addNotification } from '../../store/notificationSlice';
 import { notify } from '../ui/ToastEngine';
+import { playNotificationSound } from '../../utils/audioUtils';
 import { ProductTour } from '../../features/tour/ProductTour';
 import { PopulatedTour } from '../../features/tour/PopulatedTour';
 import { LibraryTour } from '../../features/tour/LibraryTour';
@@ -68,11 +70,17 @@ export const MainLayout = () => {
           const match = pendingDocsRef.current.find((d) => d._id === parsed.documentId);
           if (match && match.aiStatus !== parsed.aiStatus) {
             if (parsed.aiStatus === "Analyzed") {
-              notify(`Orchestrator finished analyzing "${parsed.document?.title || "Document"}"!`, "success");
+              const successMsg = `Orchestrator finished analyzing "${parsed.document?.title || "Document"}"!`;
+              notify(successMsg, "success");
+              dispatch(addNotification(successMsg));
+              playNotificationSound("success");
               dispatch(reloadDocumentThunk(parsed.documentId));
               dispatch(fetchSettings()); // Refresh AI budget/usage
             } else if (parsed.aiStatus === "Failed") {
-              notify(`Analysis failed for "${parsed.document?.title || "Document"}".`, "error");
+              const failMsg = `Analysis failed for "${parsed.document?.title || "Document"}".`;
+              notify(failMsg, "error");
+              dispatch(addNotification(failMsg));
+              playNotificationSound("error");
               dispatch(reloadDocumentThunk(parsed.documentId));
               dispatch(fetchSettings()); // Refresh AI budget/usage
             }

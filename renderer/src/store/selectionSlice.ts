@@ -60,6 +60,10 @@ const selectionSlice = createSlice({
       state.selectedDocs = [];
       state.selectedFolders = [];
     },
+    setSelection: (state, action: PayloadAction<{ docs: DocumentData[]; folders: FolderData[] }>) => {
+      state.selectedDocs = action.payload.docs;
+      state.selectedFolders = action.payload.folders;
+    },
   },
 });
 
@@ -68,6 +72,7 @@ export const {
   toggleFolderSelection,
   toggleAllVisibleSelection,
   clearSelection,
+  setSelection,
 } = selectionSlice.actions;
 
 export default selectionSlice.reducer;

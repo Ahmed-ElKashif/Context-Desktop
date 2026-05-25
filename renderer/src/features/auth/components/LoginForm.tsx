@@ -119,7 +119,7 @@ export const LoginForm = () => {
                   </FormLabel>
                   <Link
                     to="/forgot-password"
-                    className="text-[10px] text-light-text/60 dark:text-white/40 hover:text-light-primary dark:hover:text-dark-primary transition-colors uppercase tracking-wider font-mono"
+                    className="text-[10px] text-light-text/60 dark:text-white/40 hover:text-light-primary dark:hover:text-dark-primary transition-colors uppercase tracking-wider font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-sm px-1"
                   >
                     Lost Key?
                   </Link>
@@ -139,7 +139,9 @@ export const LoginForm = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="pr-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"
+                        className="pr-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-full flex items-center justify-center m-1 p-1"
+                        aria-label="Toggle password visibility"
+                        aria-pressed={showPassword}
                       >
                         <span className="material-symbols-rounded text-sm">
                           {showPassword ? "visibility_off" : "visibility"}
@@ -157,7 +159,7 @@ export const LoginForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-6 bg-light-primary dark:bg-dark-primary text-white dark:text-black font-bold py-4 rounded-xl shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+            className="w-full mt-6 bg-light-primary dark:bg-dark-primary text-white dark:text-black font-bold py-4 rounded-xl shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary dark:focus-visible:ring-offset-[#18181B]"
           >
             {isLoading ? (
               <span className="material-symbols-rounded animate-spin">
@@ -178,7 +180,7 @@ export const LoginForm = () => {
           New to the network?
           <Link
             to="/register"
-            className="text-light-primary dark:text-white font-bold hover:opacity-80 dark:hover:text-dark-primary transition-opacity ml-1"
+            className="text-light-primary dark:text-white font-bold hover:opacity-80 dark:hover:text-dark-primary transition-opacity ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-sm px-1"
           >
             Initialize System
           </Link>

@@ -16,11 +16,14 @@ interface DocumentRowProps {
   onToggleMenu: (e: React.MouseEvent) => void;
   onCloseMenu: () => void;
   onToggleSelection: () => void;
-  onClick: () => void;
+  onClick: (e?: React.MouseEvent) => void;
   onDoubleClick: () => void;
   onShare: () => void;
   onRename: () => void;
   onDelete: () => void;
+  onSummarize?: () => void;
+  onCompare?: () => void;
+  onReveal?: () => void;
 }
 
 export const DocumentRow = ({
@@ -35,10 +38,28 @@ export const DocumentRow = ({
   onShare,
   onRename,
   onDelete,
+  onSummarize,
+  onCompare,
+  onReveal,
 }: DocumentRowProps) => {
   const menuRef = useRef<HTMLTableCellElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
+  const [nativeIcon, setNativeIcon] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (doc.originalClientPath && (window as any).electronAPI?.localFiles?.getFileIcon) {
+      (window as any).electronAPI.localFiles.getFileIcon(doc.originalClientPath)
+        .then((iconData: string) => {
+          if (isMounted && iconData) {
+            setNativeIcon(iconData);
+          }
+        })
+        .catch(() => {}); // Fallback silently
+    }
+    return () => { isMounted = false; };
+  }, [doc.originalClientPath]);
 
   useEffect(() => {
     if (isMenuOpen && menuRef.current) {
@@ -58,6 +79,10 @@ export const DocumentRow = ({
     <tr
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      onContextMenu={(e) => {
+        onClick(); // ensure it's selected
+        onToggleMenu(e);
+      }}
     className={`group cursor-pointer transition-colors border-b border-light-border dark:border-white/5 bg-white dark:bg-[#121214] ${
       isSelected
         ? "bg-black/5 dark:bg-white/10"
@@ -74,7 +99,11 @@ export const DocumentRow = ({
       </td>
       <td className="py-1 pr-2">
         <div className="flex items-center gap-1.5">
-          {getFileIcon(doc.fileType)}
+          {nativeIcon ? (
+            <img src={nativeIcon} alt={doc.fileType} className="w-5 h-5 object-contain" />
+          ) : (
+            getFileIcon(doc.fileType)
+          )}
           <div className="truncate max-w-[250px] lg:max-w-[400px]">
             <p className="text-xs font-semibold group-hover:text-black dark:group-hover:text-white transition-colors truncate">
               {doc.title}
@@ -136,11 +165,12 @@ export const DocumentRow = ({
         <div className="flex justify-end items-center pr-2">
           <button
             onClick={onToggleMenu}
-            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm ${
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary ${
               isMenuOpen
-                ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white"
+                ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white opacity-100"
                 : "opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-light-text/70 dark:text-white/70"
               }`}
+            aria-label={`Actions for ${doc.title}`}
           >
             <span className="material-symbols-rounded text-[18px]">more_vert</span>
           </button>
@@ -160,6 +190,33 @@ export const DocumentRow = ({
                 right: window.innerWidth - menuRect.left + 8 // Position to the LEFT of the button since it's on the right edge
               }}
             >
+            {onSummarize && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onSummarize(); }}
+                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+              >
+                <span className="material-symbols-rounded text-[18px] text-purple-500">auto_awesome</span>
+                Summarize
+              </button>
+            )}
+            {onCompare && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onCompare(); }}
+                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+              >
+                <span className="material-symbols-rounded text-[18px] text-blue-400">compare_arrows</span>
+                Compare
+              </button>
+            )}
+            {onReveal && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onReveal(); }}
+                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+              >
+                <span className="material-symbols-rounded text-[18px] text-yellow-500">folder_open</span>
+                Reveal in Explorer
+              </button>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();

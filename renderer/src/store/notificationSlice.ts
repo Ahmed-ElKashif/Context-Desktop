@@ -55,6 +55,12 @@ export const addNotification = createAsyncThunk(
     // Save to store
     await saveToStore(newNotifications);
     
+    // Trigger OS Desktop Notification
+    const electronAPI = (window as any).electronAPI;
+    if (electronAPI?.app?.showNotification) {
+      electronAPI.app.showNotification("Context", message, { id: newNotification.id });
+    }
+    
     return newNotification;
   }
 );

@@ -190,7 +190,9 @@ export const RegisterForm = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"
+                        className="absolute right-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-full flex items-center justify-center p-1"
+                        aria-label="Toggle password visibility"
+                        aria-pressed={showPassword}
                       >
                         <span className="material-symbols-rounded text-sm">
                           {showPassword ? "visibility_off" : "visibility"}
@@ -216,7 +218,7 @@ export const RegisterForm = () => {
                   </div>
                   
                   {/* Password Criteria */}
-                  <div className="mt-2 text-[10px] text-light-text/60 dark:text-white/40 flex flex-col gap-1 px-1 font-medium">
+                  <div aria-live="polite" className="mt-2 text-[10px] text-light-text/60 dark:text-white/40 flex flex-col gap-1 px-1 font-medium">
                     <div className="flex items-center gap-1.5">
                       <span className={`material-symbols-rounded text-[12px] ${passwordValue.length >= 8 ? "text-emerald-500" : ""}`}>
                         {passwordValue.length >= 8 ? "check_circle" : "radio_button_unchecked"}
@@ -262,7 +264,7 @@ export const RegisterForm = () => {
                           onChange={field.onChange}
                           className="peer sr-only persona-radio"
                         />
-                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
+                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary peer-focus-visible:ring-2 peer-focus-visible:ring-light-primary dark:peer-focus-visible:ring-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
                           <div className="icon w-8 h-8 rounded-full bg-light-surface dark:bg-white/10 flex items-center justify-center text-light-text dark:text-dark-text shrink-0">
                             <Icon name="public" className="text-lg" />
                           </div>
@@ -286,7 +288,7 @@ export const RegisterForm = () => {
                           onChange={field.onChange}
                           className="peer sr-only persona-radio"
                         />
-                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
+                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary peer-focus-visible:ring-2 peer-focus-visible:ring-light-primary dark:peer-focus-visible:ring-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
                           <div className="icon w-8 h-8 rounded-full bg-light-surface dark:bg-white/10 flex items-center justify-center text-light-text dark:text-dark-text shrink-0">
                             <Icon name="work" className="text-lg" />
                           </div>
@@ -310,7 +312,7 @@ export const RegisterForm = () => {
                           onChange={field.onChange}
                           className="peer sr-only persona-radio"
                         />
-                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
+                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary peer-focus-visible:ring-2 peer-focus-visible:ring-light-primary dark:peer-focus-visible:ring-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
                           <div className="icon w-8 h-8 rounded-full bg-light-surface dark:bg-white/10 flex items-center justify-center text-light-text dark:text-dark-text shrink-0">
                             <Icon name="school" className="text-lg" />
                           </div>
@@ -334,7 +336,7 @@ export const RegisterForm = () => {
                           onChange={field.onChange}
                           className="peer sr-only persona-radio"
                         />
-                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
+                        <div className="p-3 rounded-xl border border-light-border dark:border-white/10 peer-checked:border-light-primary dark:peer-checked:border-dark-primary peer-focus-visible:ring-2 peer-focus-visible:ring-light-primary dark:peer-focus-visible:ring-dark-primary transition-all flex items-center gap-3 bg-light-bg/50 dark:bg-white/5">
                           <div className="icon w-8 h-8 rounded-full bg-light-surface dark:bg-white/10 flex items-center justify-center text-light-text dark:text-dark-text shrink-0">
                             <Icon name="terminal" className="text-lg" />
                           </div>
@@ -359,7 +361,7 @@ export const RegisterForm = () => {
             <div className="flex flex-col-reverse sm:flex-row items-center justify-between pt-4 gap-4">
               <Link
                 to="/login"
-                className="text-sm font-bold text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity"
+                className="text-sm font-bold text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-sm px-1"
               >
                 Already initialized?
               </Link>
@@ -367,7 +369,7 @@ export const RegisterForm = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full sm:w-auto h-auto bg-light-primary dark:bg-dark-primary text-white dark:text-black px-8 py-3 rounded-xl font-bold shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:bg-light-primary dark:hover:bg-dark-primary hover:opacity-90 hover:scale-[1.02] cursor-pointer disabled:cursor-wait disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto h-auto bg-light-primary dark:bg-dark-primary text-white dark:text-black px-8 py-3 rounded-xl font-bold shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:bg-light-primary dark:hover:bg-dark-primary hover:opacity-90 hover:scale-[1.02] cursor-pointer disabled:cursor-wait disabled:opacity-50 transition-all flex items-center justify-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary dark:focus-visible:ring-offset-[#18181B]"
               >
                 {isLoading ? (
                   <>

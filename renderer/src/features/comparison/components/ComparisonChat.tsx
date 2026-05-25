@@ -1,7 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Icon } from "../../../components/ui/Icons";
 import { ChatMessage } from "../api/chatService";
+import { documentService } from "../../dashboard/api/documentService";
+import { notify } from "../../../components/ui/ToastEngine";
 
 interface ComparisonChatProps {
   chatHistory: ChatMessage[];
@@ -21,6 +23,31 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   if (!isVisible) return null;
+
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        
+        const lastAssistantMsg = [...chatHistory].reverse().find(m => m.role === 'assistant');
+        if (lastAssistantMsg) {
+          try {
+            await documentService.processText(lastAssistantMsg.content, `AI Comparison Note`);
+            notify("Saved comparison to Library!", "success");
+          } catch (error) {
+            notify("Failed to save comparison.", "error");
+          }
+        } else {
+          notify("No AI response to save.", "info");
+        }
+      }
+    };
+
+    if (isVisible) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [chatHistory, isVisible]);
 
   const handleInputResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setChatInput(e.target.value);
@@ -117,7 +144,7 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
             onChange={handleInputResize}
             onFocus={() => setIsChatOpen(true)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 submitMessage();
               }

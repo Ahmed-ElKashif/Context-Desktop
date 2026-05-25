@@ -9,6 +9,8 @@ import {
   clearProposedStructure,
 } from "../../../../store/documentSlice";
 import { resolveUniqueName } from "../../utils/tableUtils";
+import { documentService } from "../../../dashboard/api/documentService";
+import { addNotification } from "../../../../store/notificationSlice";
 
 export interface UseUploadModalProps {
   onClose: () => void;
@@ -138,7 +140,7 @@ export const useUploadModal = ({
       await dispatch(
         uploadBatchDocuments({ files: activeFiles, clientPaths: activePaths }),
       ).unwrap();
-      notify("Saved to Your Folders!", "success");
+      dispatch(addNotification("Saved to Your Folders!"));
       onSuccess?.();
       handleClose();
       //eslint-disable-next-line
@@ -162,7 +164,7 @@ export const useUploadModal = ({
       await new Promise((resolve) => setTimeout(resolve, remaining));
       onSuccess?.();
       handleClose();
-      notify("Text snippet added to Context!", "success");
+      dispatch(addNotification("Text snippet added to Context!"));
       //eslint-disable-next-line
     } catch (error: any) {
       notify(error || "Failed to process text.", "error");
@@ -177,12 +179,71 @@ export const useUploadModal = ({
 
     try {
       await dispatch(applySemanticFolders(proposedFolderUpdates)).unwrap();
-      notify("Inbox Organized!", "success", toastId);
+      dispatch(addNotification("Inbox Organized!"));
       onSuccess?.();
       handleClose();
       //eslint-disable-next-line
     } catch (error: any) {
       notify("Failed to apply folders.", "error", toastId);
+    }
+  };
+
+  const handleAcceptLocal = async () => {
+    if (!proposedFolderUpdates) return;
+    try {
+      const electronAPI = (window as any).electronAPI;
+      if (!electronAPI?.localFiles?.selectDirectory) {
+        notify("Local export is only available in the Desktop App.", "error");
+        return;
+      }
+
+      const directoryPath = await electronAPI.localFiles.selectDirectory();
+      if (!directoryPath) return; // User canceled
+
+      const toastId = "ai-export-flow";
+      notify("Exporting organized files to your PC...", "info", toastId);
+
+      // Fetch missing documents in parallel
+      const rawFiles = await Promise.all(
+        proposedFolderUpdates.map(async (update) => {
+          let doc = documentsList.find((d) => d._id === update.documentId);
+          if (!doc || !doc.cloudinaryUrl) {
+            try {
+              doc = await documentService.getDocument(update.documentId);
+            } catch (err) {
+              console.warn("Could not fetch document", update.documentId);
+            }
+          }
+
+          const title = update.title || doc?.title || `File_${update.documentId}`;
+          const relativePath = update.newPath && update.newPath !== "/"
+            ? `${update.newPath}/${title}`
+            : title;
+          
+          return {
+            url: doc?.cloudinaryUrl || "",
+            relativePath,
+            localSourcePath: doc?.originalClientPath,
+          };
+        })
+      );
+
+      const filesToExport = rawFiles.filter(f => f.url || f.localSourcePath);
+
+      if (filesToExport.length === 0) {
+        notify("No files found to export.", "error", toastId);
+        return;
+      }
+
+      const result = await electronAPI.localFiles.exportOrganizedFiles(directoryPath, filesToExport);
+      if (result?.success) {
+        notify("Export Complete! Check your selected folder.", "success", toastId);
+        onSuccess?.();
+        handleClose();
+      }
+    } catch (err: any) {
+      console.error("Local export error:", err);
+      notify("Failed to export files to PC.", "error", "ai-export-flow");
     }
   };
 
@@ -260,6 +321,7 @@ export const useUploadModal = ({
     handleUploadToYourFolders,
     handleTextSubmit,
     handleAcceptAI,
+    handleAcceptLocal,
     handleManualFolderSelect,
     handleNativeFolderSelect,
     determineFileType,

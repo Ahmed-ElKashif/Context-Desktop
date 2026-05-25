@@ -10,6 +10,7 @@ interface AISplitScreenViewProps {
   isApplyingFolders: boolean;
   handleClose: () => void;
   handleAcceptAI: () => void;
+  handleAcceptLocal?: () => void;
 }
 
 export const AISplitScreenView = ({
@@ -19,6 +20,7 @@ export const AISplitScreenView = ({
   isApplyingFolders,
   handleClose,
   handleAcceptAI,
+  handleAcceptLocal,
 }: AISplitScreenViewProps) => {
   const originalTreePaths = proposedFolderUpdates.map((update) => {
     // Use the enriched originalPath from the backend first!
@@ -109,8 +111,19 @@ export const AISplitScreenView = ({
           disabled={isApplyingFolders}
           className="bg-light-primary dark:bg-dark-primary text-white dark:text-black font-bold"
         >
-          {isApplyingFolders ? "Applying..." : "Accept Organization"}
+          {isApplyingFolders ? "Applying..." : "Save to Cloud"}
         </Button>
+        {handleAcceptLocal && (
+          <Button
+            onClick={handleAcceptLocal}
+            disabled={isApplyingFolders}
+            variant="outline"
+            className="border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary font-bold flex items-center gap-2"
+          >
+            <Icon name="folder_open" className="text-[18px]" />
+            Export Organized Folders to PC
+          </Button>
+        )}
       </div>
     </div>
   );

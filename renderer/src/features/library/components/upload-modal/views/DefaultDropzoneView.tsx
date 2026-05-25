@@ -151,8 +151,16 @@ export const DefaultDropzoneView = ({
               <textarea
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    if (!isUploading && pastedText.trim() && snippetTitle.trim()) {
+                      handleTextSubmit();
+                    }
+                  }
+                }}
                 disabled={isUploading}
-                placeholder="Paste your text here..."
+                placeholder="Paste your text here... (Ctrl+Enter to save)"
                 className="w-full h-36 p-4 rounded-xl border border-light-border dark:border-white/10 bg-light-surface dark:bg-[#121214] text-light-text dark:text-white text-sm outline-none resize-none placeholder:text-light-text/50 dark:placeholder:text-white/40 transition-colors focus:border-light-primary dark:focus:border-dark-primary focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 leading-relaxed"
               />
             </div>
