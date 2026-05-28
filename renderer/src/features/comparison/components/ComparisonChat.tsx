@@ -22,8 +22,6 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  if (!isVisible) return null;
-
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -48,6 +46,8 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [chatHistory, isVisible]);
+
+  if (!isVisible) return null;
 
   const handleInputResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setChatInput(e.target.value);

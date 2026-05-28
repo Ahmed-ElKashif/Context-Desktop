@@ -1,5 +1,5 @@
 import { Icon } from "../../../../../components/ui/Icons";
-import { Button } from "@/components/ui/Button";
+import { Button } from "../../../../../components/ui/Button";
 import { DropzoneState } from "react-dropzone";
 
 interface DefaultDropzoneViewProps {

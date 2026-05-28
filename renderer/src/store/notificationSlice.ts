@@ -77,6 +77,27 @@ export const markAllAsRead = createAsyncThunk(
   }
 );
 
+export const removeNotification = createAsyncThunk(
+  'notifications/remove',
+  async (id: string, { getState }) => {
+    const state = getState() as RootState;
+    const newNotifications = state.notifications.notifications.filter(n => n.id !== id);
+    
+    await saveToStore(newNotifications);
+    
+    return id;
+  }
+);
+
+export const clearAllNotifications = createAsyncThunk(
+  'notifications/clearAll',
+  async () => {
+    const newNotifications: AppNotification[] = [];
+    await saveToStore(newNotifications);
+    return newNotifications;
+  }
+);
+
 const notificationSlice = createSlice({
   name: 'notifications',
   initialState,
@@ -92,6 +113,16 @@ const notificationSlice = createSlice({
       })
       .addCase(markAllAsRead.fulfilled, (state, action) => {
         state.notifications = action.payload;
+      })
+      .addCase(removeNotification.fulfilled, (state, action) => {
+        state.notifications = state.notifications.filter(n => n.id !== action.payload);
+      })
+      .addCase(clearAllNotifications.fulfilled, (state, action) => {
+        state.notifications = action.payload;
+      })
+      .addCase('auth/logout/fulfilled', (state) => {
+        state.notifications = [];
+        state.isLoaded = false;
       });
   },
 });

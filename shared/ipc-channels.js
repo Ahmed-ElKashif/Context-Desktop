@@ -17,7 +17,6 @@ exports.IPC_CHANNELS = {
         MINIMIZE: 'window:minimize',
         MAXIMIZE: 'window:maximize',
         CLOSE: 'window:close',
-        CLOSE_QUICK_CAPTURE: 'window:close-quick-capture',
     },
     FILE: {
         SELECT_BATCH_FOLDER: 'file:select-batch-folder',

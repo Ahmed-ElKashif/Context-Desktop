@@ -1,18 +1,14 @@
-import { app, BrowserWindow, session } from "electron";
+import { app, BrowserWindow, session, screen } from "electron";
 import * as path from "path";
 import { IPC_CHANNELS } from "../../shared/ipc-channels";
+import { getStore } from "../utils/store";
 
 let mainWindow: BrowserWindow | null = null;
-let quickCaptureWin: BrowserWindow | null = null;
 
 const isDev = !app.isPackaged;
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
-}
-
-export function getQuickCaptureWin(): BrowserWindow | null {
-  return quickCaptureWin;
 }
 
 export function handleCliArgs(argv: string[]) {
@@ -34,10 +30,29 @@ export function handleCliArgs(argv: string[]) {
   }
 }
 
-export function createWindow() {
+export async function createWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  const store = await getStore();
+  
+  // Load saved state or use defaults. Default to maximized on first install!
+  const savedState = store.get("windowState", {
+    width: width,
+    height: height,
+    x: undefined,
+    y: undefined,
+    isMaximized: true,
+    isFullScreen: false,
+  });
+
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    x: savedState.x,
+    y: savedState.y,
+    width: savedState.width,
+    height: savedState.height,
+    show: false,
+    autoHideMenuBar: true,
     icon: path.join(__dirname, "../../renderer/favicon.png"),
     webPreferences: {
       nodeIntegration: false,
@@ -47,14 +62,61 @@ export function createWindow() {
     },
   });
 
+  mainWindow.setMenu(null);
+
+  mainWindow.once("ready-to-show", () => {
+    if (savedState.isMaximized) {
+      mainWindow?.maximize();
+    }
+    if (savedState.isFullScreen) {
+      mainWindow?.setFullScreen(true);
+    }
+    mainWindow?.show();
+  });
+
+  // Track state manually to avoid the Windows "unmaximize on close" bug
+  let currentIsMaximized = savedState.isMaximized;
+  let currentIsFullScreen = savedState.isFullScreen;
+
+  mainWindow.on('maximize', () => currentIsMaximized = true);
+  mainWindow.on('unmaximize', () => currentIsMaximized = false);
+  mainWindow.on('enter-full-screen', () => currentIsFullScreen = true);
+  mainWindow.on('leave-full-screen', () => currentIsFullScreen = false);
+  
+  mainWindow.on("close", () => {
+    // Save true state right before destruction
+    if (mainWindow) {
+      // Normal bounds are completely messed up if maximized, so we only save them if NOT maximized
+      const bounds = mainWindow.getBounds();
+      
+      store.set("windowState", {
+        // If maximized, keep the old bounds so we remember the un-maximized size!
+        x: currentIsMaximized ? savedState.x : bounds.x,
+        y: currentIsMaximized ? savedState.y : bounds.y,
+        width: currentIsMaximized ? savedState.width : bounds.width,
+        height: currentIsMaximized ? savedState.height : bounds.height,
+        isMaximized: currentIsMaximized,
+        isFullScreen: currentIsFullScreen,
+      });
+    }
+  });
+
   mainWindow.loadFile(path.join(__dirname, "../../renderer/index.html"));
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const scriptSrc = isDev 
+      ? "'self' 'unsafe-inline' 'unsafe-eval'" 
+      : "'self' 'unsafe-inline'";
+
+    const connectSrc = isDev
+      ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com"
+      : "'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com";
+      
     callback({
       responseHeaders: {
         ...details.responseHeaders,
         "Content-Security-Policy": [
-          "default-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: *; connect-src 'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com",
+          `default-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src ${scriptSrc}; img-src 'self' data: *; connect-src ${connectSrc}`,
         ],
       },
     });
@@ -62,6 +124,13 @@ export function createWindow() {
 
   mainWindow.on("closed", () => {
     mainWindow = null;
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('mailto:')) {
+      require('electron').shell.openExternal(url);
+    }
+    return { action: 'deny' };
   });
 
   mainWindow.webContents.on("did-finish-load", () => {
@@ -76,42 +145,3 @@ export function createWindow() {
   );
 }
 
-export function toggleQuickCapture() {
-  if (quickCaptureWin) {
-    if (quickCaptureWin.isVisible()) {
-      quickCaptureWin.hide();
-    } else {
-      quickCaptureWin.show();
-      quickCaptureWin.focus();
-    }
-  } else {
-    quickCaptureWin = new BrowserWindow({
-      width: 400,
-      height: 300,
-      frame: false,
-      alwaysOnTop: true,
-      resizable: false,
-      skipTaskbar: true,
-      transparent: true,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, "../../preload/index.js"),
-      },
-    });
-
-    const routeUrl = isDev 
-      ? "http://localhost:5173/#/quick-capture" 
-      : `file://${path.join(__dirname, "../../renderer/index.html")}#/quick-capture`;
-
-    quickCaptureWin.loadURL(routeUrl);
-    
-    quickCaptureWin.on("closed", () => {
-      quickCaptureWin = null;
-    });
-
-    quickCaptureWin.on("blur", () => {
-      quickCaptureWin?.hide();
-    });
-  }
-}

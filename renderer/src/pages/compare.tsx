@@ -264,17 +264,13 @@ export default function Compare() {
               {isComparing ? (
                 <ComparisonResultSkeleton />
               ) : comparisonData ? (
-                <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 flex flex-col xl:flex-row items-start gap-6">
-                  <div className="xl:w-[400px] shrink-0 w-full flex flex-col">
-                    <AiSynthesisCard isLoading={false} hasData={true} data={comparisonData.comparison} />
-                  </div>
-                  <div className="flex-1 flex flex-col w-full min-w-0">
-                    <DeltaBoard
-                      uniqueToBase={comparisonData.comparison.uniqueToA}
-                      sharedConcepts={comparisonData.comparison.similarities}
-                      uniqueToCompare={comparisonData.comparison.uniqueToB}
-                    />
-                  </div>
+                <div className="animate-in slide-in-from-bottom-4 fade-in duration-500">
+                  <AiSynthesisCard isLoading={false} hasData={true} data={comparisonData.comparison} />
+                  <DeltaBoard
+                    uniqueToBase={comparisonData.comparison.uniqueToA}
+                    sharedConcepts={comparisonData.comparison.similarities}
+                    uniqueToCompare={comparisonData.comparison.uniqueToB}
+                  />
                 </div>
               ) : null}
             </div>

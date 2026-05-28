@@ -23,6 +23,7 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
 
   // 3. Global UI States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [externalUploadPaths, setExternalUploadPaths] = useState<string[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -46,8 +47,17 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
   // --- Global Event Listeners for Keyboard Shortcuts ---
   useEffect(() => {
     const handleOpenUpload = () => setIsUploadModalOpen(true);
+    const handleExternalUpload = (e: Event) => {
+      const paths: string[] = (e as CustomEvent).detail || [];
+      if (paths.length > 0) {
+        setExternalUploadPaths((prev) => Array.from(new Set([...prev, ...paths])));
+        setIsUploadModalOpen(true);
+      }
+      delete (window as any).pendingExternalUpload;
+    };
     const handleCloseModals = () => {
       setIsUploadModalOpen(false);
+      setExternalUploadPaths([]);
       setIsBulkDeleteModalOpen(false);
       setDocToDelete(null);
       setDocToRename(null);
@@ -55,11 +65,23 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
       setFolderToRename(null);
     };
 
+    // Check for any pending external uploads from cold start
+    if ((window as any).pendingExternalUpload) {
+      const pendingPaths = (window as any).pendingExternalUpload;
+      if (pendingPaths.length > 0) {
+        setExternalUploadPaths(pendingPaths);
+        setIsUploadModalOpen(true);
+      }
+      delete (window as any).pendingExternalUpload;
+    }
+
     window.addEventListener("open-upload-modal", handleOpenUpload);
+    window.addEventListener("external-upload", handleExternalUpload);
     window.addEventListener("close-all-modals", handleCloseModals);
     
     return () => {
       window.removeEventListener("open-upload-modal", handleOpenUpload);
+      window.removeEventListener("external-upload", handleExternalUpload);
       window.removeEventListener("close-all-modals", handleCloseModals);
     };
   }, []);
@@ -110,8 +132,12 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
     },
     uploadModal: {
       isOpen: isUploadModalOpen,
+      externalPaths: externalUploadPaths,
       open: () => setIsUploadModalOpen(true),
-      close: () => setIsUploadModalOpen(false),
+      close: () => {
+        setIsUploadModalOpen(false);
+        setExternalUploadPaths([]);
+      },
     },
     bulkDeleteModal: {
       isOpen: isBulkDeleteModalOpen,

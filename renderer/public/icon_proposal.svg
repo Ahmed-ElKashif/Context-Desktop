@@ -26,13 +26,13 @@
     </linearGradient>
 
     <!-- Soft Glow Filter -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
       <feGaussianBlur stdDeviation="2.5" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
 
     <!-- Core Heavy Glow Filter -->
-    <filter id="coreGlow" x="-50%" y="-50%" width="200%" height="200%">
+    <filter id="coreGlow" x="-100%" y="-100%" width="300%" height="300%">
       <feGaussianBlur stdDeviation="6" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
@@ -51,8 +51,8 @@
   <rect x="66" y="66" width="892" height="892" rx="222" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.1" />
 
   <!-- Logo Group -->
-  <!-- We scale the 0-100 viewBox shape by 6 to make it 600px wide, and center it in the 1024px canvas (translate 212) -->
-  <g transform="translate(212, 212) scale(6)">
+  <!-- We scale the 0-100 viewBox shape by 12 to make it larger, and center it in the 1024px canvas (translate -88, -148) -->
+  <g transform="translate(-88, -148) scale(12)">
     <!-- Path 1 (Top Left to Core) -->
     <path d="M30 30 C 30 30, 45 45, 50 50" stroke="#E5E7EB" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6" />
     
@@ -63,18 +63,18 @@
     <path d="M50 80 C 50 80, 50 65, 50 50" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.8" />
 
     <!-- Top Left Node -->
-    <circle cx="30" cy="30" r="6" fill="url(#nodeGradient)" filter="url(#glow)"/>
+    <circle cx="30" cy="30" r="6" fill="url(#nodeGradient)" />
 
     <!-- Top Right Node -->
-    <circle cx="70" cy="30" r="6" fill="url(#nodeGradient)" filter="url(#glow)"/>
+    <circle cx="70" cy="30" r="6" fill="url(#nodeGradient)" />
 
     <!-- Bottom Node -->
-    <circle cx="50" cy="80" r="6" fill="url(#accentGradient)" filter="url(#glow)"/>
+    <circle cx="50" cy="80" r="6" fill="url(#accentGradient)" />
 
     <!-- Central Core Outer Ring (matching radius 10 from original) -->
-    <circle cx="50" cy="50" r="11" stroke="url(#coreGradient)" stroke-width="2.5" fill="none" opacity="0.8" filter="url(#glow)"/>
+    <circle cx="50" cy="50" r="11" stroke="url(#coreGradient)" stroke-width="2.5" fill="none" opacity="0.8" />
 
     <!-- Central Core Inner Solid (matching radius 6 from original) -->
-    <circle cx="50" cy="50" r="6.5" fill="url(#coreGradient)" filter="url(#coreGlow)"/>
+    <circle cx="50" cy="50" r="6.5" fill="url(#coreGradient)" />
   </g>
 </svg>

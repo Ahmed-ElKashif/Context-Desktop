@@ -410,6 +410,12 @@ const documentSlice = createSlice({
   name: "document",
   initialState,
   reducers: {
+    setUploading: (state, action: PayloadAction<boolean>) => {
+      state.isUploading = action.payload;
+    },
+    setCurrentFolder: (state, action: PayloadAction<FolderData | null>) => {
+      state.currentFolder = action.payload;
+    },
     startUpload: (state, action: PayloadAction<DocumentType>) => {
       state.isUploading = true;
       state.uploadingFileType = action.payload;
@@ -648,6 +654,8 @@ const documentSlice = createSlice({
 });
 
 export const {
+  setUploading,
+  setCurrentFolder,
   startUpload,
   setUploadProgress,
   setActiveDocument,

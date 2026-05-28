@@ -16,6 +16,7 @@ export default function Reader() {
 
   // Pull the active document directly from Redux now!
   const activeDocument = useAppSelector(state => state.document.activeDocument);
+  const authToken = useAppSelector(state => state.auth.token);
 
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,7 +62,6 @@ export default function Reader() {
     const isProcessing = activeDocument?.aiStatus === "Pending" || activeDocument?.aiStatus === "Processing";
     if (!id || !isProcessing) return;
 
-    const authToken = localStorage.getItem("context_token");
     if (!authToken) return;
 
     const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -96,7 +96,7 @@ export default function Reader() {
     };
 
     return () => es.close();
-  }, [id, activeDocument?.aiStatus, dispatch]);
+  }, [id, activeDocument?.aiStatus, dispatch, authToken]);
 
   if (error || (!id && !isLoading)) {
     return (

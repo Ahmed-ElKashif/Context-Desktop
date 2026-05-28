@@ -9,6 +9,8 @@ import {
   addNotification,
   loadNotifications,
   markAllAsRead,
+  removeNotification,
+  clearAllNotifications,
 } from "../../store/notificationSlice";
 
 export const TopNav = () => {
@@ -116,19 +118,31 @@ export const TopNav = () => {
           </button>
 
           {isNotifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-2 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right flex flex-col max-h-[400px]">
-              <div className="px-4 py-2 border-b border-light-border dark:border-white/10 flex items-center justify-between shrink-0">
-                <span className="font-bold text-sm text-light-text dark:text-white">
+            <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-0 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right flex flex-col max-h-[450px]">
+              <div className="px-5 py-4 border-b border-light-border dark:border-white/10 flex items-center justify-between shrink-0 bg-light-surface/50 dark:bg-[#18181B]/50">
+                <span className="font-bold text-base text-light-text dark:text-white">
                   Notifications
                 </span>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={() => dispatch(markAllAsRead())}
-                    className="text-xs text-light-primary dark:text-dark-primary font-bold hover:underline"
-                  >
-                    Mark all as read
-                  </button>
-                )}
+                <div className="flex gap-1.5 items-center">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={() => dispatch(markAllAsRead())}
+                      className="p-1.5 rounded-md text-light-text/60 dark:text-white/60 hover:text-light-primary dark:hover:text-dark-primary hover:bg-light-primary/10 dark:hover:bg-dark-primary/10 transition-colors"
+                      title="Mark all as read"
+                    >
+                      <Icon name="done_all" className="text-[18px]" />
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={() => dispatch(clearAllNotifications())}
+                      className="p-1.5 rounded-md text-light-text/60 dark:text-white/60 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                      title="Clear all notifications"
+                    >
+                      <Icon name="delete" className="text-[18px]" />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="overflow-y-auto overflow-x-hidden flex-1 no-scrollbar">
                 {notifications.length === 0 ? (
@@ -139,26 +153,43 @@ export const TopNav = () => {
                   notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`px-4 py-3 border-b border-light-border dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${!n.isRead ? "bg-light-primary/5 dark:bg-dark-primary/5" : ""}`}
+                      className={`group relative p-4 border-b border-light-border dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${!n.isRead ? "bg-light-primary/5 dark:bg-dark-primary/5" : ""}`}
                     >
-                      <div className="flex items-start gap-3">
-                        {!n.isRead && (
-                          <div className="w-2 h-2 rounded-full bg-light-primary dark:bg-dark-primary mt-1.5 shrink-0"></div>
-                        )}
+                      <div className="flex gap-3">
+                        <div className="relative shrink-0 pt-0.5">
+                          <div className="w-8 h-8 rounded-full bg-light-surface dark:bg-[#2A2A2E] border border-light-border dark:border-white/10 flex items-center justify-center">
+                            <Icon name="info" className="text-[16px] text-light-primary dark:text-dark-primary" />
+                          </div>
+                          {!n.isRead && (
+                            <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-[#1E1E22]"></div>
+                          )}
+                        </div>
+                        
                         <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm text-light-text dark:text-white ${!n.isRead ? "font-bold" : "font-medium"}`}
-                          >
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-bold text-sm text-light-text dark:text-white truncate pr-2">
+                              Context AI
+                            </span>
+                            <span className="text-[11px] font-medium text-light-text/50 dark:text-white/40 whitespace-nowrap pt-0.5 group-hover:opacity-0 transition-opacity">
+                              {new Date(n.timestamp).toLocaleDateString("en-GB")} • {new Date(n.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+                          <p className={`text-[13px] text-light-text/80 dark:text-white/80 leading-relaxed ${!n.isRead ? "font-medium" : ""}`}>
                             {n.message}
-                          </p>
-                          <p className="text-xs text-light-text/50 dark:text-white/40 mt-1">
-                            {new Date(n.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
                           </p>
                         </div>
                       </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(removeNotification(n.id));
+                        }}
+                        className="absolute right-3 top-3.5 w-6 h-6 flex items-center justify-center rounded-md bg-white dark:bg-[#2A2A2E] hover:bg-red-50 dark:hover:bg-red-500/20 text-light-text/50 dark:text-white/50 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm border border-light-border dark:border-white/10"
+                        title="Clear notification"
+                      >
+                        <Icon name="close" className="text-[14px]" />
+                      </button>
                     </div>
                   ))
                 )}

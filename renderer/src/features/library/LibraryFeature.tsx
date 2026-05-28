@@ -272,7 +272,10 @@ export const LibraryFeature = () => {
         isOpen={ui.uploadModal.isOpen}
         onClose={ui.uploadModal.close}
         externalFiles={globalDroppedFiles}
-        externalPaths={globalDroppedPaths}
+        externalPaths={[
+          ...globalDroppedPaths,
+          ...ui.uploadModal.externalPaths,
+        ]}
         onClearExternal={() => {
           setGlobalDroppedFiles([]);
           setGlobalDroppedPaths([]);
