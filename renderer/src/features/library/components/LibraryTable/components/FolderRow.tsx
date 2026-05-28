@@ -54,7 +54,6 @@ export const FolderRow = ({
 
   return (
     <tr
-      onClick={onClick}
       onDoubleClick={onDoubleClick}
       onContextMenu={(e) => {
         if (onClick) onClick();

@@ -77,7 +77,6 @@ export const DocumentRow = ({
 
   return (
     <tr
-      onClick={onClick}
       onDoubleClick={onDoubleClick}
       onContextMenu={(e) => {
         onClick(); // ensure it's selected

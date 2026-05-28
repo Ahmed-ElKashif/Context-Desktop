@@ -51,6 +51,9 @@ export const initializeAuth = createAsyncThunk(
 export const logout = createAsyncThunk("auth/logout", async () => {
   await (window as any).electronAPI.store.delete("context_token");
   await (window as any).electronAPI.store.delete("context_user");
+  if ((window as any).electronAPI.store) {
+    await (window as any).electronAPI.store.delete("app_notifications");
+  }
 });
 
 // 2. Create the Thunks

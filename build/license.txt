@@ -1,16 +1,22 @@
-Context AI Document Intelligence - End User License Agreement (EULA)
+Context Enterprise File System - End User License Agreement (EULA)
 
-1. ACCEPTANCE OF TERMS
-By installing and using Context, you agree to these terms.
+IMPORTANT - READ CAREFULLY: This End User License Agreement ("EULA") is a legal agreement between your organization ("Licensee" or "you") and Context Systems ("Company") for the Context Enterprise File System application. This includes computer software, associated media, printed materials, and electronic documentation ("SOFTWARE PRODUCT").
 
-2. LICENSE GRANT
-We grant you a non-exclusive, non-transferable license to use this software.
+By installing, copying, or using the SOFTWARE PRODUCT on your corporate infrastructure or local machines, you agree to be bound by the terms of this EULA. If you do not agree to the terms, do not install or use the SOFTWARE PRODUCT.
 
-3. RESTRICTIONS
-You may not reverse engineer, decompile, or disassemble the software.
+1. GRANT OF ENTERPRISE LICENSE
+The Company grants the Licensee a limited, non-exclusive, non-transferable license to install and use the SOFTWARE PRODUCT across the Licensee's internal business network for file system management, document intelligence, and enterprise indexing.
 
-4. DATA PRIVACY
-We respect your privacy and only process data you explicitly upload to the AI engines.
+2. RESTRICTIONS ON USE
+- Reverse Engineering: The Licensee may not reverse engineer, decompile, or disassemble the SOFTWARE PRODUCT.
+- Sub-licensing: The Licensee may not rent, lease, lend, or sub-license the SOFTWARE PRODUCT to third parties.
+- Network Distribution: The SOFTWARE PRODUCT may only be distributed to authorized employees within the Licensee's organization.
 
-5. TERMINATION
-This license is effective until terminated by you or us.
+3. DATA GOVERNANCE AND SECURITY
+The SOFTWARE PRODUCT manages enterprise file systems and local document networks. The Licensee retains full ownership of all data, files, and documents indexed by the SOFTWARE PRODUCT. The Company acknowledges that the SOFTWARE PRODUCT may process highly sensitive corporate data and commits to maintaining zero-knowledge architecture where applicable. No local file system data is transmitted outside the Licensee's network without explicit configuration and consent.
+
+4. TERMINATION
+This EULA remains in effect until terminated. The Company may terminate this agreement if the Licensee breaches any material term. Upon termination, all instances of the SOFTWARE PRODUCT must be removed from the Licensee's infrastructure.
+
+5. NO WARRANTIES
+The SOFTWARE PRODUCT is provided "As Is". The Company expressly disclaims any warranty for the SOFTWARE PRODUCT, including implied warranties of merchantability or fitness for a particular enterprise architecture.

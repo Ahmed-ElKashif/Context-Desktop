@@ -1,6 +1,7 @@
-import { app, BrowserWindow, globalShortcut, ipcMain } from "electron";
+import { app, BrowserWindow, globalShortcut, ipcMain, crashReporter } from "electron";
 import { setupErrorLogger } from "./utils/error-logger";
-import { createWindow, toggleQuickCapture, getMainWindow, getQuickCaptureWin, handleCliArgs } from "./windows/window-manager";
+import { setupApplicationMenu } from "./utils/menu";
+import { createWindow, getMainWindow, handleCliArgs } from "./windows/window-manager";
 import { registerAppHandlers } from "./ipc/app-handlers";
 import { registerWindowHandlers } from "./ipc/window-handlers";
 import { registerStoreHandlers } from "./ipc/store-handlers";
@@ -9,7 +10,8 @@ import { registerFileHandlers } from "./ipc/file-handlers";
 import { getStore } from "./utils/store";
 import { IPC_CHANNELS } from "../shared/ipc-channels";
 
-// 1. Initialize Error Logger immediately
+// 1. Initialize Error Logger and Crash Reporter
+crashReporter.start({ submitURL: '', uploadToServer: false });
 setupErrorLogger();
 
 // 2. Ensure Single Instance
@@ -19,8 +21,8 @@ if (!gotTheLock) {
   // Delay exit slightly to prevent Windows 11 from interpreting a rapid exit 
   // as a shell failure, which triggers the "Open with" dialog.
   setTimeout(() => {
-    app.exit(0);
-  }, 100);
+    app.quit();
+  }, 400);
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
     const mainWindow = getMainWindow();
@@ -39,8 +41,9 @@ if (!gotTheLock) {
     registerUpdaterHandlers();
     registerFileHandlers();
 
-    // 4. Create Windows
-    createWindow();
+    // 4. Setup Menu and Create Windows
+    setupApplicationMenu();
+    await createWindow();
 
     // 5. Register Global Shortcuts
     globalShortcut.register('CommandOrControl+Shift+C', () => {
@@ -56,13 +59,9 @@ if (!gotTheLock) {
       }
     });
 
-    globalShortcut.register('CommandOrControl+Shift+Q', () => {
-      toggleQuickCapture();
-    });
-
-    app.on("activate", () => {
+    app.on("activate", async () => {
       if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        await createWindow();
       }
     });
 
@@ -98,11 +97,6 @@ app.on("will-quit", () => {
   globalShortcut.unregisterAll();
   ipcMain.removeAllListeners();
   
-  const quickCaptureWin = getQuickCaptureWin();
-  if (quickCaptureWin && !quickCaptureWin.isDestroyed()) {
-    quickCaptureWin.close();
-  }
-
   const mainWindow = getMainWindow();
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.close();
@@ -114,3 +108,4 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+

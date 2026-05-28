@@ -1,25 +1,13 @@
-import { app } from "electron";
-import * as path from "path";
-import * as fs from "fs";
+import log from "electron-log";
 
 export const logError = (type: string, err: any) => {
-  try {
-    const logsDir = app.getPath('logs');
-    if (!fs.existsSync(logsDir)) {
-      fs.mkdirSync(logsDir, { recursive: true });
-    }
-    const logFile = path.join(logsDir, 'error.log');
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] [${type}] ${err?.stack || err?.message || err}\n`;
-    fs.appendFileSync(logFile, logMessage);
-    console.error(logMessage);
-  } catch (e) {
-    console.error("Failed to write to log file:", e);
-    console.error("Original error:", err);
-  }
+  log.error(`[${type}]`, err?.stack || err?.message || err);
 };
 
 export const setupErrorLogger = () => {
+  // Optional: customize electron-log behavior
+  log.transports.file.level = 'info';
+  
   process.on('uncaughtException', (err) => {
     logError('uncaughtException', err);
   });
@@ -27,4 +15,7 @@ export const setupErrorLogger = () => {
   process.on('unhandledRejection', (reason) => {
     logError('unhandledRejection', reason);
   });
+  
+  log.info("Error logger initialized.");
 };
+

@@ -7,7 +7,6 @@ import {
 import { AISplitScreenView } from "./upload-modal/views/AISplitScreenView";
 import { StagedFilesView } from "./upload-modal/views/StagedFilesView";
 import { DefaultDropzoneView } from "./upload-modal/views/DefaultDropzoneView";
-import { BatchIngestionView } from "./upload-modal/views/BatchIngestionView";
 
 export const UploadModal = ({
   isOpen,
@@ -21,30 +20,10 @@ export const UploadModal = ({
   let canCloseOnBackdrop = !uploadState.isUploading;
 
   // ==========================================
-  // VIEW Z: Batch Native Folder Progress
-  // ==========================================
-  if (uploadState.batchFolderPath && uploadState.batchFiles.length > 0) {
-    canCloseOnBackdrop = false;
-    modalContent = (
-      <div className="w-full max-w-4xl bg-white dark:bg-[#0A0A0C] rounded-2xl border border-light-border dark:border-white/10 shadow-xl overflow-hidden">
-        <BatchIngestionView
-          folderPath={uploadState.batchFolderPath}
-          files={uploadState.batchFiles}
-          onBack={() => uploadState.handleClose()}
-          onSuccess={() => {
-            uploadState.handleClose();
-            props.onSuccess?.();
-          }}
-        />
-      </div>
-    );
-  }
-  // ==========================================
   // VIEW A: AI Split-Screen Proposal
   // ==========================================
-  else if (uploadState.proposedFolderUpdates) {
-    canCloseOnBackdrop = false; // AISplitScreenView doesn't allow closing via backdrop
-    modalContent = (
+  if (uploadState.proposedFolderUpdates) {
+    return (
       <AISplitScreenView
         proposedFolderUpdates={uploadState.proposedFolderUpdates}
         documentsList={uploadState.documentsList}
@@ -135,7 +114,7 @@ export const UploadModal = ({
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${canCloseOnBackdrop ? "cursor-default" : "pointer-events-none"}`}
         onClick={canCloseOnBackdrop ? uploadState.handleClose : undefined}
       ></div>
       {modalContent}

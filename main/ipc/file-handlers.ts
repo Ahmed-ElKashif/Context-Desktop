@@ -108,7 +108,8 @@ export function registerFileHandlers() {
         } else {
           const fileMime = mime.lookup(filepath) || "";
           if (SUPPORTED_TYPES.includes(fileMime)) {
-            const clientPath = path.relative(folderPath, filepath).replace(/\\/g, '/');
+            const rootParent = path.dirname(folderPath);
+            const clientPath = path.relative(rootParent, filepath).replace(/\\/g, '/');
             fileList.push({
               name: file,
               path: filepath,
@@ -125,39 +126,42 @@ export function registerFileHandlers() {
     return { folderPath, files: fileList };
   });
 
-  ipcMain.handle(IPC_CHANNELS.FILE.INGEST_BATCH_START, async (event, { token, apiUrl, files }) => {
+  ipcMain.handle(IPC_CHANNELS.FILE.INGEST_BATCH_START, async (event, { token, apiUrl, files, clientPaths, folderId }) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) return;
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const formData = new FormData();
+    try {
+      const formData = new FormData();
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         formData.append("files", fs.createReadStream(file.path), file.name);
-        if (file.clientPath) {
+        
+        // Use the explicit clientPaths array if provided (handles folder renaming!)
+        if (clientPaths && clientPaths[i]) {
+          formData.append("clientPaths", clientPaths[i]);
+        } else if (file.clientPath) {
           formData.append("clientPaths", file.clientPath);
+        } else {
+          formData.append("clientPaths", file.name);
         }
-        
-        await axios.post(`${apiUrl}/documents/batch`, formData, {
-          headers: {
-            ...formData.getHeaders(),
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        mainWindow.webContents.send(IPC_CHANNELS.FILE.INGEST_BATCH_PROGRESS, {
-          fileId: file.path,
-          status: 'success',
-          progress: 100
-        });
-      } catch (err: any) {
-        console.error("[Main Process] Batch upload error:", err.message);
-        mainWindow.webContents.send(IPC_CHANNELS.FILE.INGEST_BATCH_PROGRESS, {
-          fileId: file.path,
-          status: 'failed',
-          error: err.response?.data?.message || err.message
-        });
       }
+
+      if (folderId) {
+        formData.append("folderId", folderId);
+      }
+      
+      const response = await axios.post(`${apiUrl}/documents/upload`, formData, {
+        headers: {
+          ...formData.getHeaders(),
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      return response.data;
+    } catch (err: any) {
+      console.error("[Main Process] Batch upload error:", err.message);
+      throw err;
     }
   });
 

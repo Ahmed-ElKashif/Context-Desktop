@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { notify } from "../../../../components/ui/ToastEngine";
@@ -7,6 +7,10 @@ import {
   uploadTextDocument,
   applySemanticFolders,
   clearProposedStructure,
+  setUploading,
+  fetchFolderTree,
+  fetchFolderContents,
+  setActiveDocument,
 } from "../../../../store/documentSlice";
 import { resolveUniqueName } from "../../utils/tableUtils";
 import { documentService } from "../../../dashboard/api/documentService";
@@ -34,7 +38,9 @@ export const useUploadModal = ({
     isApplyingFolders,
     globalFolderTree,
     documentsList,
+    currentFolder,
   } = useAppSelector((state) => state.document);
+  const { token } = useAppSelector((state: any) => state.auth);
 
   const [activeTab, setActiveTab] = useState<"file" | "text">("file");
   const [pastedText, setPastedText] = useState("");
@@ -45,11 +51,7 @@ export const useUploadModal = ({
   const [localPaths, setLocalPaths] = useState<string[]>([]);
 
   const activeFiles = externalFiles.length > 0 ? externalFiles : localFiles;
-  const activePaths = externalPaths.length > 0 ? externalPaths : localPaths;
-
-  // New Batch Ingestion State
-  const [batchFolderPath, setBatchFolderPath] = useState<string | null>(null);
-  const [batchFiles, setBatchFiles] = useState<any[]>([]);
+  const activePaths = externalFiles.length > 0 ? externalPaths : localPaths;
 
   const hiddenFolderInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,35 +62,44 @@ export const useUploadModal = ({
     setPastedText("");
     setSnippetTitle("");
     setIsSnippetLoading(false);
-    setBatchFolderPath(null);
-    setBatchFiles([]);
     onClearExternal?.();
     onClose();
   };
 
-  // Removing startSequentialUpload since we are handling this in BatchIngestionView
+  // Process externalPaths when they arrive via prop (from context-menu "Upload to Context")
+  useEffect(() => {
+    if (!externalPaths || externalPaths.length === 0) return;
+    const electronAPI = (window as any).electronAPI;
+    if (!electronAPI?.localFiles?.processDroppedPaths) return;
+
+    (async () => {
+      try {
+        const result =
+          await electronAPI.localFiles.processDroppedPaths(externalPaths);
+        if (result && result.files && result.files.length > 0) {
+          const fakeFiles = result.files.map((f: any) => ({
+            name: f.name,
+            path: f.path,
+            size: f.size || 0,
+            type: f.type || "",
+            isNativeFile: true,
+          }));
+          setLocalFiles(fakeFiles as any as File[]);
+          setLocalPaths(
+            result.files.map(
+              (f: any) => f.clientPath || f.webkitRelativePath || f.path || f.name,
+            ),
+          );
+        }
+      } catch (err) {
+        console.error("Failed to process external upload paths:", err);
+        notify("Failed to process folder natively.", "error");
+      }
+    })();
+  }, [externalPaths]);
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
-
-    const electronAPI = (window as any).electronAPI;
-    // Native Electron mode: send all dropped absolute paths to the Main process to properly walk folders natively.
-    if (electronAPI?.localFiles?.processDroppedPaths) {
-      const paths = acceptedFiles.map((f: any) => f.path).filter(Boolean);
-      if (paths.length > 0) {
-        try {
-          const result = await electronAPI.localFiles.processDroppedPaths(paths);
-          if (result && result.files && result.files.length > 0) {
-            setBatchFolderPath("Dropped Context");
-            setBatchFiles(result.files);
-            return;
-          }
-        } catch (e) {
-          console.error("Dropped paths processing error:", e);
-          notify("Failed to process dropped files natively.", "error");
-        }
-      }
-    }
 
     // Web Browser fallback
     const filesToProcess = acceptedFiles.slice(0, 10);
@@ -137,6 +148,72 @@ export const useUploadModal = ({
 
   const handleUploadToYourFolders = async () => {
     try {
+      const existingNames = new Set(
+        documentsList.map((d: any) => (d.title || "").toLowerCase()),
+      );
+      const duplicates = activeFiles.filter((f) =>
+        existingNames.has(f.name.toLowerCase()),
+      );
+
+      if (duplicates.length > 0) {
+        notify(
+          `Duplicate not permitted: "${duplicates[0].name}" already exists in Context.`,
+          "error",
+        );
+        return;
+      }
+
+      const isNativeUpload = activeFiles.some((f: any) => f.isNativeFile);
+
+      if (isNativeUpload) {
+        const electronAPI = (window as any).electronAPI;
+        if (electronAPI?.localFiles?.startBatchIngest) {
+          dispatch(setUploading(true));
+          
+          try {
+            const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+            
+            // Pass the current folder ID if we are inside a folder
+            const currentFolderId = currentFolder?._id;
+            
+            const response = await electronAPI.localFiles.startBatchIngest({
+              token,
+              apiUrl,
+              files: activeFiles,
+              clientPaths: activePaths,
+              folderId: currentFolderId,
+            });
+            
+            // If the backend returned documents, set the first one as active
+            // so the SSE listener tracks it and fires the notification/sound.
+            if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+              dispatch(setActiveDocument(response.data[0]));
+            } else if (response?.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+              dispatch(setActiveDocument(response.data.data[0]));
+            }
+            
+            // Refresh the sidebar tree
+            dispatch(fetchFolderTree() as any);
+            
+            // Refresh the current folder view
+            dispatch(fetchFolderContents({ 
+              folderId: currentFolderId, 
+              page: 1, 
+              limit: 10 
+            }) as any);
+            
+            dispatch(addNotification("Saved to Your Folders!"));
+            onSuccess?.();
+            handleClose();
+          } catch (err: any) {
+            notify(err.message || "Failed to upload natively.", "error");
+          } finally {
+            dispatch(setUploading(false));
+          }
+          return;
+        }
+      }
+
       await dispatch(
         uploadBatchDocuments({ files: activeFiles, clientPaths: activePaths }),
       ).unwrap();
@@ -215,29 +292,38 @@ export const useUploadModal = ({
             }
           }
 
-          const title = update.title || doc?.title || `File_${update.documentId}`;
-          const relativePath = update.newPath && update.newPath !== "/"
-            ? `${update.newPath}/${title}`
-            : title;
-          
+          const title =
+            update.title || doc?.title || `File_${update.documentId}`;
+          const relativePath =
+            update.newPath && update.newPath !== "/"
+              ? `${update.newPath}/${title}`
+              : title;
+
           return {
             url: doc?.cloudinaryUrl || "",
             relativePath,
             localSourcePath: doc?.originalClientPath,
           };
-        })
+        }),
       );
 
-      const filesToExport = rawFiles.filter(f => f.url || f.localSourcePath);
+      const filesToExport = rawFiles.filter((f) => f.url || f.localSourcePath);
 
       if (filesToExport.length === 0) {
         notify("No files found to export.", "error", toastId);
         return;
       }
 
-      const result = await electronAPI.localFiles.exportOrganizedFiles(directoryPath, filesToExport);
+      const result = await electronAPI.localFiles.exportOrganizedFiles(
+        directoryPath,
+        filesToExport,
+      );
       if (result?.success) {
-        notify("Export Complete! Check your selected folder.", "success", toastId);
+        notify(
+          "Export Complete! Check your selected folder.",
+          "success",
+          toastId,
+        );
         onSuccess?.();
         handleClose();
       }
@@ -266,9 +352,27 @@ export const useUploadModal = ({
       if (!result || !result.files || result.files.length === 0) return;
 
       const { files, folderPath } = result;
-      setBatchFolderPath(folderPath);
-      setBatchFiles(files);
+      
+      const fakeFiles = files.map((f: any) => {
+        // If clientPath doesn't have a slash (due to old main process without restart), fallback to folderName
+        let relativePath = f.clientPath || f.webkitRelativePath || "";
+        if (!relativePath.includes("/") && folderPath) {
+           const folderName = folderPath.split(/[\\/]/).filter(Boolean).pop() || "Folder";
+           relativePath = `${folderName}/${f.name}`;
+        }
+        
+        return {
+          name: f.name,
+          path: f.path,
+          size: f.size || 0,
+          type: f.type || "",
+          webkitRelativePath: relativePath,
+          isNativeFile: true,
+        };
+      });
 
+      // Delegate to onDrop to handle folder uniqueness and state setting
+      onDrop(fakeFiles as any as File[]);
     } catch (err: any) {
       console.error("Native folder select error:", err);
       notify("Failed to read folder recursively.", "error");
@@ -313,8 +417,6 @@ export const useUploadModal = ({
     activeFiles,
     activePaths,
     wordCount,
-    batchFolderPath,
-    batchFiles,
 
     // Handlers
     handleClose,

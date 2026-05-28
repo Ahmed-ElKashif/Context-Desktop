@@ -23,6 +23,7 @@ export function registerAppHandlers() {
       const notification = new Notification({
         title,
         body,
+        silent: true,
         actions: [{ type: "button", text: "View Result" }]
       });
 

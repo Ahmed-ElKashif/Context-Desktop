@@ -52,7 +52,7 @@ export const FileTreeViewer = ({
       {sortedNodes.map((node, index) => (
         <div key={`${node.name}-${index}`}>
           <div
-            className="flex items-center gap-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md pr-2"
+            className="flex items-center gap-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md pr-2 w-full overflow-hidden"
             style={{ paddingLeft: `${level * 20 + 8}px` }}
           >
             <Icon
@@ -63,7 +63,7 @@ export const FileTreeViewer = ({
                   : "text-light-text/50 dark:text-white/40"
               }`}
             />
-            <span className="font-mono text-sm font-medium text-light-text/80 dark:text-white/70 truncate">
+            <span className="font-mono text-sm font-medium text-light-text/80 dark:text-white/70 truncate flex-1 min-w-0">
               {node.name}
             </span>
           </div>

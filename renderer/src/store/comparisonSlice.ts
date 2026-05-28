@@ -164,7 +164,7 @@ export const sendComparisonMessage = createAsyncThunk(
   async (text: string, { getState, rejectWithValue }) => {
     const state = getState() as any;
     const { baseDoc, compareDoc } = state.comparison;
-    const token = localStorage.getItem("context_token");
+    const token = state.auth.token;
 
     if (!baseDoc || !compareDoc || !token) return rejectWithValue("Missing data");
 
@@ -183,7 +183,7 @@ export const fetchComparisonChatHistory = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     const state = getState() as any;
     const { baseDoc, compareDoc } = state.comparison;
-    const token = localStorage.getItem("context_token");
+    const token = state.auth.token;
 
     if (!baseDoc || !compareDoc || !token) return rejectWithValue("Missing data");
 

@@ -15,6 +15,7 @@ import { AIUsageSection } from "./AIUsageSection";
 import { api } from "../../../lib/axios";
 import { Icon } from "../../../components/ui/Icons";
 import Settings from "../../../pages/settings";
+import { PaymentRequestsSection } from "./PaymentRequestsSection";
 
 const AdminDashboard: React.FC = () => {
   const {
@@ -36,7 +37,7 @@ const AdminDashboard: React.FC = () => {
   } = useAdminDashboard();
 
   // Active tab state
-  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "top-ai" | "ai" | "settings">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments">("dashboard");
 
   // AI Usage state for top-ai and charts
   const [aiUsage, setAIUsage] = useState<any>(null);
@@ -347,6 +348,12 @@ const AdminDashboard: React.FC = () => {
           {activeTab === "settings" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 h-full -m-8 lg:-m-10">
               <Settings />
+            </div>
+          )}
+
+          {activeTab === "payments" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <PaymentRequestsSection />
             </div>
           )}
 

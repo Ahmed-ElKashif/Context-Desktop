@@ -3,7 +3,7 @@ import { DocumentHeader } from "./populated/DocumentHeader";
 import { ExecutiveSummary } from "./populated/ExecutiveSummary";
 import { AIChatSidebar } from "./populated/AIChatSidebar";
 import { PopulatedDashboardSkeleton } from "./populated/PopulatedDashboardSkeleton";
-import { LibraryFeature } from "../../library/LibraryFeature";
+import { Icon } from "../../../components/ui/Icons";
 
 export const PopulatedDashboard = ({
   isRestoring = false,
@@ -19,8 +19,20 @@ export const PopulatedDashboard = ({
       return <PopulatedDashboardSkeleton />;
     }
     return (
-      <div className="h-full w-full m-0 flex flex-col">
-        <LibraryFeature />
+      <div className="flex-1 flex flex-col items-center justify-center h-full text-light-text/50 dark:text-white/40 animate-in fade-in zoom-in-95 duration-300">
+        <div className="w-20 h-20 bg-light-bg dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner border border-light-border dark:border-white/10">
+          <Icon
+            name="quick_reference_all"
+            className="text-4xl text-light-primary/50 dark:text-dark-primary/50"
+          />
+        </div>
+        <h2 className="text-2xl font-black text-light-text dark:text-white mb-2 tracking-tight">
+          Select a Document
+        </h2>
+        <p className="text-sm font-medium max-w-sm text-center">
+          Open a file from your Library to view its AI summary, extracted
+          metadata, and chat with the context engine.
+        </p>
       </div>
     );
   }

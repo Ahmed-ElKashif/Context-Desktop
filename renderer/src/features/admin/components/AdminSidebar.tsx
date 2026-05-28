@@ -2,9 +2,11 @@ import React from "react";
 import { Icon } from "../../../components/ui/Icons";
 import { useAppSelector } from "../../../store/hooks";
 
+import { paymentService } from "../../settings/api/paymentService";
+
 interface AdminSidebarProps {
-  activeTab: "dashboard" | "users" | "top-ai" | "ai" | "settings";
-  setActiveTab: (tab: "dashboard" | "users" | "top-ai" | "ai" | "settings") => void;
+  activeTab: "dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments";
+  setActiveTab: (tab: "dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments") => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -12,10 +14,27 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   setActiveTab,
 }) => {
   const user = useAppSelector((state) => state.auth.user);
+  const [pendingCount, setPendingCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const data = await paymentService.getPaymentRequests({ status: "pending", limit: 1 });
+        setPendingCount(data.counts.pending);
+      } catch (error) {
+        console.error("Failed to fetch pending payments count in sidebar:", error);
+      }
+    };
+    fetchPendingCount();
+    // Poll every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "grid_view" },
     { id: "users", label: "User Management", icon: "manage_accounts" },
+    { id: "payments", label: "Payments", icon: "payments" },
     { id: "top-ai", label: "Top AI Users", icon: "stars" },
     { id: "ai", label: "AI Analytics", icon: "auto_awesome" },
     { id: "settings", label: "Settings", icon: "settings" },
@@ -70,7 +89,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 filled={isActive}
                 className="text-[20px]"
               />
-              <span>{item.label}</span>
+              <div className="flex-1 flex items-center justify-between min-w-0">
+                <span className="truncate">{item.label}</span>
+                {item.id === "payments" && pendingCount > 0 && (
+                  <span className="shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-black animate-pulse">
+                    {pendingCount}
+                  </span>
+                )}
+              </div>
             </button>
           );
         })}
