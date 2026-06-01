@@ -169,7 +169,7 @@ export const sendComparisonMessage = createAsyncThunk(
     if (!baseDoc || !compareDoc || !token) return rejectWithValue("Missing data");
 
     try {
-      const aiResponse = await chatService.sendMessage(baseDoc._id, compareDoc._id, text, token);
+      const aiResponse = await chatService.sendMessage(baseDoc._id, compareDoc._id, text);
       return aiResponse;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to send message");
@@ -188,7 +188,7 @@ export const fetchComparisonChatHistory = createAsyncThunk(
     if (!baseDoc || !compareDoc || !token) return rejectWithValue("Missing data");
 
     try {
-      const history = await chatService.getChatHistory(baseDoc._id, compareDoc._id, token);
+      const history = await chatService.getChatHistory(baseDoc._id, compareDoc._id);
       return history;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to fetch chat history");

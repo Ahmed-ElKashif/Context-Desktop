@@ -9,10 +9,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import axios from 'axios'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
+import { api } from '../../../lib/axios'
 // ─── Session Management ──────────────────────────────────────────────────────
 
 const SESSION_KEY = 'context_analytics_session'
@@ -47,8 +44,8 @@ async function trackEvent(
   const sessionId = getOrCreateSessionId()
 
   try {
-    await axios.post(
-      `${API_BASE}/analytics/track`,
+    await api.post(
+      '/analytics/track',
       { eventType, route, metadata, errorMessage, errorStack },
       { headers: { 'X-Session-Id': sessionId } }
     )

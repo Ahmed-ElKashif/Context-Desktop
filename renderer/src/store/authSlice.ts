@@ -17,8 +17,8 @@ interface AuthState {
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === "object") {
-    const maybeResponse = error as { response?: { data?: { message?: string } } };
-    return maybeResponse.response?.data?.message || fallback;
+    const maybeResponse = error as { response?: { data?: { message?: string; error?: string } } };
+    return maybeResponse.response?.data?.message || maybeResponse.response?.data?.error || fallback;
   }
   return fallback;
 };

@@ -169,9 +169,9 @@ The `preload/index.ts` exposes a typed `window.electronAPI` surface split into 5
 | `/register`        | `RegisterPage`   | Public   |                   | Account creation                                                  |
 | `/forgot-password` | `ForgotPassword` | Public   |                   | Request password reset email                                      |
 | `/reset-password`  | `ResetPassword`  | Public   |                   | Set new password via token                                        |
-| `/dashboard`       | `Dashboard`      | ✅ User  |                   | AI-curated focus feed + stats                                     |
+| `/dashboard`       | `Dashboard`      | ✅ User  |                   | AI-curated focus feed, stats, and unified RAG chat |
 | `/library`         | `SmartLibrary`   | ✅ User  |                   | Full document management                                          |
-| `/read/:id`        | `Reader`         | ✅ User  |                   | PDF viewer + AI sidebar + RAG chat                                |
+| `/read/:id`        | `Reader`         | ✅ User  |                   | Clean PDF & Document viewer                                |
 | `/compare`         | `Compare`        | ✅ User  |                   | AI document comparison + dual-doc chat                            |
 | `/settings`        | `Settings`       | ✅ User  |                   | App preferences + connection config                               |
 | `/profile`         | `Profile`        | ✅ User  |                   | Avatar, persona, password change                                  |
@@ -257,6 +257,8 @@ Unlike the web frontend which stores JWT tokens in `localStorage`, the desktop a
 - Not exposed to the renderer's `window` object
 - Not accessible by other browser tabs or extensions
 - Automatically cleared on `electron-store.clear()` (logout)
+
+> **API Compatibility:** To remain compatible with the Web's strict `HttpOnly` cookie security, the Desktop app uses a **Dual-Auth Architecture**. It passes `Client-Type: native` and `X-Requested-With: XMLHttpRequest` headers to the API, signaling the backend to securely inject the token into the JSON response for encrypted local storage.
 
 </details>
 
@@ -348,6 +350,7 @@ Native Windows toast notifications dispatched from the main process can carry a 
 | mammoth    | 1.x     | Word (.docx) text extraction & preview     |
 | papaparse  | 5.x     | CSV / Excel parsing for data preview       |
 | diff       | 8.x     | Character-level text diffing (Comparison)  |
+| dompurify  | 3.x     | Safe HTML sanitization for Word Preview    |
 | AG Grid    | 35.x    | High-performance data grid (Smart Library) |
 | Recharts   | 3.x     | Analytics charts (Dashboard, Admin)        |
 
