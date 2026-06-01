@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import mammoth from "mammoth";
+import DOMPurify from "dompurify";
 import { Icon } from "../../../../components/ui/Icons";
 import { handleDownload } from "../../shared/downloadUtils";
 
@@ -68,7 +69,8 @@ const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
         const response = await fetch(fileUrl);
         const arrayBuffer = await response.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer });
-        setHtml(result.value);
+        const cleanHtml = DOMPurify.sanitize(result.value);
+        setHtml(cleanHtml);
       } catch (err) {
         console.error("Failed to parse Word doc:", err);
         setHtml(
