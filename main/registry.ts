@@ -1,8 +1,8 @@
 import { app } from 'electron';
 import Registry from 'winreg';
 
-const DIR_KEY_PATH = '\\Software\\Classes\\Directory\\shell\\ContextApp';
-const FILE_KEY_PATH = '\\Software\\Classes\\*\\shell\\ContextAppFile';
+const DIR_KEY_PATH = '\\Software\\Classes\\Directory\\shell\\Upload to Context';
+const FILE_KEY_PATH = '\\Software\\Classes\\*\\shell\\Upload to Context';
 
 function regKeyExists(keyPath: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -42,6 +42,13 @@ function regDelete(keyPath: string): Promise<void> {
   });
 }
 
+async function regDeleteTree(keyPath: string): Promise<void> {
+  // Delete known child key first (command subkey), then the parent.
+  // winreg's .destroy() cannot delete a key that has child keys on some Windows versions.
+  await regDelete(`${keyPath}\\command`);
+  await regDelete(keyPath);
+}
+
 export async function getContextMenuStatus(): Promise<boolean> {
   if (process.platform !== 'win32') return false;
   return await regKeyExists(DIR_KEY_PATH);
@@ -54,13 +61,14 @@ export async function registerFolderContextMenu(): Promise<void> {
   const commandStr = `"${process.execPath}" --action=upload --path="%V"`;
 
   await regSet(DIR_KEY_PATH, '', Registry.REG_SZ, 'Upload to Context');
+  await regSet(DIR_KEY_PATH, 'MUIVerb', Registry.REG_SZ, 'Upload to Context');
   await regSet(DIR_KEY_PATH, 'Icon', Registry.REG_SZ, `"${iconPath}",0`);
   await regSet(`${DIR_KEY_PATH}\\command`, '', Registry.REG_SZ, commandStr);
 }
 
 export async function unregisterFolderContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
-  await regDelete(DIR_KEY_PATH);
+  await regDeleteTree(DIR_KEY_PATH);
 }
 
 const SUPPORTED_EXTENSIONS = [
@@ -74,12 +82,14 @@ export async function registerFileContextMenu(): Promise<void> {
   const iconPath = process.execPath;
   const commandStr = `"${process.execPath}" --action=upload --path="%1"`;
 
-  // Clean up legacy global registration
-  await regDelete('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  // Clean up ALL legacy global wildcard registrations
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextApp');
 
   for (const ext of SUPPORTED_EXTENSIONS) {
-    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
+    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\Upload to Context`;
     await regSet(keyPath, '', Registry.REG_SZ, 'Upload to Context');
+    await regSet(keyPath, 'MUIVerb', Registry.REG_SZ, 'Upload to Context');
     await regSet(keyPath, 'Icon', Registry.REG_SZ, `"${iconPath}",0`);
     await regSet(`${keyPath}\\command`, '', Registry.REG_SZ, commandStr);
   }
@@ -88,11 +98,38 @@ export async function registerFileContextMenu(): Promise<void> {
 export async function unregisterFileContextMenu(): Promise<void> {
   if (process.platform !== 'win32') return;
   
-  // Clean up legacy global registration
-  await regDelete('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  // Clean up ALL legacy global wildcard registrations
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextApp');
 
   for (const ext of SUPPORTED_EXTENSIONS) {
-    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`;
-    await regDelete(keyPath);
+    const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\Upload to Context`;
+    await regDeleteTree(keyPath);
+    // Also clean up the old name just in case
+    await regDeleteTree(`\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\ContextAppFile`);
+  }
+}
+
+export async function cleanupStaleRegistryKeys(): Promise<void> {
+  if (process.platform !== 'win32') return;
+
+  // Check if any stale wildcard keys exist from the old installer
+  const hadWildcardFile = await regKeyExists('\\Software\\Classes\\*\\shell\\ContextApp');
+  const hadWildcardFile2 = await regKeyExists('\\Software\\Classes\\*\\shell\\ContextAppFile');
+
+  // Remove them
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextApp');
+  await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  await regDeleteTree('\\Software\\Classes\\Directory\\shell\\ContextApp');
+
+  // If stale keys existed, the user had context menu enabled via the old installer.
+  // Re-register with the correct per-extension + directory keys so nothing breaks.
+  if (hadWildcardFile || hadWildcardFile2) {
+    const dirExists = await regKeyExists(DIR_KEY_PATH);
+    if (!dirExists) {
+      await registerFolderContextMenu();
+    }
+    // Re-register per-extension file entries (idempotent — overwrites if already correct)
+    await registerFileContextMenu();
   }
 }

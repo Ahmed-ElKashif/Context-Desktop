@@ -9,6 +9,7 @@ import {
   addNotification,
   loadNotifications,
   markAllAsRead,
+  markAsRead,
   removeNotification,
   clearAllNotifications,
 } from "../../store/notificationSlice";
@@ -68,6 +69,34 @@ export const TopNav = () => {
   };
 
   const isAdmin = user?.role === "admin";
+
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    
+    return `${Math.floor(diffHours / 24)}d ago`;
+  };
+
+  const getNotificationIcon = (type?: string) => {
+    switch (type) {
+      case "error":
+        return { icon: "error", colorClass: "text-red-500", bgClass: "bg-red-500/10" };
+      case "success":
+        return { icon: "check_circle", colorClass: "text-emerald-500", bgClass: "bg-emerald-500/10" };
+      case "warning":
+        return { icon: "warning", colorClass: "text-yellow-500", bgClass: "bg-yellow-500/10" };
+      default:
+        return { icon: "info", colorClass: "text-light-primary dark:text-dark-primary", bgClass: "bg-light-primary/10 dark:bg-dark-primary/10" };
+    }
+  };
 
   return (
     <header
@@ -153,12 +182,17 @@ export const TopNav = () => {
                   notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`group relative p-4 border-b border-light-border dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${!n.isRead ? "bg-light-primary/5 dark:bg-dark-primary/5" : ""}`}
+                      onClick={() => {
+                        if (!n.isRead) {
+                          dispatch(markAsRead(n.id));
+                        }
+                      }}
+                      className={`group relative p-4 border-b border-light-border dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer ${!n.isRead ? "bg-light-primary/5 dark:bg-dark-primary/5" : ""}`}
                     >
                       <div className="flex gap-3">
                         <div className="relative shrink-0 pt-0.5">
-                          <div className="w-8 h-8 rounded-full bg-light-surface dark:bg-[#2A2A2E] border border-light-border dark:border-white/10 flex items-center justify-center">
-                            <Icon name="info" className="text-[16px] text-light-primary dark:text-dark-primary" />
+                          <div className={`w-8 h-8 rounded-full border border-light-border dark:border-white/10 flex items-center justify-center ${getNotificationIcon(n.type).bgClass}`}>
+                            <Icon name={getNotificationIcon(n.type).icon} className={`text-[16px] ${getNotificationIcon(n.type).colorClass}`} />
                           </div>
                           {!n.isRead && (
                             <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-[#1E1E22]"></div>
@@ -170,8 +204,8 @@ export const TopNav = () => {
                             <span className="font-bold text-sm text-light-text dark:text-white truncate pr-2">
                               Context AI
                             </span>
-                            <span className="text-[11px] font-medium text-light-text/50 dark:text-white/40 whitespace-nowrap pt-0.5 group-hover:opacity-0 transition-opacity">
-                              {new Date(n.timestamp).toLocaleDateString("en-GB")} • {new Date(n.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            <span className="text-[11px] font-mono text-light-text/50 dark:text-white/40 whitespace-nowrap pt-0.5 group-hover:opacity-0 transition-opacity">
+                              {formatTime(n.timestamp)}
                             </span>
                           </div>
                           <p className={`text-[13px] text-light-text/80 dark:text-white/80 leading-relaxed ${!n.isRead ? "font-medium" : ""}`}>

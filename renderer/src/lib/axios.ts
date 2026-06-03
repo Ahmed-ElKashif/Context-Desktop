@@ -41,6 +41,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // 1. Extract backend message
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
       window.dispatchEvent(new CustomEvent("auth-expired"));
@@ -49,7 +52,12 @@ api.interceptors.response.use(
       (error.response && error.response.status >= 502 && error.response.status <= 504)
     ) {
       window.dispatchEvent(new CustomEvent("server-down"));
+    } else if (message) {
+      // Dispatch globally so App.tsx can log it to the Notification Center if needed
+      window.dispatchEvent(new CustomEvent("api-error", { detail: { message } }));
     }
-    return Promise.reject(error);
+    
+    // 2. Reject with the string so individual components don't toast "[object Object]"
+    return Promise.reject(message);
   }
 );

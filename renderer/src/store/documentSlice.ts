@@ -501,11 +501,16 @@ const documentSlice = createSlice({
       .addCase(uploadBatchDocuments.fulfilled, (state, action) => {
         state.isUploading = false;
         state.uploadProgress = 100;
-        if (!state.activeDocument && Array.isArray(action.payload?.data)) {
-          state.activeDocument = action.payload.data[0] ?? null;
+        if (action.payload?.data?.length > 0) {
+          if (!state.activeDocument) {
+            state.activeDocument = action.payload.data[0];
+          }
+          // 🛠️ BUG FIX: We MUST manually push the pending documents into documentsList synchronously!
+          // If we don't, the SSE stream connection will be closed while waiting for `fetchFolderContents` to resolve,
+          // causing the frontend to completely miss the AI "Analyzed" notifications for documents that finish quickly!
+          // They will be safely overwritten by the true paginated data once fetchFolderContents finishes.
+          state.documentsList = [...action.payload.data, ...state.documentsList];
         }
-        // 🛠️ THE FIX 3: Removed the half-baked manual push!
-        // The thunk now calls fetchFolderContents which perfectly sets state.foldersList AND state.documentsList
       })
       .addCase(uploadBatchDocuments.rejected, (state, action) => {
         state.isUploading = false;
@@ -568,11 +573,10 @@ const documentSlice = createSlice({
       .addCase(uploadTextDocument.fulfilled, (state, action) => {
         state.isUploading = false;
         state.uploadProgress = 100;
-        state.activeDocument = action.payload.data[0];
-        // 🛠️ Removed the manual documentsList push — fetchFolderContents
-        // (dispatched inside the thunk) now drives the table refresh,
-        // so the snippet appears in the correct "Random files" folder
-        // rather than being prepended to whichever folder is open.
+        if (action.payload?.data?.length > 0) {
+          state.activeDocument = action.payload.data[0];
+          state.documentsList = [...action.payload.data, ...state.documentsList];
+        }
       })
       .addCase(uploadTextDocument.rejected, (state, action) => {
         state.isUploading = false;

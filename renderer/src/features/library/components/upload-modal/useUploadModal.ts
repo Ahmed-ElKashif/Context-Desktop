@@ -90,10 +90,14 @@ export const useUploadModal = ({
               (f: any) => f.clientPath || f.webkitRelativePath || f.path || f.name,
             ),
           );
+        } else {
+          notify("No supported files found in this selection.", "warning");
+          handleClose();
         }
       } catch (err) {
         console.error("Failed to process external upload paths:", err);
         notify("Failed to process folder natively.", "error");
+        handleClose();
       }
     })();
   }, [externalPaths]);

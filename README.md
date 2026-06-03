@@ -36,9 +36,10 @@
 
 <br/>
 
-[![Context API](https://img.shields.io/badge/🔗_Paired_With-Context_API-4F46E5?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-api)
-[![Context Web](https://img.shields.io/badge/🔗_Paired_With-Context_Web-61DAFB?style=flat-square)](https://github.com/youssef1232004/context-mvp-front)
-[![Context Mobile](https://img.shields.io/badge/🔗_Paired_With-Context_Mobile-000020?style=flat-square)](https://github.com/youssef1232004/context-mobile)
+[![Context Cloud API](https://img.shields.io/badge/🔗_Paired_With-Context_Cloud_API-4F46E5?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-api)
+[![Context Local API (Ollama)](https://img.shields.io/badge/🔗_Paired_With-Context_Local_API_(Ollama)-111827?style=flat-square)](https://github.com/Ahmed-ElKashif/Context-api-ollama)
+[![Context Web Frontend](https://img.shields.io/badge/🔗_Paired_With-Context_Web_Frontend-61DAFB?style=flat-square)](https://github.com/youssef1232004/context-mvp-front)
+[![Context Mobile App](https://img.shields.io/badge/🔗_Paired_With-Context_Mobile_App-10B981?style=flat-square)](https://github.com/youssef1232004/context-mobile)
 
 </div>
 
@@ -69,7 +70,7 @@
 - 🔒 **Secure local credential storage** — auth tokens are stored in the OS-level store, not `localStorage`
 - 🚀 **Auto-updates via GitHub Releases** — users always get the latest version silently
 - 📁 **Native file integration** — open files directly from Windows Explorer via CLI or drag-and-drop onto the app icon
-- 🪟 **Quick Capture window** — a lightweight floating window for instant uploads without opening the full app
+
 - 🔔 **System notifications** — native Windows toast notifications with deep-link routing
 - 💻 **Boot sequence** — branded animated loading screen while the app initializes and authenticates
 
@@ -79,20 +80,20 @@
 
 ## ⚖️ Desktop vs Web
 
-| Feature                      | Web (`context-front`) | Desktop (`Context-Desktop`)                               |
-| ---------------------------- | --------------------- | --------------------------------------------------------- |
-| Authentication storage       | `localStorage`        | `electron-store` (encrypted OS store)                     |
-| File open method             | Browser file picker   | Native Windows file picker via IPC                        |
-| Auto-updates                 | Manual refresh        | `electron-updater` via GitHub Releases                    |
-| Landing page (`/`)           | ✅ Marketing page     | ❌ Smart redirect (login / dashboard)                     |
-| Quick Capture                | ❌                    | ✅ Dedicated floating window                              |
-| Boot screen                  | ❌                    | ✅ Animated branded boot sequence                         |
-| Server-down screen           | ❌                    | ✅ Dedicated `ServerErrorPage`                            |
-| CLI file open                | ❌                    | ✅ Drag file onto app icon → auto-uploads                  |
+| Feature                | Web (`context-front`) | Desktop (`Context-Desktop`)            |
+| ---------------------- | --------------------- | -------------------------------------- |
+| Authentication storage | `localStorage`        | `electron-store` (encrypted OS store)  |
+| File open method       | Browser file picker   | Native Windows file picker via IPC     |
+| Auto-updates           | Manual refresh        | `electron-updater` via GitHub Releases |
+| Landing page (`/`)     | ✅ Marketing page     | ❌ Smart redirect (login / dashboard)  |
+
+| Boot screen | ❌ | ✅ Animated branded boot sequence |
+| Server-down screen | ❌ | ✅ Dedicated `ServerErrorPage` |
+| CLI file open | ❌ | ✅ Drag file onto app icon → auto-uploads |
 | **"Upload to Context" shell extension** | ❌ | ✅ **Right-click any file/folder in Explorer → instant upload** |
-| **AI folder export to disk** | ❌                    | ✅ **Export AI-organized folders to any local directory** |
-| System notifications         | Browser push          | Native Windows toast with routing                         |
-| Installer                    | N/A                   | NSIS single-file `.exe`                                   |
+| **AI folder export to disk** | ❌ | ✅ **Export AI-organized folders to any local directory** |
+| System notifications | Browser push | Native Windows toast with routing |
+| Installer | N/A | NSIS single-file `.exe` |
 
 ---
 
@@ -162,21 +163,21 @@ The `preload/index.ts` exposes a typed `window.electronAPI` surface split into 5
 
 ## 🗺️ Screen Map
 
-| Route              | Page             | Auth     | Desktop-Exclusive | Description                                                       |
-| ------------------ | ---------------- | -------- | ----------------- | ----------------------------------------------------------------- |
-| `/`                | `DesktopRoot`    | —        | ✅                | Smart redirect — goes to dashboard or login, never a landing page |
-| `/login`           | `LoginPage`      | Public   |                   | Email + password authentication                                   |
-| `/register`        | `RegisterPage`   | Public   |                   | Account creation                                                  |
-| `/forgot-password` | `ForgotPassword` | Public   |                   | Request password reset email                                      |
-| `/reset-password`  | `ResetPassword`  | Public   |                   | Set new password via token                                        |
-| `/dashboard`       | `Dashboard`      | ✅ User  |                   | AI-curated focus feed, stats, and unified RAG chat |
-| `/library`         | `SmartLibrary`   | ✅ User  |                   | Full document management                                          |
-| `/read/:id`        | `Reader`         | ✅ User  |                   | Clean PDF & Document viewer                                |
-| `/compare`         | `Compare`        | ✅ User  |                   | AI document comparison + dual-doc chat                            |
-| `/settings`        | `Settings`       | ✅ User  |                   | App preferences + connection config                               |
-| `/profile`         | `Profile`        | ✅ User  |                   | Avatar, persona, password change                                  |
-| `/quick-capture`   | `QuickCapture`   | ✅ User  | ✅                | Lightweight floating upload window                                |
-| `/admin`           | `AdminPage`      | 🛡️ Admin |                   | User management dashboard                                         |
+| Route              | Page             | Auth    | Desktop-Exclusive | Description                                                       |
+| ------------------ | ---------------- | ------- | ----------------- | ----------------------------------------------------------------- |
+| `/`                | `DesktopRoot`    | —       | ✅                | Smart redirect — goes to dashboard or login, never a landing page |
+| `/login`           | `LoginPage`      | Public  |                   | Email + password authentication                                   |
+| `/register`        | `RegisterPage`   | Public  |                   | Account creation                                                  |
+| `/forgot-password` | `ForgotPassword` | Public  |                   | Request password reset email                                      |
+| `/reset-password`  | `ResetPassword`  | Public  |                   | Set new password via token                                        |
+| `/dashboard`       | `Dashboard`      | ✅ User |                   | AI-curated focus feed, stats, and unified RAG chat                |
+| `/library`         | `SmartLibrary`   | ✅ User |                   | Full document management                                          |
+| `/read/:id`        | `Reader`         | ✅ User |                   | Clean PDF & Document viewer                                       |
+| `/compare`         | `Compare`        | ✅ User |                   | AI document comparison + dual-doc chat                            |
+| `/settings`        | `Settings`       | ✅ User |                   | App preferences + connection config                               |
+| `/profile`         | `Profile`        | ✅ User |                   | Avatar, persona, password change                                  |
+
+| `/admin` | `AdminPage` | 🛡️ Admin | | User management dashboard |
 
 ---
 
@@ -213,19 +214,13 @@ The main process captures CLI args, batches rapid multi-file calls with a 350ms 
 This is perhaps the most powerful desktop-exclusive integration. During installation, Context registers a **Windows Shell context menu entry** using the `winreg` package to write the required keys into the Windows Registry.
 
 This means users can:
+
 - **Right-click any file** (PDF, DOCX, image, Excel…) anywhere on their machine → **"Upload to Context"** appears in the context menu
 - **Right-click any folder** in Explorer → **"Upload to Context"** uploads every supported file inside that folder in one action
 
 The shell extension passes the selected path(s) as CLI arguments to the app. The main process captures them via `app-handlers.ts`, batches them with a 350ms debounce, and fires the `external-upload` custom event to the React `UploadModal` — so the user sees the staged file preview and can confirm before anything is sent to the API.
 
 This makes Context feel like a **true native citizen of Windows** — not just an app you have to switch to, but one that integrates directly into your daily file workflow.
-
-</details>
-
-<details>
-<summary><b>⚡ Quick Capture Window</b></summary>
-
-A dedicated **lightweight floating window** at `/quick-capture` allows users to drop files for instant upload without bringing the full app to the foreground. Ideal for power users who want frictionless capture while working in other applications.
 
 </details>
 
@@ -298,22 +293,22 @@ Native Windows toast notifications dispatched from the main process can carry a 
 
 ### Electron (Main Process)
 
-| Technology       | Version | Purpose                                     |
-| ---------------- | ------- | ------------------------------------------- |
-| Electron         | 42.x    | Desktop runtime & native OS bridge          |
-| electron-builder | 26.x    | NSIS installer packaging for Windows        |
-| electron-updater | 6.x     | Auto-update via GitHub Releases             |
-| electron-store   | 11.x    | Encrypted OS-level key-value storage        |
-| electron-log     | 5.x     | File-based structured logging               |
-| @electron/remote | 2.x     | Remote module compatibility                 |
-| electron-reload  | 2.x     | Hot-reload in development                   |
-| sharp-cli        | 5.x     | Icon asset processing (PNG → ICO, resize)   |
-| axios            | 1.x     | HTTP client for IPC-proxied API calls       |
-| form-data        | 4.x     | Multipart form builder for file uploads     |
-| mime-types       | 3.x     | MIME type detection from file extension     |
+| Technology       | Version | Purpose                                                                             |
+| ---------------- | ------- | ----------------------------------------------------------------------------------- |
+| Electron         | 42.x    | Desktop runtime & native OS bridge                                                  |
+| electron-builder | 26.x    | NSIS installer packaging for Windows                                                |
+| electron-updater | 6.x     | Auto-update via GitHub Releases                                                     |
+| electron-store   | 11.x    | Encrypted OS-level key-value storage                                                |
+| electron-log     | 5.x     | File-based structured logging                                                       |
+| @electron/remote | 2.x     | Remote module compatibility                                                         |
+| electron-reload  | 2.x     | Hot-reload in development                                                           |
+| sharp-cli        | 5.x     | Icon asset processing (PNG → ICO, resize)                                           |
+| axios            | 1.x     | HTTP client for IPC-proxied API calls                                               |
+| form-data        | 4.x     | Multipart form builder for file uploads                                             |
+| mime-types       | 3.x     | MIME type detection from file extension                                             |
 | winreg           | 1.x     | Windows Registry write — registers the "Upload to Context" shell context menu entry |
-| concurrently     | 10.x    | Parallel dev: renderer Vite + TS watch      |
-| TypeScript       | 6.x     | Type safety for main process                |
+| concurrently     | 10.x    | Parallel dev: renderer Vite + TS watch                                              |
+| TypeScript       | 6.x     | Type safety for main process                                                        |
 
 ### Renderer (React App — same stack as context-front)
 
@@ -427,7 +422,7 @@ Context-Desktop/
 │       │   ├── settings.tsx
 │       │   ├── profile.tsx
 │       │   ├── admin.tsx
-│       │   ├── QuickCapture.tsx        ← Desktop-exclusive floating upload window
+
 │       │   ├── FileSummary.tsx         ← Desktop-exclusive file preview page
 │       │   ├── ServerErrorPage.tsx     ← Desktop-exclusive offline/server-down screen
 │       │   └── read/
@@ -550,7 +545,7 @@ The **ContextLogo** is a three-node neural graph SVG — two input nodes (your d
 ### Git Rules
 
 1. **Never push directly to `main` or `dev`**
-2. **Branch off `dev`** — format: `feat/quick-capture`, `fix/ipc-token`, `chore/update-electron`
+2. **Branch off `dev`** — format: `feat/native-export`, `fix/ipc-token`, `chore/update-electron`
 3. **Conventional commits:** `feat:`, `fix:`, `chore:`, `docs:`, `electron:`
 4. **PR to `dev`** — 1 approval from rotation partner required before merge
 5. **Must pass:** `tsc --noEmit` (both root and renderer) + `npm run build` before opening a PR

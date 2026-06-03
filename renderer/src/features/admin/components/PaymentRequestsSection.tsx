@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { paymentService, PaymentRequest } from "../../settings/api/paymentService";
 import { Icon } from "../../../components/ui/Icons";
 
@@ -419,9 +420,9 @@ export const PaymentRequestsSection: React.FC = () => {
       </div>
 
       {/* ── Screenshot Lightbox Modal ──────────────────────────────────── */}
-      {lightboxUrl && (
+      {lightboxUrl && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setLightboxUrl(null)}
         >
           <div
@@ -440,13 +441,14 @@ export const PaymentRequestsSection: React.FC = () => {
               className="max-w-full max-h-[85vh] object-contain bg-white dark:bg-[#1A1A1E]"
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Confirm Action Dialog ──────────────────────────────────────── */}
-      {confirmAction && (
+      {confirmAction && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setConfirmAction(null)}
         >
           <div
@@ -516,7 +518,8 @@ export const PaymentRequestsSection: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -12,6 +12,8 @@ export const DesktopSection = () => {
   const electronAPI = (window as any).electronAPI;
   const isDesktop = !!electronAPI;
 
+  const [isUpdatingContextMenu, setIsUpdatingContextMenu] = useState(false);
+
   useEffect(() => {
     if (!isDesktop) return;
 
@@ -49,7 +51,8 @@ export const DesktopSection = () => {
   };
 
   const toggleContextMenu = async () => {
-    if (!isDesktop) return;
+    if (!isDesktop || isUpdatingContextMenu) return;
+    setIsUpdatingContextMenu(true);
     try {
       if (contextMenuEnabled) {
         await electronAPI.app.unregisterContextMenu();
@@ -63,6 +66,8 @@ export const DesktopSection = () => {
     } catch (err) {
       console.error(err);
       notify("Failed to update context menu.", "error");
+    } finally {
+      setIsUpdatingContextMenu(false);
     }
   };
 
@@ -128,7 +133,10 @@ export const DesktopSection = () => {
           </div>
           <button
             onClick={toggleContextMenu}
+            disabled={isUpdatingContextMenu}
             className={`relative w-12 h-6 rounded-full transition-colors ${
+              isUpdatingContextMenu ? "opacity-50 cursor-not-allowed" : ""
+            } ${
               contextMenuEnabled ? "bg-light-primary dark:bg-dark-primary" : "bg-light-border dark:bg-white/10"
             }`}
           >

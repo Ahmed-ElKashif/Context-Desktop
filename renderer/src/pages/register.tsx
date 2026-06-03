@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 
 import { RegisterForm } from "../features/auth/components/RegisterForm";
+import { NeuralBackground } from "../components/ui/NeuralBackground";
 
 export default function RegisterPage() {
   
@@ -14,7 +15,7 @@ export default function RegisterPage() {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-light-surface/50 to-light-bg dark:from-transparent dark:via-dark-bg/80 dark:to-dark-bg"></div>
 
-        <div className="absolute inset-0 neural-bg animate-pan opacity-60 dark:opacity-40"></div>
+        <NeuralBackground />
 
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-light-primary/10 dark:bg-dark-primary/10 blur-[100px] rounded-full animate-pulse-slow"></div>
       </div>

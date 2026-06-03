@@ -4,6 +4,7 @@ import { RootState } from './store';
 export interface AppNotification {
   id: string;
   message: string;
+  type: string;
   timestamp: string;
   isRead: boolean;
 }
@@ -40,11 +41,17 @@ export const loadNotifications = createAsyncThunk(
 
 export const addNotification = createAsyncThunk(
   'notifications/add',
-  async (message: string, { getState }) => {
+  async (payload: { message: string, type?: string, silent?: boolean } | string, { getState }) => {
     const state = getState() as RootState;
+    const isObj = typeof payload === "object" && payload !== null;
+    const message = isObj ? (payload as any).message : payload;
+    const type = isObj ? ((payload as any).type || "info") : "info";
+    const silent = isObj ? !!(payload as any).silent : false;
+
     const newNotification: AppNotification = {
       id: crypto.randomUUID(),
       message,
+      type,
       timestamp: new Date().toISOString(),
       isRead: false,
     };
@@ -55,10 +62,16 @@ export const addNotification = createAsyncThunk(
     // Save to store
     await saveToStore(newNotifications);
     
-    // Trigger OS Desktop Notification
-    const electronAPI = (window as any).electronAPI;
-    if (electronAPI?.app?.showNotification) {
-      electronAPI.app.showNotification("Context", message, { id: newNotification.id });
+    // Trigger OS Desktop Notification only if user has notifications enabled AND it's not silent
+    if (!silent) {
+      const electronAPI = (window as any).electronAPI;
+      if (electronAPI?.app?.showNotification) {
+        const notifEnabled = await electronAPI.store.get('notificationsEnabled');
+        // Default to true if the preference has never been set
+        if (notifEnabled !== false) {
+          electronAPI.app.showNotification("Context", message, { id: newNotification.id });
+        }
+      }
     }
     
     return newNotification;
@@ -73,6 +86,20 @@ export const markAllAsRead = createAsyncThunk(
     
     await saveToStore(newNotifications);
     
+    return newNotifications;
+  }
+);
+
+export const markAsRead = createAsyncThunk(
+  'notifications/markAsRead',
+  async (id: string, { getState }) => {
+    const state = getState() as RootState;
+    const newNotifications = state.notifications.notifications.map(n =>
+      n.id === id ? { ...n, isRead: true } : n
+    );
+
+    await saveToStore(newNotifications);
+
     return newNotifications;
   }
 );
@@ -112,6 +139,9 @@ const notificationSlice = createSlice({
         state.notifications.unshift(action.payload);
       })
       .addCase(markAllAsRead.fulfilled, (state, action) => {
+        state.notifications = action.payload;
+      })
+      .addCase(markAsRead.fulfilled, (state, action) => {
         state.notifications = action.payload;
       })
       .addCase(removeNotification.fulfilled, (state, action) => {
