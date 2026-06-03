@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { LoginHero } from "../features/auth/components/LoginHero";
 import { LoginForm } from "../features/auth/components/LoginForm";
+import { NeuralBackground } from "../components/ui/NeuralBackground";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function LoginPage() {
     <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text antialiased font-sans h-screen w-full flex overflow-y-auto overflow-x-hidden min-w-[320px] selection:bg-light-primary selection:text-white dark:selection:bg-dark-primary dark:selection:text-dark-bg transition-colors">
       {/* Shared Backgrounds */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 neural-bg animate-pan opacity-60 dark:opacity-40 will-change-transform"></div>
+        <NeuralBackground />
 
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-light-primary/5 dark:bg-dark-secondary/10 blur-[100px] rounded-full pointer-events-none"></div>
 

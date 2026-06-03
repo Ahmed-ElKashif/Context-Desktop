@@ -5,7 +5,6 @@ import { TopNav } from './TopNav';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { reloadDocumentThunk } from '../../store/documentSlice';
 import { fetchSettings } from '../../store/settingsSlice';
-import { addNotification } from '../../store/notificationSlice';
 import { notify } from '../ui/ToastEngine';
 import { playNotificationSound } from '../../utils/audioUtils';
 import { ProductTour } from '../../features/tour/ProductTour';
@@ -72,14 +71,12 @@ export const MainLayout = () => {
             if (parsed.aiStatus === "Analyzed") {
               const successMsg = `Orchestrator finished analyzing "${parsed.document?.title || "Document"}"!`;
               notify(successMsg, "success");
-              dispatch(addNotification(successMsg));
               playNotificationSound("success");
               dispatch(reloadDocumentThunk(parsed.documentId));
               dispatch(fetchSettings()); // Refresh AI budget/usage
             } else if (parsed.aiStatus === "Failed") {
               const failMsg = `Analysis failed for "${parsed.document?.title || "Document"}".`;
               notify(failMsg, "error");
-              dispatch(addNotification(failMsg));
               playNotificationSound("error");
               dispatch(reloadDocumentThunk(parsed.documentId));
               dispatch(fetchSettings()); // Refresh AI budget/usage

@@ -154,7 +154,8 @@ export function registerFileHandlers() {
       const response = await axios.post(`${apiUrl}/documents/upload`, formData, {
         headers: {
           ...formData.getHeaders(),
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'X-Requested-With': 'XMLHttpRequest'
         }
       });
       
