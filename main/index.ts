@@ -5,10 +5,9 @@ import { createWindow, getMainWindow, handleCliArgs } from "./windows/window-man
 import { registerAppHandlers } from "./ipc/app-handlers";
 import { registerWindowHandlers } from "./ipc/window-handlers";
 import { registerStoreHandlers } from "./ipc/store-handlers";
-import { registerUpdaterHandlers } from "./ipc/updater-handlers";
+import { registerUpdaterHandlers, checkForUpdatesOnStartup } from "./ipc/updater-handlers";
 import { registerFileHandlers } from "./ipc/file-handlers";
 import { getStore } from "./utils/store";
-import { IPC_CHANNELS } from "../shared/ipc-channels";
 import { cleanupStaleRegistryKeys } from "./registry";
 
 // 1. Initialize Error Logger and Crash Reporter
@@ -69,25 +68,15 @@ if (!gotTheLock) {
       }
     });
 
-    // 6. Setup Auto-Updater
+    // 6. Setup Auto-Updater (delayed 3s to not block the main thread)
     try {
       const store = await getStore();
       const autoUpdateEnabled = store.get("autoUpdate", true);
 
       if (autoUpdateEnabled) {
         setTimeout(() => {
-          import("electron-updater").then(({ autoUpdater }) => {
-            autoUpdater.on("update-available", (info) => {
-              getMainWindow()?.webContents.send(IPC_CHANNELS.UPDATER.ON_UPDATE_AVAILABLE, info);
-            });
-            autoUpdater.on("update-downloaded", (info) => {
-              getMainWindow()?.webContents.send(IPC_CHANNELS.UPDATER.ON_UPDATE_DOWNLOADED, info);
-            });
-            autoUpdater.checkForUpdatesAndNotify().catch(err => {
-              console.error("[Updater] Check failed on startup:", err);
-            });
-          }).catch(err => console.error("[Updater] Failed to import electron-updater", err));
-        }, 3000); // Wait 3s after boot to not block main thread
+          checkForUpdatesOnStartup();
+        }, 3000);
       }
     } catch (e) {
       console.error("[Main Process] Startup logic error:", e);

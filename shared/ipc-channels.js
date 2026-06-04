@@ -5,6 +5,7 @@ exports.IPC_CHANNELS = {
     APP: {
         GET_VERSION: 'app:get-version',
         ON_CLI_ARGS: 'app:on-cli-args',
+        GET_INITIAL_CLI_ARGS: 'app:get-initial-cli-args',
         SET_STARTUP: 'app:set-startup',
         GET_STARTUP: 'app:get-startup',
         SHOW_NOTIFICATION: 'app:show-notification',
@@ -37,8 +38,11 @@ exports.IPC_CHANNELS = {
     },
     UPDATER: {
         CHECK_FOR_UPDATES: 'updater:check',
+        QUIT_AND_INSTALL: 'updater:quit-and-install',
         ON_UPDATE_AVAILABLE: 'updater:available',
+        ON_UPDATE_NOT_AVAILABLE: 'updater:not-available',
         ON_UPDATE_DOWNLOADED: 'updater:downloaded',
+        ON_UPDATE_ERROR: 'updater:error',
     },
     NOTIFICATION: {
         AI_COMPLETE: 'notification:ai-complete',

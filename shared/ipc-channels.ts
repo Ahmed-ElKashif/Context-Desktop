@@ -35,8 +35,11 @@ export const IPC_CHANNELS = {
   },
   UPDATER: {
     CHECK_FOR_UPDATES: 'updater:check',
+    QUIT_AND_INSTALL: 'updater:quit-and-install',
     ON_UPDATE_AVAILABLE: 'updater:available',
+    ON_UPDATE_NOT_AVAILABLE: 'updater:not-available',
     ON_UPDATE_DOWNLOADED: 'updater:downloaded',
+    ON_UPDATE_ERROR: 'updater:error',
   },
   NOTIFICATION: {
     AI_COMPLETE: 'notification:ai-complete',
