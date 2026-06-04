@@ -30,15 +30,27 @@ export const DesktopSection = () => {
       setUpdateStatus("available");
       notify("Update available! Downloading in background...", "success");
     });
+
+    const unsubNotAvailable = electronAPI.updater.onUpdateNotAvailable(() => {
+      setUpdateStatus("idle");
+      notify("You're on the latest version ✓", "success");
+    });
     
     const unsubDownloaded = electronAPI.updater.onUpdateDownloaded(() => {
       setUpdateStatus("downloaded");
-      notify("Update downloaded. It will be installed on restart.", "success");
+      notify("Update downloaded! Click 'Install & Restart' to apply.", "success");
+    });
+
+    const unsubError = electronAPI.updater.onUpdateError((message: string) => {
+      setUpdateStatus("idle");
+      notify(`Update check failed: ${message}`, "error");
     });
 
     return () => {
       unsubAvailable();
+      unsubNotAvailable();
       unsubDownloaded();
+      unsubError();
     };
   }, [isDesktop]);
 
@@ -83,14 +95,20 @@ export const DesktopSection = () => {
     if (!isDesktop) return;
     setUpdateStatus("checking");
     try {
-      const result = await electronAPI.updater.checkForUpdates();
-      if (!result) {
-        setUpdateStatus("idle");
-        notify("You're on the latest version", "success");
-      }
+      // Fire-and-forget — results come back via the event listeners
+      await electronAPI.updater.checkForUpdates();
     } catch (err) {
       setUpdateStatus("idle");
       notify("Failed to check for updates", "error");
+    }
+  };
+
+  const installAndRestart = async () => {
+    if (!isDesktop) return;
+    try {
+      await electronAPI.updater.quitAndInstall();
+    } catch (err) {
+      notify("Failed to install update", "error");
     }
   };
 
@@ -175,14 +193,20 @@ export const DesktopSection = () => {
             </p>
           </div>
           <button
-            onClick={checkForUpdates}
-            disabled={updateStatus === "checking" || updateStatus === "downloaded"}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors bg-light-bg dark:bg-white/5 border border-light-border dark:border-white/10 hover:bg-light-border/50 dark:hover:bg-white/10 text-light-text dark:text-white disabled:opacity-50"
+            onClick={updateStatus === "downloaded" ? installAndRestart : checkForUpdates}
+            disabled={updateStatus === "checking" || updateStatus === "available"}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors border disabled:opacity-50 ${
+              updateStatus === "downloaded"
+                ? "bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-600"
+                : "bg-light-bg dark:bg-white/5 border-light-border dark:border-white/10 hover:bg-light-border/50 dark:hover:bg-white/10 text-light-text dark:text-white"
+            }`}
           >
             {updateStatus === "checking" ? (
               <><Icon name="sync" className="text-sm animate-spin" /> Checking...</>
+            ) : updateStatus === "available" ? (
+              <><Icon name="download" className="text-sm animate-bounce" /> Downloading...</>
             ) : updateStatus === "downloaded" ? (
-              <><Icon name="download_done" className="text-sm" /> Ready to Install</>
+              <><Icon name="restart_alt" className="text-sm" /> Install &amp; Restart</>
             ) : (
               <><Icon name="update" className="text-sm" /> Check for Updates</>
             )}
