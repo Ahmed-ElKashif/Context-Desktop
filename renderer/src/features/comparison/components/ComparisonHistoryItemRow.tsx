@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { useAppDispatch } from "../../../store/hooks";
-import { renameComparisonRecord, deleteComparisonRecord } from "../../../store/comparisonSlice";
+import { renameComparisonRecord, deleteComparisonRecord } from "../../../store/comparison/comparisonSlice";
 import { useClickOutside } from "../../../components/ui/hooks/useClickOutside";
-import { notify } from "../../../components/ui/ToastEngine";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { ComparisonHistoryItem } from "../api/comparisonHistoryService";
 
 interface HistoryItemRowProps {
@@ -91,7 +91,7 @@ export function ComparisonHistoryItemRow({ item, isActive, onSelect }: HistoryIt
           </div>
 
           {/* Subtle Date */}
-          <span className="text-[10px] text-light-text/70 dark:text-white/60 pl-5">
+          <span className="text-[11px] text-light-text/70 dark:text-white/60 pl-5">
             {new Date(item.createdAt).toLocaleString("en-GB", {
               day: "numeric",
               month: "numeric",

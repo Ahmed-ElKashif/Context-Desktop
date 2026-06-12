@@ -6,28 +6,27 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
-import { ContextToaster } from "./components/ui/ToastEngine";
+import { ContextToaster } from "./components/ui/feedback/ToastEngine";
 import AdminGuard from "./features/auth/components/AdminGuard";
 import { useAnalytics } from "./features/analytics/hooks/useAnalytics";
 import { ServerErrorPage } from "./pages/ServerErrorPage";
-import { PageLoader } from "./components/ui/PageLoader";
+import { PageLoader } from "./components/ui/loaders/PageLoader";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "./store/store";
-import { initializeAuth, logout } from "./store/authSlice";
+import { initializeAuth, logout } from "./store/auth/authSlice";
 import { BootSequence } from "./components/layout/BootSequence";
 
-const Dashboard = lazy(() => import("./pages/dashboard"));
+const Workspace = lazy(() => import("./pages/workspace"));
 const Library = lazy(() => import("./pages/Smartlibrary"));
-const Reader = lazy(() => import("./pages/read/Reader"));
+const Reader = lazy(() => import("./pages/Reader"));
 const Compare = lazy(() => import("./pages/compare"));
 const Settings = lazy(() => import("./pages/settings"));
-const QuickCapture = lazy(() => import("./pages/QuickCapture"));
 const Profile = lazy(() => import("./pages/profile"));
 const AdminPage = lazy(() => import("./pages/admin"));
 // Smart root redirect: desktop apps never show a landing page
 const DesktopRoot = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ? "/workspace" : "/login"} replace />;
 };
 
 function App() {
@@ -64,13 +63,58 @@ function App() {
       navigate("/login");
     };
 
+    const handleApiError = (e: Event) => {
+      const msg = (e as CustomEvent).detail?.message;
+      if (msg) {
+        import("./components/ui/feedback/ToastEngine").then(({ notify }) => {
+          notify(msg, "error");
+        });
+      }
+    };
+
+    const handleAppNotify = (e: Event) => {
+      const { message, type } = (e as CustomEvent).detail || {};
+      // Filter out transient info toasts like "Authenticating..."
+      if (message && type && type !== "info") {
+        import("./store/ui/notificationSlice").then(({ addNotification }) => {
+          dispatch(addNotification({ message, type, silent: true }));
+        });
+      }
+    };
+
     window.addEventListener("server-down", handleServerDown);
     window.addEventListener("auth-expired", handleAuthExpired);
+    window.addEventListener("api-error", handleApiError);
+    window.addEventListener("app-notify", handleAppNotify);
 
+    // 1. Fetch any CLI args from cold start
+    if (!(window as any).initialCliProcessed && (window as any).electronAPI?.app?.getInitialCLIArgs) {
+      (window as any).initialCliProcessed = true;
+      (window as any).electronAPI.app.getInitialCLIArgs().then((args: any) => {
+        if (args && args.action === "upload") {
+          const filePath = args.path;
+          if (!(window as any).pendingExternalUpload) {
+            (window as any).pendingExternalUpload = [];
+          }
+          if (!(window as any).pendingExternalUpload.includes(filePath)) {
+            (window as any).pendingExternalUpload.push(filePath);
+          }
+          navigate("/library");
+          
+          // Fire event for cold starts since LibraryDropzone might have already mounted
+          setTimeout(() => {
+            window.dispatchEvent(
+              new CustomEvent("external-upload", { detail: [filePath] })
+            );
+          }, 500);
+        }
+      }).catch(console.error);
+    }
+
+    // 2. Listen for CLI args if app is already running
     const cleanupCLI = (window as any).electronAPI?.app?.onCLIArgs?.(
       (action: string, filePath: string) => {
         if (action === "upload") {
-          // Accumulate for cold starts before Library mounts
           if (!(window as any).pendingExternalUpload) {
             (window as any).pendingExternalUpload = [];
           }
@@ -96,6 +140,17 @@ function App() {
             const pathsToUpload = [...(window as any).batchedExternalUploads];
             (window as any).batchedExternalUploads = [];
             
+            // Also append to pendingExternalUpload just in case Library is currently unmounted
+            // so it can pick it up on mount.
+            if (!(window as any).pendingExternalUpload) {
+               (window as any).pendingExternalUpload = [];
+            }
+            pathsToUpload.forEach(p => {
+               if (!(window as any).pendingExternalUpload.includes(p)) {
+                 (window as any).pendingExternalUpload.push(p);
+               }
+            });
+
             window.dispatchEvent(
               new CustomEvent("external-upload", { detail: pathsToUpload }),
             );
@@ -115,6 +170,8 @@ function App() {
     return () => {
       window.removeEventListener("server-down", handleServerDown);
       window.removeEventListener("auth-expired", handleAuthExpired);
+      window.removeEventListener("api-error", handleApiError);
+      window.removeEventListener("app-notify", handleAppNotify);
       if (cleanupCLI) cleanupCLI();
       if (cleanupNotificationClick) cleanupNotificationClick();
     };
@@ -142,9 +199,8 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<AuthGuard />}>
-              <Route path="/quick-capture" element={<QuickCapture />} />
               <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/workspace" element={<Workspace />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="/read/:id" element={<Reader />} />
                 <Route path="/compare" element={<Compare />} />

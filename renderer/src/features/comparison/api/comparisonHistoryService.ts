@@ -5,14 +5,14 @@ export interface ComparisonHistoryItem {
   _id: string;
   titleA: string;
   titleB: string;
+  docIdA: string;
+  docIdB: string;
   customTitle?: string;
   createdAt: string;
 }
 
 export interface ComparisonRecord extends ComparisonHistoryItem {
   user: string;
-  docIdA: string;
-  docIdB: string;
   comparison: ComparisonResponse;
 }
 

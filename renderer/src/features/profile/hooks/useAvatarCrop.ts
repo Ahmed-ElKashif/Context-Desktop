@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { type Area } from "react-easy-crop";
 import getCroppedImg from "@/lib/getCroppedImg";
 import { useAppDispatch } from "../../../store/hooks";
-import { uploadAvatar } from "../../../store/authSlice";
-import { notify } from "../../../components/ui/ToastEngine";
+import { uploadAvatar } from "../../../store/auth/authSlice";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { extractErrorMessage } from "../utils/errorUtils";
 
 const MAX_AVATAR_SIZE_BYTES = 10 * 1024 * 1024;

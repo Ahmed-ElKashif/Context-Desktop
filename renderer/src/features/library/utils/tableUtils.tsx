@@ -1,4 +1,4 @@
-import { notify } from "../../../components/ui/ToastEngine";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 /**
  * Copies the Cloudinary URL directly to the clipboard.

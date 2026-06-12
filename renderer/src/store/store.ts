@@ -1,17 +1,19 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
-import documentReducer from "./documentSlice";
-import adminReducer from "./adminSlice";
-import comparisonReducer from "./comparisonSlice"; 
-import settingsReducer from './settingsSlice'; 
-import selectionReducer from './selectionSlice';
-import libraryUIReducer from './libraryUISlice';
-import themeReducer from './themeSlice';
-import notificationReducer from './notificationSlice';
+import { configureStore, combineReducers, Action } from "@reduxjs/toolkit";
+import authReducer from "./auth/authSlice";
+import adminReducer from "./admin/adminSlice";
+import comparisonReducer from "./comparison/comparisonSlice"; 
+import settingsReducer from "./settings/settingsSlice"; 
+import selectionReducer from "./library/selectionSlice";
+import libraryUIReducer from "./library/libraryUISlice";
+import themeReducer from "./ui/themeSlice";
+import notificationReducer from "./ui/notificationSlice";
+import appReducerSlice from "./ui/appSlice";
+import libraryReducer from "./library/librarySlice";
+import workspaceReducer from "./workspace/workspaceSlice";
+import prettifyReducer from "./workspace/prettifySlice";
 
 const appReducer = combineReducers({
   auth: authReducer,
-  document: documentReducer,
   admin: adminReducer,
   comparison: comparisonReducer,
   settings: settingsReducer,
@@ -19,12 +21,14 @@ const appReducer = combineReducers({
   libraryUI: libraryUIReducer,
   theme: themeReducer,
   notifications: notificationReducer,
+  app: appReducerSlice,
+  library: libraryReducer,
+  workspace: workspaceReducer,
+  prettify: prettifyReducer,
 });
 
-const rootReducer = (state: any, action: any) => {
-  if (action.type === 'auth/logout/fulfilled') {
-    // Reset all state to undefined when the user logs out.
-    // Reducers will return their initial state.
+const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: Action) => {
+  if (action.type === 'auth/logout') {
     state = undefined;
   }
   return appReducer(state, action);

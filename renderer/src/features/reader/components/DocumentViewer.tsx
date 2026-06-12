@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { DocumentData, reanalyzeDocumentThunk } from "../../../store/documentSlice";
+import { DocumentData, reanalyzeDocumentThunk } from "../../../store/library/librarySlice";
 import { useAppDispatch } from "../../../store/hooks";
-import { Icon } from "../../../components/ui/Icons";
-import { notify } from "../../../components/ui/ToastEngine";
+import { Icon } from "../../../components/ui/core/Icons";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 // ── Viewer sub-components ────────────────────────────────────────────────────
 import { PdfViewer }        from "./viewers/PdfViewer";
@@ -11,6 +11,7 @@ import { ExcelViewer }      from "./viewers/ExcelViewer";
 import { ImageViewer }      from "./viewers/ImageViewer";
 import { TextViewer }       from "./viewers/TextViewer";
 import { CsvPrettyViewer }  from "./viewers/CsvPrettyViewer";
+import { PrettifyViewer }   from "./viewers/PrettifyViewer";
 
 interface DocumentViewerProps {
   document: DocumentData;
@@ -50,11 +51,10 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
     }
   };
 
-  // ── View mode (extracted text vs original) ────────────────────────────────
-  // Images and Excel both have a toggle; all others start in "original"
-  const [viewMode, setViewMode] = useState<"extracted" | "original">(
-    isTextSnippet ? "extracted" : "original",
-  );
+  // ── View mode (extracted text vs original vs prettify) ─────────────────────
+  // Images and Excel have extracted/original toggle; Word/Excel/TextSnippet also get "prettify"
+  const isSupportedForPrettify = isExcel || isWord || isTextSnippet;
+  const [viewMode, setViewMode] = useState<"extracted" | "original" | "prettify">("original");
 
   // ── Zoom ──────────────────────────────────────────────────────────────────
   const [zoomLevel, setZoomLevel] = useState<number>(0.75);
@@ -85,22 +85,24 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
       {/* Left: Main viewer area */}
       <div className="flex-1 h-full flex flex-col min-w-0 p-4 md:p-6 overflow-hidden relative">
 
-        {/* View toggle pill — images have Extracted Text / Original Image
-                            — excel has Raw Data (CSV) / Interactive Grid      */}
-        {(isImage || isExcel) && (
+        {/* View toggle pill — shows for Image, Excel, Word, TextSnippet */}
+        {(isImage || isExcel || isWord || isTextSnippet) && (
           <div className="w-full mx-auto flex justify-center mb-4 shrink-0 z-20">
             <div className="flex bg-white/80 dark:bg-[#18181B]/80 p-1.5 rounded-full border border-light-border dark:border-white/10 shadow-sm backdrop-blur-md">
-              <button
-                onClick={() => setViewMode("extracted")}
-                className={`px-5 py-2 rounded-full shadow-sm text-xs font-bold flex items-center gap-2 transition-all ${
-                  viewMode === "extracted"
-                    ? "bg-light-primary dark:bg-dark-primary text-white dark:text-black"
-                    : "hover:bg-light-border dark:hover:bg-white/5 text-light-text/70 dark:text-dark-text/70"
-                }`}
-              >
-                <Icon name="subject" className="text-[16px]" />
-                {isExcel ? "Raw Data (CSV)" : "Extracted Text"}
-              </button>
+              {/* Original / Extracted button */}
+              {(isImage || isExcel) && (
+                <button
+                  onClick={() => setViewMode("extracted")}
+                  className={`px-5 py-2 rounded-full shadow-sm text-xs font-bold flex items-center gap-2 transition-all ${
+                    viewMode === "extracted"
+                      ? "bg-light-primary dark:bg-dark-primary text-white dark:text-black"
+                      : "hover:bg-light-border dark:hover:bg-white/5 text-light-text/70 dark:text-dark-text/70"
+                  }`}
+                >
+                  <Icon name="subject" className="text-[16px]" />
+                  {isExcel ? "Raw Data (CSV)" : "Extracted Text"}
+                </button>
+              )}
               <button
                 onClick={() => setViewMode("original")}
                 className={`px-5 py-2 rounded-full shadow-sm text-xs font-bold flex items-center gap-2 transition-all ${
@@ -110,11 +112,25 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
                 }`}
               >
                 <Icon
-                  name={isExcel ? "table_view" : "image"}
+                  name={isExcel ? "table_view" : isImage ? "image" : isWord ? "description" : "text_snippet"}
                   className="text-[16px]"
                 />
-                {isExcel ? "Interactive Grid" : "Original Image"}
+                {isExcel ? "Interactive Grid" : isImage ? "Original Image" : isWord ? "Original Document" : "Original Text"}
               </button>
+              {/* Prettify toggle — only for Excel, Word, TextSnippet */}
+              {isSupportedForPrettify && (
+                <button
+                  onClick={() => setViewMode("prettify")}
+                  className={`px-5 py-2 rounded-full shadow-sm text-xs font-bold flex items-center gap-2 transition-all ${
+                    viewMode === "prettify"
+                      ? "bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-secondary text-white shadow-light-primary/25 dark:shadow-dark-primary/25"
+                      : "hover:bg-light-border dark:hover:bg-white/5 text-light-text/80 dark:text-white/80"
+                  }`}
+                >
+                  <Icon name="auto_awesome" className="text-[16px]" />
+                  Prettify ✨
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -125,9 +141,9 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
             <h2 className="text-xl md:text-2xl font-black tracking-tight font-sans text-light-text dark:text-white/90">
               {document.title.replace(/\.[^/.]+$/, "")}
             </h2>
-            <p className="text-xs font-mono font-semibold text-light-text/60 dark:text-white/50 flex items-center gap-2">
+            <p className="text-xs font-mono font-semibold text-light-text/70 dark:text-white/70 flex items-center gap-2">
               Source: {document.title}
-              <span className="text-light-border dark:text-white/20">|</span> AI Status:
+              <span className="text-light-border dark:text-white/30">|</span> AI Status:
               <span
                 className={
                   document.aiStatus === "Analyzed"
@@ -151,8 +167,8 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
             </p>
           </div>
 
-          {/* Zoom controls — hidden for PDF (has its own) and Excel (no zoom needed) */}
-          {!isPdf && !isExcel && (
+          {/* Zoom controls — hidden for PDF (has its own), Excel, and Prettify view */}
+          {!isPdf && !isExcel && viewMode !== "prettify" && (
             <div className="flex items-center gap-2 bg-white dark:bg-[#18181B] border border-light-border dark:border-white/10 rounded-lg p-1 shadow-sm shrink-0 z-20">
               <button
                 onClick={handleZoomOut}
@@ -180,8 +196,12 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
           ref={viewerRef}
           className="flex-1 w-full min-h-0 bg-white dark:bg-[#121214] rounded-xl shadow-sm border border-light-border dark:border-white/10 overflow-hidden flex flex-col"
         >
-          {/* ── Extracted / raw text view ── */}
-          {viewMode === "extracted" ? (
+          {/* ── Prettify view ── */}
+          {viewMode === "prettify" && isSupportedForPrettify ? (
+            <PrettifyViewer document={document} />
+
+          /* ── Extracted / raw text view ── */
+          ) : viewMode === "extracted" ? (
             isExcel ? (
               // Excel: show a beautiful parsed CSV table instead of raw text
               <CsvPrettyViewer extractedText={document.extractedText} />
@@ -198,6 +218,14 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
             <div className="flex-1 min-h-0 w-full h-full flex flex-col overflow-hidden">
               <ExcelViewer extractedText={document.extractedText || ""} />
             </div>
+
+          /* ── TextSnippet (original = extracted, no file to load) ── */
+          ) : isTextSnippet ? (
+            <TextViewer
+              extractedText={document.extractedText}
+              zoomLevel={zoomLevel}
+              isExcel={false}
+            />
 
           /* ── Word (.docx or legacy .doc) ── */
           ) : (isDocx || isOldDoc) ? (

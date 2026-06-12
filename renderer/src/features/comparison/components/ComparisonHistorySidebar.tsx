@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchComparisonHistory, setSearchQuery } from "../../../store/comparisonSlice";
+import { fetchComparisonHistory, setSearchQuery } from "../../../store/comparison/comparisonSlice";
 import { ComparisonHistoryItemRow } from "./ComparisonHistoryItemRow";
 
 interface SidebarProps {
@@ -40,14 +40,14 @@ export function ComparisonHistorySidebar({ onSelectHistory, onNewComparison }: S
         <div className="relative">
           <Icon
             name="search"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-light-text/60 dark:text-dark-text/40 text-[14px]"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-light-text/70 dark:text-dark-text/60 text-[14px]"
           />
           <input
             type="text"
             placeholder="Search records..."
             value={searchQuery}
             onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-            className="w-full pl-8 pr-3 h-8 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-lg text-xs text-light-text dark:text-white focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/50 dark:placeholder:text-dark-text/50"
+            className="w-full pl-8 pr-3 h-8 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-lg text-xs text-light-text dark:text-white focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/60 dark:placeholder:text-white/60"
           />
         </div>
       </div>
@@ -66,11 +66,11 @@ export function ComparisonHistorySidebar({ onSelectHistory, onNewComparison }: S
           </div>
         ) : history.length === 0 ? (
           <div className="px-2 py-4 text-center">
-            <p className="text-xs text-light-text/50 dark:text-white/40">No previous comparisons found.</p>
+            <p className="text-xs text-light-text/70 dark:text-white/60">No previous comparisons found.</p>
           </div>
         ) : filteredHistory.length === 0 ? (
           <div className="px-2 py-4 text-center">
-            <p className="text-xs text-light-text/50 dark:text-white/40">No results match your search.</p>
+            <p className="text-xs text-light-text/70 dark:text-white/60">No results match your search.</p>
           </div>
         ) : (
           <div className="space-y-1">
@@ -88,4 +88,3 @@ export function ComparisonHistorySidebar({ onSelectHistory, onNewComparison }: S
     </div>
   );
 }
-

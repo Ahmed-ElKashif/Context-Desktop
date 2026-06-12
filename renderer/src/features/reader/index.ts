@@ -1,5 +1,5 @@
 import { api } from "../../lib/axios";
-import { DocumentData } from "../../store/documentSlice";
+import { DocumentData } from "../../store/library/librarySlice";
 
 export const readerService = {
   // 1. Fetch document metadata

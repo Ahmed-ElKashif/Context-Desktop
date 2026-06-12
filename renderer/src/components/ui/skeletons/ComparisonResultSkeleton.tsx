@@ -1,4 +1,4 @@
-import { Icon } from "../Icons"; // تأكد إن مسار الأيقونة صح بالنسبة لمكان الملف
+import { Icon } from "../core/Icons"; // تأكد إن مسار الأيقونة صح بالنسبة لمكان الملف
 
 export const ComparisonResultSkeleton = () => {
   return (

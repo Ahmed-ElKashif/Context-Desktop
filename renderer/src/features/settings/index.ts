@@ -23,10 +23,13 @@ export const settingsService = {
   },
 
   // Utility to clear local storage cache
-  clearLocalCache: () => {
-    const token = localStorage.getItem("context_token");
+  clearLocalCache: async () => {
+    const electronAPI = (window as any).electronAPI;
+    const user = await electronAPI.store.get("context_user");
+    await electronAPI.store.delete("context_analytics_session");
+    await electronAPI.store.delete("app_notifications");
     localStorage.clear();
-    if (token) localStorage.setItem("context_token", token); // Keep auth token
+    if (user) await electronAPI.store.set("context_user", user); // Keep auth user
     return true;
   }
 };

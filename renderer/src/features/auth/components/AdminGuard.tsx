@@ -9,7 +9,7 @@
  *
  * Redirect chain:
  *  - Not logged in           → /login
- *  - Logged in, not admin    → /dashboard
+ *  - Logged in, not admin    → /workspace
  *  - Logged in, is admin     → renders child route via <Outlet />
  */
 
@@ -26,7 +26,7 @@ const AdminGuard: React.FC = () => {
   }
 
   if (user.role !== "admin") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/workspace" replace />;
   }
 
   return <Outlet />;

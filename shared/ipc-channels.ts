@@ -2,6 +2,7 @@ export const IPC_CHANNELS = {
   APP: {
     GET_VERSION: 'app:get-version',
     ON_CLI_ARGS: 'app:on-cli-args',
+    GET_INITIAL_CLI_ARGS: 'app:get-initial-cli-args',
     SET_STARTUP: 'app:set-startup',
     GET_STARTUP: 'app:get-startup',
     SHOW_NOTIFICATION: 'app:show-notification',

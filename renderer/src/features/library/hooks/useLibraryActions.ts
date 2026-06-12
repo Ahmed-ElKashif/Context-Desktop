@@ -1,30 +1,27 @@
 import { useRef } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { useAppDispatch } from "../../../store/hooks";
 import {
   deleteDocumentThunk,
-  clearActiveDocument,
   generateSemanticStructure,
   synthesizeDocumentsThunk,
   clearSynthesisResult,
+  renameDocumentThunk,
+  bulkDeleteDocumentsThunk,
+  deleteFolderThunk,
+  renameFolderThunk,
+  downloadFolderZipThunk,
   DocumentData,
   FolderData,
-} from "../../../store/documentSlice";
-import { clearSelection } from "../../../store/selectionSlice";
-import { documentService } from "../../dashboard/api/documentService";
-import { notify } from "../../../components/ui/ToastEngine";
-import { updateUserLocalState, updateProfile } from "../../../store/authSlice";
+} from "../../../store/library/librarySlice";
+import { clearSelection } from "../../../store/library/selectionSlice";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 interface UseLibraryActionsOptions {
   ui: any; // The useLibraryUI hook return value
-  refetchCurrentView: () => void;
-  activeDocument: DocumentData | null;
   selectedDocs: DocumentData[];
   selectedFolders: FolderData[];
   selectedDocIds: string[];
   selectedFolderIds: string[];
-  foldersList: FolderData[];
-  visibleFolders: FolderData[];
-  globalFolderTree: FolderData[];
 }
 
 /**
@@ -32,18 +29,12 @@ interface UseLibraryActionsOptions {
  */
 export const useLibraryActions = ({
   ui,
-  refetchCurrentView,
-  activeDocument,
   selectedDocs,
   selectedFolders,
   selectedDocIds,
   selectedFolderIds,
-  foldersList,
-  visibleFolders,
-  globalFolderTree,
 }: UseLibraryActionsOptions) => {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
 
   const executeDelete = async () => {
     if (!ui.deleteModal.doc) return;
@@ -52,8 +43,8 @@ export const useLibraryActions = ({
       await dispatch(deleteDocumentThunk(ui.deleteModal.doc._id)).unwrap();
       notify("Document permanently deleted.", "success");
       ui.deleteModal.close();
-    } catch (error: any) {
-      notify(error || "Failed to delete document.", "error");
+    } catch (error: unknown) {
+      notify((error as string) || "Failed to delete document.", "error");
     } finally {
       ui.loading.setIsDeleting(false);
     }
@@ -63,13 +54,12 @@ export const useLibraryActions = ({
     if (!ui.renameModal.doc) return;
     ui.loading.setIsRenaming(true);
     try {
-      await documentService.updateDocument(ui.renameModal.doc._id, {
-        title: newName,
-      });
+      await dispatch(
+        renameDocumentThunk({ id: ui.renameModal.doc._id, title: newName }),
+      ).unwrap();
       notify("Document renamed successfully.", "success");
       ui.renameModal.close();
-      refetchCurrentView();
-    } catch (error: any) {
+    } catch {
       notify("Failed to rename document.", "error");
     } finally {
       ui.loading.setIsRenaming(false);
@@ -77,41 +67,20 @@ export const useLibraryActions = ({
   };
 
   const executeBulkDelete = async () => {
-    const docIdsToDelete = selectedDocIds;
-    const folderIdsToDelete = selectedFolderIds;
-    const totalToDelete = docIdsToDelete.length + folderIdsToDelete.length;
+    const documentIds = selectedDocIds;
+    const folderIds = selectedFolderIds;
+    const totalToDelete = documentIds.length + folderIds.length;
 
     if (totalToDelete === 0) return;
     ui.loading.setIsDeleting(true);
     try {
-      if (docIdsToDelete.length > 0) {
-        await documentService.bulkDeleteDocuments(docIdsToDelete);
-
-        // If the active document was deleted, clear it from Redux
-        if (activeDocument?._id && docIdsToDelete.includes(activeDocument._id)) {
-          dispatch(clearActiveDocument());
-        }
-        
-        // Also clear lastActiveDocumentId from user profile if it was deleted
-        if (user?.lastActiveDocumentId && docIdsToDelete.includes(user.lastActiveDocumentId)) {
-          dispatch(updateUserLocalState({ lastActiveDocumentId: null }));
-          dispatch(updateProfile({ lastActiveDocumentId: null }));
-        }
-      }
-
-      if (folderIdsToDelete.length > 0) {
-        await Promise.all(
-          folderIdsToDelete.map((folderId) =>
-            documentService.deleteFolder(folderId)
-          )
-        );
-      }
-
+      await dispatch(
+        bulkDeleteDocumentsThunk({ documentIds, folderIds }),
+      ).unwrap();
       notify(`Successfully deleted ${totalToDelete} items.`, "success");
       dispatch(clearSelection());
       ui.bulkDeleteModal.close();
-      refetchCurrentView();
-    } catch (error: any) {
+    } catch {
       notify("Failed to delete some items.", "error");
     } finally {
       ui.loading.setIsDeleting(false);
@@ -122,23 +91,11 @@ export const useLibraryActions = ({
     if (!ui.folderDeleteModal.path) return;
     ui.loading.setIsDeleting(true);
     try {
-      await documentService.deleteFolder(ui.folderDeleteModal.path);
-
-      // If the active document resides inside the deleted folder, clear it from Redux
-      if (activeDocument?.folder === ui.folderDeleteModal.path) {
-        dispatch(clearActiveDocument());
-        if (user?.lastActiveDocumentId === activeDocument?._id) {
-          dispatch(updateUserLocalState({ lastActiveDocumentId: null }));
-          dispatch(updateProfile({ lastActiveDocumentId: null }));
-        }
-      }
-
+      await dispatch(deleteFolderThunk(ui.folderDeleteModal.path)).unwrap();
       notify("Folder permanently deleted.", "success");
       ui.folderDeleteModal.close();
-      refetchCurrentView();
-    } catch (error: any) {
-      const errMsg = error.response?.data?.error || "Failed to delete folder.";
-      notify(errMsg, "error");
+    } catch (error: unknown) {
+      notify((error as string) || "Failed to delete folder.", "error");
     } finally {
       ui.loading.setIsDeleting(false);
     }
@@ -148,30 +105,24 @@ export const useLibraryActions = ({
     if (!ui.folderRenameModal.path) return;
     ui.loading.setIsRenaming(true);
     try {
-      await documentService.renameFolder(ui.folderRenameModal.path, newName);
+      await dispatch(
+        renameFolderThunk({ path: ui.folderRenameModal.path, newName }),
+      ).unwrap();
       notify("Folder renamed successfully.", "success");
       ui.folderRenameModal.close();
-      refetchCurrentView();
-    } catch (error: any) {
-      const errMsg = error.response?.data?.error || "Failed to rename folder.";
-      notify(errMsg, "error");
+    } catch (error: unknown) {
+      notify((error as string) || "Failed to rename folder.", "error");
     } finally {
       ui.loading.setIsRenaming(false);
     }
   };
 
   const executeDownloadFolder = async (folderId: string) => {
-    const folder =
-      foldersList.find((f) => f._id === folderId) ||
-      visibleFolders.find((f) => f._id === folderId) ||
-      globalFolderTree.find((f) => f._id === folderId);
-    if (!folder) return;
-
     notify("Preparing your download...", "info");
     try {
-      await documentService.downloadFolderZip(folder._id);
+      await dispatch(downloadFolderZipThunk(folderId)).unwrap();
       notify("Download started successfully.", "success");
-    } catch (error: any) {
+    } catch {
       notify("Failed to download folder.", "error");
     }
   };
@@ -182,12 +133,25 @@ export const useLibraryActions = ({
     try {
       notify("Analyzing semantic paths...", "info");
       await dispatch(
-        generateSemanticStructure({ documents: selectedDocs, folderIds: selectedFolderIds })
+        generateSemanticStructure({
+          documents: selectedDocs,
+          folderIds: selectedFolderIds,
+        }),
       ).unwrap();
       dispatch(clearSelection());
       ui.uploadModal.open();
     } catch (error: any) {
-      notify(error || "Failed to process AI routing.", "error");
+      let errMsg = "Failed to process AI routing.";
+      if (typeof error === 'string') errMsg = error;
+      else if (error?.response?.data?.message) errMsg = error.response.data.message;
+      else if (error?.data?.message) errMsg = error.data.message;
+      else if (error?.message) errMsg = error.message;
+
+      if (errMsg.includes("8-hour") || errMsg.includes("token budget")) {
+        notify("Not enough tokens to organize folders with AI right now.", "error");
+      } else {
+        notify(errMsg, "error");
+      }
     }
   };
 
@@ -198,14 +162,21 @@ export const useLibraryActions = ({
 
     try {
       synthesisPromiseRef.current = dispatch(
-        synthesizeDocumentsThunk({ documentIds: selectedDocIds, folderIds: selectedFolderIds })
+        synthesizeDocumentsThunk({
+          documentIds: selectedDocIds,
+          folderIds: selectedFolderIds,
+        }),
       );
       await synthesisPromiseRef.current.unwrap();
-    } catch (error: any) {
-      if (error?.name === "AbortError" || error === "Synthesis cancelled") {
+    } catch (error: unknown) {
+      const err = error as any;
+      if (err?.name === "AbortError" || error === "Synthesis cancelled") {
         return; // Silently handle cancellation
       }
-      const errorMsg = typeof error === 'string' ? error : error?.message || "Failed to synthesize documents.";
+      const errorMsg =
+        typeof error === "string"
+          ? error
+          : err?.message || "Failed to synthesize documents.";
       notify(errorMsg, "error");
     }
   };

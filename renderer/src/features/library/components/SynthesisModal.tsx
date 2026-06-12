@@ -1,9 +1,9 @@
+
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Icon } from "../../../components/ui/Icons";
-import { notify } from "../../../components/ui/ToastEngine";
+import { ContextMarkdown } from "../../../components/ui/display/ContextMarkdown";
+import { Icon } from "../../../components/ui/core/Icons";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 interface SynthesisModalProps {
   isOpen: boolean;
@@ -52,14 +52,14 @@ export const SynthesisModal = ({
               <h3 className="font-bold text-lg text-light-text dark:text-white leading-tight">
                 AI Document Synthesis
               </h3>
-              <p className="text-xs text-light-text/60 dark:text-white/50 font-medium">
+              <p className="text-xs text-light-text/70 dark:text-white/70 font-medium">
                 Aggregated insights from selected documents
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/50 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-light-text dark:hover:text-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/60 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/10 hover:text-light-text dark:hover:text-white transition-colors"
           >
             <Icon name="close" className="text-[20px]" />
           </button>
@@ -79,78 +79,7 @@ export const SynthesisModal = ({
             </div>
           ) : synthesisResult ? (
             <div className="flex flex-col text-sm md:text-base leading-relaxed overflow-hidden text-light-text dark:text-white/90">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ node: _, ...props }) => (
-                    <p className="mb-4 last:mb-0" {...props} />
-                  ),
-                  ul: ({ node: _, ...props }) => (
-                    <ul
-                      className="list-disc ml-6 mb-4 flex flex-col gap-2"
-                      {...props}
-                    />
-                  ),
-                  ol: ({ node: _, ...props }) => (
-                    <ol
-                      className="list-decimal ml-6 mb-4 flex flex-col gap-2"
-                      {...props}
-                    />
-                  ),
-                  li: ({ node: _, ...props }) => (
-                    <li className="pl-1" {...props} />
-                  ),
-                  h1: ({ node: _, ...props }) => (
-                    <h1
-                      className="text-2xl font-black mb-4 mt-6 first:mt-0 text-light-text dark:text-white"
-                      {...props}
-                    />
-                  ),
-                  h2: ({ node: _, ...props }) => (
-                    <h2
-                      className="text-xl font-bold mb-3 mt-5 text-light-text dark:text-white"
-                      {...props}
-                    />
-                  ),
-                  h3: ({ node: _, ...props }) => (
-                    <h3
-                      className="text-lg font-bold mb-3 mt-4 text-light-text dark:text-white"
-                      {...props}
-                    />
-                  ),
-                  strong: ({ node: _, ...props }) => (
-                    <strong
-                      className="font-bold text-light-text dark:text-white"
-                      {...props}
-                    />
-                  ),
-                  a: ({ node: _, ...props }) => (
-                    <a
-                      className="text-light-primary dark:text-dark-primary hover:underline font-bold"
-                      {...props}
-                    />
-                  ),
-                  code: ({ node: _, inline, ...props }: any) =>
-                    inline ? (
-                      <code
-                        className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-[13px] text-light-primary dark:text-dark-primary"
-                        {...props}
-                      />
-                    ) : (
-                      <div className="bg-black/80 dark:bg-[#18181b] text-gray-100 rounded-lg p-4 my-4 overflow-x-auto text-[13px] font-mono border border-black/10 dark:border-white/10 shadow-sm">
-                        <code {...props} />
-                      </div>
-                    ),
-                  blockquote: ({ node, ...props }) => (
-                    <blockquote
-                      className="border-l-2 border-light-primary dark:border-dark-primary pl-4 italic text-light-text/80 dark:text-white/80 my-4"
-                      {...props}
-                    />
-                  ),
-                }}
-              >
-                {synthesisResult}
-              </ReactMarkdown>
+              <ContextMarkdown content={synthesisResult} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-48 text-center">
@@ -158,7 +87,7 @@ export const SynthesisModal = ({
                 name="error_outline"
                 className="text-[40px] text-red-400 mb-3"
               />
-              <p className="text-sm text-light-text/60 dark:text-white/50">
+              <p className="text-sm text-light-text/70 dark:text-white/70">
                 Failed to generate synthesis. Please try again.
               </p>
             </div>

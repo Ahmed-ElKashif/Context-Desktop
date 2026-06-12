@@ -1,10 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { notify } from "../../../components/ui/ToastEngine";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 export const useLibraryDropzone = (openUploadModal: () => void) => {
   const [globalDroppedFiles, setGlobalDroppedFiles] = useState<File[]>([]);
   const [globalDroppedPaths, setGlobalDroppedPaths] = useState<string[]>([]);
+
+  useEffect(() => {
+    const handleExternalUpload = async (event: any) => {
+      const pathsToUpload = event.detail as string[];
+      if (pathsToUpload && pathsToUpload.length > 0) {
+        if ((window as any).electronAPI) {
+          try {
+            const result = await (
+              window as any
+            ).electronAPI.localFiles.processDroppedPaths(pathsToUpload);
+            if (result && result.files) {
+              setGlobalDroppedFiles(result.files);
+              setGlobalDroppedPaths(result.files.map((f: any) => f.clientPath));
+              openUploadModal();
+            }
+          } catch (err) {
+            console.error("Failed to process CLI paths", err);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("external-upload", handleExternalUpload);
+
+    // Check for any pending external uploads from cold start
+    if ((window as any).pendingExternalUpload) {
+      const pendingPaths = (window as any).pendingExternalUpload;
+      if (pendingPaths.length > 0) {
+        handleExternalUpload({ detail: pendingPaths });
+      }
+      delete (window as any).pendingExternalUpload;
+    }
+    return () => {
+      window.removeEventListener("external-upload", handleExternalUpload);
+    };
+  }, [openUploadModal]);
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;

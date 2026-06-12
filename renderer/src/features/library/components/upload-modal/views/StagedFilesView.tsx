@@ -1,7 +1,7 @@
-import { Button } from "../../../../../components/ui/Button";
+import { Button } from "@/components/ui/core/Button";
 import { buildFileTree, FileTreeViewer } from "../fileTreeUtils";
 import { createPortal } from "react-dom";
-import { Icon } from "../../../../../components/ui/Icons";
+import { Icon } from "@/components/ui/core/Icons";
 
 interface StagedFilesViewProps {
   activeFiles: File[];

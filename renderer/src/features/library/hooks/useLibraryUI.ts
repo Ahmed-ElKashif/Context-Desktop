@@ -1,13 +1,13 @@
-import { useMemo, useState, useEffect } from "react";
-import { DocumentData } from "../../../store/documentSlice";
+import { useMemo, useState } from "react";
+import { DocumentData } from "../../../store/library/librarySlice";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../store/hooks";
-import { clearSelection } from "../../../store/selectionSlice";
+import { clearSelection } from "../../../store/library/selectionSlice";
 import {
   setSort,
   setActiveTag,
   setSearchQuery as setReduxSearchQuery,
-} from "../../../store/libraryUISlice";
+} from "../../../store/library/libraryUISlice";
 
 export const useLibraryUI = (documentsList: DocumentData[] = []) => {
 
@@ -23,7 +23,6 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
 
   // 3. Global UI States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [externalUploadPaths, setExternalUploadPaths] = useState<string[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -43,48 +42,6 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
     documentsList.forEach((doc) => doc.tags?.forEach((t) => tags.add(t)));
     return Array.from(tags).sort();
   }, [documentsList]);
-
-  // --- Global Event Listeners for Keyboard Shortcuts ---
-  useEffect(() => {
-    const handleOpenUpload = () => setIsUploadModalOpen(true);
-    const handleExternalUpload = (e: Event) => {
-      const paths: string[] = (e as CustomEvent).detail || [];
-      if (paths.length > 0) {
-        setExternalUploadPaths((prev) => Array.from(new Set([...prev, ...paths])));
-        setIsUploadModalOpen(true);
-      }
-      delete (window as any).pendingExternalUpload;
-    };
-    const handleCloseModals = () => {
-      setIsUploadModalOpen(false);
-      setExternalUploadPaths([]);
-      setIsBulkDeleteModalOpen(false);
-      setDocToDelete(null);
-      setDocToRename(null);
-      setFolderToDelete(null);
-      setFolderToRename(null);
-    };
-
-    // Check for any pending external uploads from cold start
-    if ((window as any).pendingExternalUpload) {
-      const pendingPaths = (window as any).pendingExternalUpload;
-      if (pendingPaths.length > 0) {
-        setExternalUploadPaths(pendingPaths);
-        setIsUploadModalOpen(true);
-      }
-      delete (window as any).pendingExternalUpload;
-    }
-
-    window.addEventListener("open-upload-modal", handleOpenUpload);
-    window.addEventListener("external-upload", handleExternalUpload);
-    window.addEventListener("close-all-modals", handleCloseModals);
-    
-    return () => {
-      window.removeEventListener("open-upload-modal", handleOpenUpload);
-      window.removeEventListener("external-upload", handleExternalUpload);
-      window.removeEventListener("close-all-modals", handleCloseModals);
-    };
-  }, []);
 
   // --- Handlers ---
 
@@ -132,12 +89,8 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
     },
     uploadModal: {
       isOpen: isUploadModalOpen,
-      externalPaths: externalUploadPaths,
       open: () => setIsUploadModalOpen(true),
-      close: () => {
-        setIsUploadModalOpen(false);
-        setExternalUploadPaths([]);
-      },
+      close: () => setIsUploadModalOpen(false),
     },
     bulkDeleteModal: {
       isOpen: isBulkDeleteModalOpen,

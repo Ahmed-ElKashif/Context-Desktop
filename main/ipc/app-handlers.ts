@@ -59,4 +59,10 @@ export function registerAppHandlers() {
     await unregisterFileContextMenu();
     return true;
   });
+
+  ipcMain.handle(IPC_CHANNELS.APP.GET_INITIAL_CLI_ARGS, () => {
+    // Import dynamically to avoid circular dependencies if any
+    const { getInitialCliArgs } = require("../windows/window-manager");
+    return getInitialCliArgs();
+  });
 }

@@ -38,7 +38,7 @@ export const IntelligenceSection = () => {
             <div>
               <p className="font-extrabold text-sm text-light-text dark:text-white">Daily Token Budget</p>
               <p className="text-xs font-medium text-light-text/80 dark:text-dark-text/60 mt-1">
-                Your AI processing budget resets at midnight UTC.
+                Your AI processing budget resets every 8 hours.
               </p>
             </div>
             <div className="text-right">
@@ -53,7 +53,7 @@ export const IntelligenceSection = () => {
             <div className="mb-4 flex items-start gap-3 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl">
               <span className="material-symbols-rounded text-red-500 text-[20px] shrink-0">error</span>
               <p className="text-xs font-semibold text-red-700 dark:text-red-400">
-                You have reached your daily limit of {dailyLimit.toLocaleString()} tokens. AI features will be temporarily paused until the budget resets at midnight.
+                You have reached your limit of {dailyLimit.toLocaleString()} tokens for this 8-hour period. AI features will be temporarily paused until the budget resets.
               </p>
             </div>
           )}
@@ -66,7 +66,7 @@ export const IntelligenceSection = () => {
             />
           </div>
 
-          <div className="flex justify-between items-center mt-3 text-xs font-semibold text-light-text/60 dark:text-white/50">
+          <div className="flex justify-between items-center mt-3 text-xs font-semibold text-light-text/70 dark:text-white/70">
             <span>{dailyUsed.toLocaleString()} used</span>
             <span>{dailyRemaining.toLocaleString()} remaining</span>
           </div>
@@ -109,7 +109,7 @@ export const IntelligenceSection = () => {
             />
           </div>
 
-          <div className="flex justify-between items-center mt-3 text-xs font-semibold text-light-text/60 dark:text-white/50">
+          <div className="flex justify-between items-center mt-3 text-xs font-semibold text-light-text/70 dark:text-white/70">
             <span>{monthlyUsed.toLocaleString()} used</span>
             <span>{monthlyRemaining.toLocaleString()} remaining</span>
           </div>

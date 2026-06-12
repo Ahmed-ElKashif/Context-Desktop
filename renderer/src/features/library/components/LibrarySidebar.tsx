@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "../../../components/ui/Icons";
-import { FolderData } from "../../../store/documentSlice";
+import { Icon } from "../../../components/ui/core/Icons";
+import { FolderData } from "../../../store/library/librarySlice";
 import { useAppSelector } from "../../../store/hooks"; // 🛠️ Pulling the global tree directly
 import { useClickOutside } from "../../../components/ui/hooks/useClickOutside";
 
@@ -44,11 +44,10 @@ const FolderTreeItem = ({
   return (
     <div className="w-full">
       <div
-        className={`w-full flex items-center justify-between px-2 py-1 rounded-md group transition-colors ${
-          isActive
+        className={`w-full flex items-center justify-between px-2 py-1 rounded-md group transition-colors ${isActive
             ? "bg-light-primary/10 dark:bg-dark-primary/15"
             : "hover:bg-light-bg dark:hover:bg-white/5"
-        }`}
+          }`}
         style={{ paddingLeft: `${level * 10 + 6}px` }} // Indentation math
       >
         <button
@@ -58,18 +57,16 @@ const FolderTreeItem = ({
         >
           <Icon
             name={isOpen && children.length > 0 ? "folder_open" : "folder"}
-            className={`text-[16px] shrink-0 ${
-              isActive
+            className={`text-[16px] shrink-0 ${isActive
                 ? "text-light-primary dark:text-dark-primary"
                 : "text-yellow-500"
-            }`}
+              }`}
           />
           <span
-            className={`truncate text-sm font-semibold ${
-              isActive
+            className={`truncate text-sm font-semibold ${isActive
                 ? "text-light-primary dark:text-dark-primary"
                 : "text-light-text/70 dark:text-white/60 group-hover:text-light-text dark:group-hover:text-white"
-            }`}
+              }`}
           >
             {folder.name}
           </span>
@@ -78,7 +75,7 @@ const FolderTreeItem = ({
         {children.length > 0 && (
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 shrink-0 text-light-text/40 dark:text-white/30"
+            className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 shrink-0 text-light-text/60 dark:text-white/50"
           >
             <Icon
               name={isOpen ? "expand_more" : "chevron_right"}
@@ -130,7 +127,7 @@ export const LibrarySidebar = ({
   });
 
   // 🛠️ Grab the global tree we added to Redux
-  const { globalFolderTree } = useAppSelector((state) => state.document);
+  const { globalFolderTree } = useAppSelector((state) => state.library);
 
   const handleAllDocumentsClick = () => {
     onNavigate(undefined); // Go to Root
@@ -165,7 +162,7 @@ export const LibrarySidebar = ({
         ${isMobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="p-4 border-b border-light-border dark:border-white/5 h-14 flex items-center shrink-0">
-          <h2 className="text-[10px] font-black text-light-text/50 dark:text-white/40 uppercase tracking-widest flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-light-text/70 dark:text-white/60 uppercase tracking-widest flex items-center gap-2">
             <Icon name="grid_view" className="text-[14px]" />
             Spaces
           </h2>
@@ -175,11 +172,10 @@ export const LibrarySidebar = ({
           <div className="px-2 mb-2">
             <button
               onClick={handleAllDocumentsClick}
-              className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                isAllActive
+              className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${isAllActive
                   ? "bg-light-primary/10 dark:bg-dark-primary/15 text-light-primary dark:text-dark-primary shadow-sm"
                   : "text-light-text/70 dark:text-white/60 hover:bg-light-bg dark:hover:bg-white/5 hover:text-light-text dark:hover:text-white"
-              }`}
+                }`}
             >
               <Icon
                 name={isAllActive ? "folder_open" : "folder"}
@@ -193,10 +189,10 @@ export const LibrarySidebar = ({
           {rootFolders.length > 0 && (
             <>
               <div className="h-px w-full bg-light-border/50 dark:bg-white/5 my-4"></div>
-              <p className="px-4 text-[10px] font-bold text-light-text/40 dark:text-white/30 uppercase tracking-wider mb-2 flex items-center gap-1">
+              <p className="px-4 text-[10px] font-bold text-light-text/60 dark:text-white/50 uppercase tracking-wider mb-2 flex items-center gap-1">
                 <Icon
                   name="folder"
-                  className="text-[12px] text-light-text/40 dark:text-white/30"
+                  className="text-[12px] text-light-text/60 dark:text-white/50"
                 />
                 Your Folders
               </p>
@@ -212,95 +208,85 @@ export const LibrarySidebar = ({
                     onContextMenu={(e, id) => {
                       e.preventDefault();
                       setOpenMenuId(id);
-                      setMenuRect(
-                        (
-                          e.currentTarget as HTMLElement
-                        ).getBoundingClientRect(),
-                      );
+                      setMenuRect((e.currentTarget as HTMLElement).getBoundingClientRect());
                     }}
                   />
                 ))}
 
                 {/* RIGHT-CLICK MENU (Portal) */}
-                {openMenuId &&
-                  menuRect &&
-                  (() => {
-                    const isNearBottom =
-                      menuRect.bottom + 150 > window.innerHeight;
-                    return createPortal(
-                      <div
-                        ref={menuRef}
-                        className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
-                          isNearBottom
-                            ? "origin-bottom-left"
-                            : "origin-top-left"
-                        }`}
-                        style={{
-                          top: isNearBottom ? undefined : menuRect.top,
-                          bottom: isNearBottom
-                            ? window.innerHeight - menuRect.bottom
-                            : undefined,
-                          left: menuRect.right + 4, // Pop to the right of the sidebar item!
+                {openMenuId && menuRect && (() => {
+                  const isNearBottom = menuRect.bottom + 150 > window.innerHeight;
+                  return createPortal(
+                  <div 
+                    ref={menuRef} 
+                    className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
+                      isNearBottom ? "origin-bottom-left" : "origin-top-left"
+                    }`}
+                    style={{
+                      top: isNearBottom ? undefined : menuRect.top,
+                      bottom: isNearBottom ? window.innerHeight - menuRect.bottom : undefined,
+                      left: menuRect.right + 4 // Pop to the right of the sidebar item!
+                    }}
+                  >
+                    {!openMenuFolder?.isAIGenerated && openMenuFolder?.name?.toLowerCase() !== "random files" && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRenameFolder(openMenuId);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                          >
+                            <span className="material-symbols-rounded text-[16px] text-blue-500">
+                              edit
+                            </span>
+                            Rename
+                          </button>
+                          <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
+                        </>
+                      )}
+                      {openMenuFolder?.isAIGenerated && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDownloadFolder(openMenuId);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
+                          >
+                            <span className="material-symbols-rounded text-[16px] text-green-500">
+                              download
+                            </span>
+                            Download
+                          </button>
+                          <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
+                        </>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteFolder(openMenuId);
+                          setOpenMenuId(null);
                         }}
+                        className="w-full px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                       >
-                        {!openMenuFolder?.isAIGenerated &&
-                          openMenuFolder?.name?.toLowerCase() !==
-                            "random files" && (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onRenameFolder(openMenuId);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-                              >
-                                <span className="material-symbols-rounded text-[16px] text-blue-500">
-                                  edit
-                                </span>
-                                Rename
-                              </button>
-                              <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-                            </>
-                          )}
-                        {openMenuFolder?.isAIGenerated && (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDownloadFolder(openMenuId);
-                                setOpenMenuId(null);
-                              }}
-                              className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-                            >
-                              <span className="material-symbols-rounded text-[16px] text-green-500">
-                                download
-                              </span>
-                              Download
-                            </button>
-                            <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-                          </>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteFolder(openMenuId);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
-                        >
-                          <span className="material-symbols-rounded text-[18px]">
-                            delete
-                          </span>
-                          Delete
-                        </button>
-                      </div>,
-                      document.body,
-                    );
-                  })()}
+                        <span className="material-symbols-rounded text-[18px]">
+                          delete
+                        </span>
+                        Delete
+                      </button>
+                    </div>,
+                    document.body
+                  );
+                })()}
               </div>
             </>
           )}
+
+     
+        
         </div>
       </aside>
     </>

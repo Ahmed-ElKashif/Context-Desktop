@@ -7,6 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Context - AI Document Intelligence</title>
 
+  <!-- 
+    Content Security Policy (CSP)
+    - Prevents loading external malicious scripts (script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com)
+    - Allows Google Fonts (style-src, font-src)
+    - Allows images from anywhere securely (img-src 'self' data: blob: https: file:)
+    - Allows API connections (connect-src 'self' http: https: ws: wss:)
+    - Allows PDF.js worker (worker-src 'self' blob: file:)
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: file:; connect-src 'self' http: https: ws: wss:; worker-src 'self' blob: file:; object-src 'none';" />
+
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
     rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />

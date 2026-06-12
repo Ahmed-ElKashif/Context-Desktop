@@ -1,5 +1,5 @@
-import { Icon } from "../Icons";
-import { DocumentData } from "../../../store/documentSlice";
+import { Icon } from "../core/Icons";
+import { DocumentData } from "../../../store/library/librarySlice";
 
 export const OcrEngineSkeleton = ({
   activeDocument,

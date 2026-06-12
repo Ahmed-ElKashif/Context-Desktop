@@ -34,7 +34,7 @@ export const PieChartView = ({ pieData, yAxisKey, yIsDate }: PieChartViewProps) 
       </Pie>
       <Tooltip
         contentStyle={DarkTooltipStyle}
-        formatter={(_v: any, _name: any, props: any) => [
+        formatter={(_v: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, _name: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, props: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => [
           yIsDate
             ? formatDateTick(props.payload.value)   // show readable date
             : props.payload.value.toLocaleString(), // show formatted number

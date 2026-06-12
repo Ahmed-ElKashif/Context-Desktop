@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { useNavigate } from "react-router-dom";
 import { searchService, SemanticSearchResult } from "../index";
 
@@ -41,8 +41,6 @@ export const GlobalSearch = () => {
   // Debounced search effect (500ms for heavy embedding calls)
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setSearchResults([]);
-      setIsDropdownOpen(false);
       return;
     }
 
@@ -71,20 +69,26 @@ export const GlobalSearch = () => {
   return (
     <div className="w-[440px] relative" ref={dropdownRef}>
       <div className="relative flex items-center group">
-        <div className="absolute left-4 inset-y-0 flex items-center text-light-text/40 dark:text-white/30 group-focus-within:text-light-primary dark:group-focus-within:text-dark-primary transition-colors z-10">
-          <Icon name={isSearching ? "sync" : "auto_awesome"} className={`text-[20px] ${isSearching ? "animate-spin text-light-primary dark:text-dark-primary" : ""}`} />
+        <div className="absolute left-4 inset-y-0 flex items-center z-10">
+          <Icon name={isSearching ? "sync" : "search"} className={`text-[20px] text-light-primary dark:text-dark-primary ${isSearching ? "animate-spin" : ""}`} />
         </div>
         <input
-          id="global-search-input"
           ref={searchInputRef}
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setSearchQuery(val);
+            if (!val.trim()) {
+              setSearchResults([]);
+              setIsDropdownOpen(false);
+            }
+          }}
           onFocus={() => {
             if (searchQuery.trim()) setIsDropdownOpen(true);
           }}
           placeholder="Ask anything,searching by meaning (Cmd+K)"
-          className="w-full bg-light-bg dark:bg-[#0A0A0C] border border-light-border dark:border-white/10 rounded-xl py-2.5 pl-12 pr-12 text-sm font-medium text-light-text dark:text-white placeholder:text-light-text/40 dark:placeholder:text-white/30 focus:outline-none focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50 transition-all shadow-inner relative z-0"
+          className="w-full bg-light-bg dark:bg-[#0A0A0C] border border-light-border dark:border-white/10 rounded-xl py-2.5 pl-12 pr-12 text-sm font-medium text-light-text dark:text-white placeholder:text-light-text/60 dark:placeholder:text-white/60 focus:outline-none focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50 transition-all shadow-inner relative z-0"
         />
         {searchQuery && (
           <button
@@ -92,7 +96,7 @@ export const GlobalSearch = () => {
               setSearchQuery("");
               searchInputRef.current?.focus();
             }}
-            className="absolute right-4 inset-y-0 flex items-center text-light-text/40 dark:text-white/30 hover:text-light-text dark:hover:text-white transition-colors z-10"
+            className="absolute right-4 inset-y-0 flex items-center text-light-text/60 dark:text-white/50 hover:text-light-text dark:hover:text-white transition-colors z-10"
           >
             <Icon name="close" className="text-[16px]" />
           </button>
@@ -103,9 +107,8 @@ export const GlobalSearch = () => {
         <div className="absolute top-full mt-2 w-full bg-white dark:bg-[#121214] border border-light-border dark:border-white/10 rounded-xl shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {searchResults.length > 0 ? (
             <ul className="max-h-80 overflow-y-auto p-2">
-              <li className="px-3 py-1.5 text-[10px] font-mono font-bold text-light-text/40 dark:text-white/30 uppercase tracking-wider flex items-center justify-between">
-                <span>Semantic Matches</span>
-                <span className="text-[9px]">text-embedding-3-small</span>
+              <li className="px-3 py-2 text-xs font-bold text-light-text/80 dark:text-white/80 tracking-wide border-b border-light-border/50 dark:border-white/5 mb-1">
+                Semantic Matches
               </li>
               {searchResults.map((chunk, index) => (
                 <li key={`${chunk.documentId}-${chunk.chunkIndex}-${index}`}>
@@ -119,7 +122,7 @@ export const GlobalSearch = () => {
                         <p className="text-xs text-light-text/70 dark:text-white/70 line-clamp-2 mt-1 font-serif bg-light-surface/50 dark:bg-black/20 p-1.5 rounded border border-light-border/50 dark:border-white/5 italic">
                           "{chunk.text}"
                         </p>
-                        <div className="flex items-center gap-2 mt-1 text-[10px] text-light-text/50 dark:text-white/40 font-mono">
+                        <div className="flex items-center gap-2 mt-1.5 text-[11px] font-semibold text-light-text/70 dark:text-white/60">
                           <span>Chunk #{chunk.chunkIndex + 1}</span>
                           <span>•</span>
                           <span>{chunk.documentType}</span>
@@ -128,9 +131,9 @@ export const GlobalSearch = () => {
                     </div>
                     
                     {chunk.confidenceScore && (
-                      <div className="shrink-0 ml-3 px-2 py-1 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center gap-1">
-                        <Icon name="radar" className="text-[12px] text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-[10px] font-bold font-mono text-emerald-700 dark:text-emerald-300">
+                      <div className="shrink-0 ml-3 px-2 py-1 rounded bg-light-primary/10 dark:bg-dark-primary/10 border border-light-primary/20 dark:border-dark-primary/20 flex items-center gap-1">
+                        <Icon name="my_location" className="text-[12px] text-light-primary dark:text-dark-primary" />
+                        <span className="text-[10px] font-bold text-light-primary dark:text-dark-primary">
                           {Math.round(chunk.confidenceScore)}%
                         </span>
                       </div>
@@ -141,9 +144,9 @@ export const GlobalSearch = () => {
             </ul>
           ) : (
             <div className="p-6 text-center">
-              <Icon name="travel_explore" className="text-light-text/30 dark:text-white/20 text-[32px] mx-auto mb-2" />
+              <Icon name="travel_explore" className="text-light-text/50 dark:text-white/40 text-[32px] mx-auto mb-2" />
               <p className="text-sm font-bold text-light-text/80 dark:text-white/80">No semantic matches found</p>
-              <p className="text-xs text-light-text/50 dark:text-white/50 mt-1">Try asking your question differently.</p>
+              <p className="text-xs text-light-text/70 dark:text-white/70 mt-1">Try asking your question differently.</p>
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon } from "../../components/ui/Icons";
+import { Icon } from "../../components/ui/core/Icons";
 import { IdentityForm } from "./components/IdentityForm";
 import { SecurityForm } from "./components/SecurityForm";
 import { AvatarUpload } from "./components/AvatarUpload";
@@ -31,7 +31,7 @@ export const ProfileFeature: React.FC = () => {
               <Icon name="fingerprint" className="text-xl" />
               Identity Core
             </h2>
-            <p className="text-sm text-light-text/60 dark:text-white/50 mt-1.5 font-medium">
+            <p className="text-sm text-light-text/70 dark:text-white/70 mt-1.5 font-medium">
               Update your node's alias, public identification markers, and avatar.
             </p>
           </div>
@@ -57,7 +57,12 @@ export const ProfileFeature: React.FC = () => {
             </p>
           </div>
 
-          <SecurityForm />
+          <div className="p-6 md:p-8 overflow-visible">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="w-28 hidden md:block shrink-0"></div>
+              <SecurityForm />
+            </div>
+          </div>
         </div>
 
       </div>

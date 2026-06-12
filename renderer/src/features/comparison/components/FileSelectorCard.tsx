@@ -1,5 +1,5 @@
-import { Icon } from "../../../components/ui/Icons";
-import { DocumentData } from "../../../store/documentSlice";
+import { Icon } from "../../../components/ui/core/Icons";
+import { DocumentData } from "../../../store/library/librarySlice";
 import { cn } from "../../../lib/utils";
 
 interface FileSelectorCardProps {
@@ -49,14 +49,14 @@ export const FileSelectorCard = ({ type, document, onClick }: FileSelectorCardPr
           <h2 className="text-base font-bold text-light-text dark:text-white truncate" title={document.title}>
             {document.title}
           </h2>
-          <p className="text-xs font-medium text-light-text/60 dark:text-dark-text/50 mt-1 truncate">
+          <p className="text-xs font-medium text-light-text/70 dark:text-dark-text/70 mt-1 truncate">
             {document.semanticPath || "From Library"}
           </p>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center opacity-60">
            <div className="w-12 h-12 rounded-full border-2 border-dashed border-light-border dark:border-white/20 flex items-center justify-center mb-2">
-              <Icon name="add" className="text-[24px] text-light-text/50 dark:text-white/50" />
+              <Icon name="add" className="text-[24px] text-light-text/60 dark:text-white/60" />
            </div>
            <span className="text-sm font-bold text-light-text/70 dark:text-white/70">
              {isBase ? "Select Base Document" : "Select Document to Compare"}

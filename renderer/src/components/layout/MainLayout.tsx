@@ -3,10 +3,10 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { reloadDocumentThunk } from '../../store/documentSlice';
-import { fetchSettings } from '../../store/settingsSlice';
-import { addNotification } from '../../store/notificationSlice';
-import { notify } from '../ui/ToastEngine';
+import { reloadDocumentThunk } from '../../store/library/librarySlice';
+import { fetchSettings } from '../../store/settings/settingsSlice';
+import { addNotification } from '../../store/ui/notificationSlice';
+import { notify } from '../ui/feedback/ToastEngine';
 import { playNotificationSound } from '../../utils/audioUtils';
 import { ProductTour } from '../../features/tour/ProductTour';
 import { PopulatedTour } from '../../features/tour/PopulatedTour';
@@ -22,7 +22,8 @@ export const MainLayout = () => {
   useEffect(() => {
     dispatch(fetchSettings());
   }, [dispatch]);
-  const { documentsList, activeDocument } = useAppSelector((state) => state.document);
+  const { documentsList } = useAppSelector((state) => state.library);
+  const { activeDocument } = useAppSelector((state) => state.workspace);
 
   const { token } = useAppSelector((state) => state.auth);
 

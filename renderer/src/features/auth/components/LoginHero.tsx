@@ -1,4 +1,4 @@
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 
 export const LoginHero = () => {
   return (

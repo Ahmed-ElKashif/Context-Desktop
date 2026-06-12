@@ -1,4 +1,4 @@
-import { SemanticVoid } from "../components/ui/SemanticVoid";
+import { SemanticVoid } from "../components/ui/display/SemanticVoid";
 
 export const ServerErrorPage = () => {
   return (

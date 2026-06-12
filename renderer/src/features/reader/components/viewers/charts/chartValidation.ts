@@ -31,7 +31,7 @@ export function validateChart(
   // Bar / Line / Area
   if (numericRatio === 0) {
     const sample        = yValues.find((v) => v !== "") ?? "";
-    const looksLikeDate = /^\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}$/.test(sample);
+    const looksLikeDate = /^\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}$/.test(sample);
     const looksLikeText = isNaN(parseFloat(sample)) && sample !== "";
     const hint = looksLikeDate
       ? `"${yAxisKey}" appears to contain dates, which can't be plotted as a number.`

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { DocumentData } from "../../../../../store/documentSlice";
+import { DocumentData } from "../../../../../store/library/librarySlice";
 import {
   getFileIcon,
   formatDate,
@@ -16,14 +16,11 @@ interface DocumentRowProps {
   onToggleMenu: (e: React.MouseEvent) => void;
   onCloseMenu: () => void;
   onToggleSelection: () => void;
-  onClick: (e?: React.MouseEvent) => void;
+  onClick: () => void;
   onDoubleClick: () => void;
   onShare: () => void;
   onRename: () => void;
   onDelete: () => void;
-  onSummarize?: () => void;
-  onCompare?: () => void;
-  onReveal?: () => void;
 }
 
 export const DocumentRow = ({
@@ -38,9 +35,6 @@ export const DocumentRow = ({
   onShare,
   onRename,
   onDelete,
-  onSummarize,
-  onCompare,
-  onReveal,
 }: DocumentRowProps) => {
   const menuRef = useRef<HTMLTableCellElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
@@ -56,7 +50,7 @@ export const DocumentRow = ({
             setNativeIcon(iconData);
           }
         })
-        .catch(() => {}); // Fallback silently
+        .catch(() => {});
     }
     return () => { isMounted = false; };
   }, [doc.originalClientPath]);
@@ -79,14 +73,15 @@ export const DocumentRow = ({
     <tr
       onDoubleClick={onDoubleClick}
       onContextMenu={(e) => {
-        onClick(); // ensure it's selected
+        e.preventDefault();
+        onClick();
         onToggleMenu(e);
       }}
-    className={`group cursor-pointer transition-colors border-b border-light-border dark:border-white/5 bg-white dark:bg-[#121214] ${
-      isSelected
-        ? "bg-black/5 dark:bg-white/10"
-        : "hover:bg-light-bg/50 dark:hover:bg-white/5"
-        }`}
+      className={`group cursor-pointer transition-colors border-b border-light-border dark:border-white/5 bg-white dark:bg-[#121214] ${
+        isSelected
+          ? "bg-black/5 dark:bg-white/10"
+          : "hover:bg-black/5 dark:hover:bg-white/5"
+      }`}
     >
       <td className="py-2 pl-3 pr-1 w-8" onClick={(e) => e.stopPropagation()}>
         <input
@@ -107,7 +102,7 @@ export const DocumentRow = ({
             <p className="text-xs font-semibold group-hover:text-black dark:group-hover:text-white transition-colors truncate">
               {doc.title}
             </p>
-            <p className="text-[9px] font-semibold text-light-text/60 dark:text-dark-text/50">
+            <p className="text-[11px] font-semibold text-light-text/60 dark:text-dark-text/50">
               {doc.fileType} • Active
             </p>
           </div>
@@ -152,7 +147,7 @@ export const DocumentRow = ({
         </div>
       </td>
       <td className="py-1 whitespace-nowrap">{renderCognitiveLoadBars(doc.cognitiveLoad)}</td>
-      <td className="py-1 text-light-text/70 dark:text-dark-text/60 font-mono text-[9px] font-semibold whitespace-nowrap">
+      <td className="py-1 text-light-text/70 dark:text-dark-text/60 font-mono text-[11px] font-semibold whitespace-nowrap">
         {formatDate(doc.updatedAt)}
       </td>
       <td
@@ -164,12 +159,11 @@ export const DocumentRow = ({
         <div className="flex justify-end items-center pr-2">
           <button
             onClick={onToggleMenu}
-            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary ${
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm ${
               isMenuOpen
-                ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white opacity-100"
+                ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white"
                 : "opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-light-text/70 dark:text-white/70"
               }`}
-            aria-label={`Actions for ${doc.title}`}
           >
             <span className="material-symbols-rounded text-[18px]">more_vert</span>
           </button>
@@ -189,33 +183,6 @@ export const DocumentRow = ({
                 right: window.innerWidth - menuRect.left + 8 // Position to the LEFT of the button since it's on the right edge
               }}
             >
-            {onSummarize && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onSummarize(); }}
-                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-              >
-                <span className="material-symbols-rounded text-[18px] text-purple-500">auto_awesome</span>
-                Summarize
-              </button>
-            )}
-            {onCompare && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onCompare(); }}
-                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-              >
-                <span className="material-symbols-rounded text-[18px] text-blue-400">compare_arrows</span>
-                Compare
-              </button>
-            )}
-            {onReveal && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onReveal(); }}
-                className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-              >
-                <span className="material-symbols-rounded text-[18px] text-yellow-500">folder_open</span>
-                Reveal in Explorer
-              </button>
-            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();

@@ -34,6 +34,10 @@ function getOrCreateSessionId(): string {
 
 // ─── Analytics API ───────────────────────────────────────────────────────────
 
+// Global cooldown to prevent analytics bursting / infinite loops
+let lastTrackTime = 0;
+const TRACK_COOLDOWN_MS = 500;
+
 async function trackEvent(
   eventType: string,
   route?: string,
@@ -41,12 +45,27 @@ async function trackEvent(
   errorMessage?: string,
   errorStack?: string
 ) {
+  // 1. Prevent Logging Loops & Bursting
+  const now = Date.now();
+  if (now - lastTrackTime < TRACK_COOLDOWN_MS) {
+    console.debug('[Analytics] Event dropped (rate limited)');
+    return;
+  }
+  lastTrackTime = now;
+
   const sessionId = getOrCreateSessionId()
+
+  // 2. Stack Trace Sanitation (Strip local file paths and sensitive internal directories)
+  let cleanStack = errorStack;
+  if (cleanStack) {
+    // Regex matches common absolute paths (e.g., C:\Users\..., /var/www/..., file:///)
+    cleanStack = cleanStack.replace(/(?:\bfile:\/\/|\b[a-zA-Z]:[\\/]|^\/)[^\s()]+/gm, '[redacted_path]');
+  }
 
   try {
     await api.post(
       '/analytics/track',
-      { eventType, route, metadata, errorMessage, errorStack },
+      { eventType, route, metadata, errorMessage, errorStack: cleanStack },
       { headers: { 'X-Session-Id': sessionId } }
     )
   } catch (error) {

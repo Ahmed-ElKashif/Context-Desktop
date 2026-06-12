@@ -1,21 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import {
-  setActiveDocument,
-} from "../../store/documentSlice";
-import { updateProfile, updateUserLocalState } from "../../store/authSlice";
+import { setActiveDocument } from "../../store/workspace/workspaceSlice";
+import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
 import {
   clearSelection,
   toggleDocSelection,
   toggleFolderSelection,
   toggleAllVisibleSelection,
-  setSelection,
-} from "../../store/selectionSlice";
-import { Icon } from "../../components/ui/Icons";
+} from "../../store/library/selectionSlice";
+import { Icon } from "../../components/ui/core/Icons";
 import { useLibraryUI } from "./hooks/useLibraryUI";
 import { handleShareClick } from "./utils/tableUtils";
-import { FolderData } from "../../store/documentSlice";
+import { FolderData } from "../../store/library/librarySlice";
 
 // Hooks
 import { useLibraryNavigation } from "./hooks/useLibraryNavigation";
@@ -26,8 +23,8 @@ import { useLibraryActions } from "./hooks/useLibraryActions";
 // Components
 import { LibraryTable } from "./components/LibraryTable/LibraryTable";
 import { LibraryPagination } from "./components/LibraryPagination";
-import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
-import { RenameDialog } from "../../components/ui/RenameDialog";
+import { ConfirmDialog } from "../../components/ui/feedback/ConfirmDialog";
+import { RenameDialog } from "../../components/ui/feedback/RenameDialog";
 import { UploadModal } from "./components/UploadModal";
 import { LibrarySidebar } from "./components/LibrarySidebar";
 import { LibraryDragOverlay } from "./components/LibraryDragOverlay";
@@ -45,12 +42,12 @@ export const LibraryFeature = () => {
     foldersList,
     documentsList,
     isFetchingLibrary,
+    isRevalidating,
     pagination,
     isSynthesizing,
     synthesisResult,
-    activeDocument,
     globalFolderTree,
-  } = useAppSelector((state) => state.document);
+  } = useAppSelector((state) => state.library);
 
   const { selectedDocs, selectedFolders } = useAppSelector((state) => state.selection);
   const selectedDocIds = selectedDocs.map(d => d._id);
@@ -64,7 +61,7 @@ export const LibraryFeature = () => {
   const { activeFolderId, setActiveFolderId, navPendingRef } = useLibraryNavigation();
 
   // 4. Data Fetching Hook
-  const { debouncedSearchQuery, handlePageChange, refetchCurrentView } = useLibraryData({
+  const { debouncedSearchQuery, handlePageChange } = useLibraryData({
     activeFolderId,
     searchQuery: ui.filters.searchQuery,
     activeTag: ui.filters.activeTag,
@@ -94,15 +91,10 @@ export const LibraryFeature = () => {
   // 6. Action Handlers Hook
   const actions = useLibraryActions({
     ui,
-    refetchCurrentView,
-    activeDocument,
     selectedDocs,
     selectedFolders,
     selectedDocIds,
     selectedFolderIds,
-    foldersList,
-    visibleFolders,
-    globalFolderTree,
   });
 
   const findFolderById = (folders: FolderData[], id: string): FolderData | undefined => {
@@ -110,26 +102,7 @@ export const LibraryFeature = () => {
   };
   const folderToRename = ui.folderRenameModal.path ? findFolderById(globalFolderTree, ui.folderRenameModal.path) : null;
 
-  // Keyboard Delete listener
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-      
-      if (e.key === 'Delete') {
-        if (selectedDocIds.length + selectedFolderIds.length > 1) {
-          ui.bulkDeleteModal.open();
-        } else if (selectedDocIds.length === 1) {
-          const doc = documentsList.find(d => d._id === selectedDocIds[0]);
-          if (doc) ui.deleteModal.open(doc);
-        } else if (selectedFolderIds.length === 1) {
-          ui.folderDeleteModal.open(selectedFolderIds[0]);
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedDocIds, selectedFolderIds, documentsList, ui.bulkDeleteModal, ui.deleteModal, ui.folderDeleteModal]);
+  const isHardLoading = isFetchingLibrary && !isRevalidating && documentsList.length === 0 && foldersList.length === 0;
 
   return (
     <div
@@ -176,9 +149,14 @@ export const LibraryFeature = () => {
 
         <div className="flex-1 overflow-y-auto p-0 bg-light-bg dark:bg-dark-bg scroll-smooth relative">
           <div id="tour-library-table" className="w-full h-full bg-white dark:bg-dark-surface rounded-xl border border-light-border dark:border-white/5 shadow-sm relative flex flex-col overflow-hidden">
-            <div className="w-full flex-1 overflow-hidden flex flex-col">
-              {isFetchingLibrary ? (
-                <div className="flex items-center justify-center h-64 text-light-text/50 dark:text-white/50">
+            {(isRevalidating || (isFetchingLibrary && !isHardLoading)) && (
+              <div className="absolute top-0 left-0 w-full h-0.5 z-50 overflow-hidden bg-primary/20">
+                <div className="h-full bg-primary animate-progress-indeterminate"></div>
+              </div>
+            )}
+            <div className="w-full flex-1 overflow-hidden flex flex-col relative">
+              {isHardLoading ? (
+                <div className="flex items-center justify-center h-64 text-light-text/60 dark:text-white/60">
                   <Icon name="sync" className="animate-spin text-3xl" />
                 </div>
               ) : (
@@ -200,19 +178,11 @@ export const LibraryFeature = () => {
                     dispatch(setActiveDocument(doc));
                     dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
                     dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
-                    navigate("/dashboard");
+                    navigate("/workspace");
                   }}
                   onShareClick={(doc) => handleShareClick(doc.cloudinaryUrl)}
                   onRenameClick={ui.renameModal.open}
                   onDeleteClick={ui.deleteModal.open}
-                  onSummarizeClick={(doc) => navigate(`/summary-local?id=${doc._id}`)}
-                  onCompareClick={() => navigate(`/compare`)}
-                  onRevealClick={(doc) => {
-                    if (doc.originalClientPath && (window as any).electronAPI?.localFiles?.showItemInFolder) {
-                      (window as any).electronAPI.localFiles.showItemInFolder(doc.originalClientPath);
-                    }
-                  }}
-                  onOrganizeFolderClick={() => actions.executeAIOrganization()}
                   sortBy={ui.sorting.sortBy}
                   sortOrder={ui.sorting.sortOrder}
                   onSort={ui.sorting.handleSort}
@@ -232,9 +202,6 @@ export const LibraryFeature = () => {
                     folders: visibleFolders,
                     isAllVisibleSelected: isAllSelected
                   }))}
-                  onSelectRange={(docs, folders) => {
-                    dispatch(setSelection({ docs, folders }));
-                  }}
                 />
               )}
             </div>
@@ -272,10 +239,7 @@ export const LibraryFeature = () => {
         isOpen={ui.uploadModal.isOpen}
         onClose={ui.uploadModal.close}
         externalFiles={globalDroppedFiles}
-        externalPaths={[
-          ...globalDroppedPaths,
-          ...ui.uploadModal.externalPaths,
-        ]}
+        externalPaths={globalDroppedPaths}
         onClearExternal={() => {
           setGlobalDroppedFiles([]);
           setGlobalDroppedPaths([]);

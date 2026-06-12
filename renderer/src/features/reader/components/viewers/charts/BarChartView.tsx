@@ -25,7 +25,7 @@ export const BarChartView = ({ chartData, xAxisKey, yAxisKey, yIsDate }: BarChar
       <Tooltip
         contentStyle={DarkTooltipStyle}
         cursor={{ fill: "rgba(255,255,255,0.03)" }}
-        formatter={(v: any) => [yIsDate ? formatDateTick(v as number) : v.toLocaleString(), yAxisKey]}
+        formatter={(v: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => [yIsDate ? formatDateTick(v as number) : v.toLocaleString(), yAxisKey]}
       />
       <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
       <Bar dataKey={yAxisKey} fill={ACCENT} radius={[5, 5, 0, 0]} maxBarSize={56} />

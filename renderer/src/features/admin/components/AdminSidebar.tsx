@@ -1,12 +1,12 @@
 import React from "react";
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { useAppSelector } from "../../../store/hooks";
 
 import { paymentService } from "../../settings/api/paymentService";
 
 interface AdminSidebarProps {
-  activeTab: "dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments";
-  setActiveTab: (tab: "dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments") => void;
+  activeTab: "dashboard" | "users" | "top-ai" | "ai" | "profile" | "settings" | "payments";
+  setActiveTab: (tab: "dashboard" | "users" | "top-ai" | "ai" | "profile" | "settings" | "payments") => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -37,6 +37,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { id: "payments", label: "Payments", icon: "payments" },
     { id: "top-ai", label: "Top AI Users", icon: "stars" },
     { id: "ai", label: "AI Analytics", icon: "auto_awesome" },
+    { id: "profile", label: "Profile", icon: "person" },
     { id: "settings", label: "Settings", icon: "settings" },
   ] as const;
 
@@ -45,7 +46,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* ── Admin User Card (Mockup Style) ────────────────────────────────── */}
       <div className="p-6">
-        <div className="flex items-center gap-3 p-4 bg-black/[0.03] dark:bg-white/[0.03] rounded-2xl border border-light-border dark:border-white/5">
+        <button 
+          onClick={() => setActiveTab("profile")}
+          className="w-full text-left flex items-center gap-3 p-4 bg-black/[0.03] dark:bg-white/[0.03] rounded-2xl border border-light-border dark:border-white/5 hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-colors"
+        >
           <div className="w-10 h-10 rounded-full bg-light-primary/10 dark:bg-dark-primary/15 flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
             {user?.avatar ? (
               <img
@@ -68,7 +72,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               {user?.role || "Administrator"}
             </span>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* ── Sub Navigation Links ─────────────────────────────────────────── */}

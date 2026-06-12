@@ -195,21 +195,25 @@ export function registerFileHandlers() {
     };
 
     for (const itemPath of paths) {
-      if (!fs.existsSync(itemPath)) continue;
-      const stat = fs.statSync(itemPath);
-      if (stat.isDirectory()) {
-        walkSync(itemPath, itemPath);
-      } else {
-        const fileMime = mime.lookup(itemPath) || "";
-        if (SUPPORTED_TYPES.includes(fileMime)) {
-          fileList.push({
-            name: path.basename(itemPath),
-            path: itemPath,
-            clientPath: path.basename(itemPath),
-            mimeType: fileMime,
-            size: stat.size,
-          });
+      try {
+        if (!fs.existsSync(itemPath)) continue;
+        const stat = fs.statSync(itemPath);
+        if (stat.isDirectory()) {
+          walkSync(itemPath, itemPath);
+        } else {
+          const fileMime = mime.lookup(itemPath) || "";
+          if (SUPPORTED_TYPES.includes(fileMime)) {
+            fileList.push({
+              name: path.basename(itemPath),
+              path: itemPath,
+              clientPath: path.basename(itemPath),
+              mimeType: fileMime,
+              size: stat.size,
+            });
+          }
         }
+      } catch (err) {
+        console.error(`Failed to process path: ${itemPath}`, err);
       }
     }
 

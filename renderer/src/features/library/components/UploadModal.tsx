@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { EngineRouterSkeleton } from "../../../components/ui/EngineRouterSkeleton";
+import { EngineRouterSkeleton } from "../../../components/ui/loaders/EngineRouterSkeleton";
 import {
   useUploadModal,
   UseUploadModalProps,
@@ -23,7 +23,8 @@ export const UploadModal = ({
   // VIEW A: AI Split-Screen Proposal
   // ==========================================
   if (uploadState.proposedFolderUpdates) {
-    return (
+    canCloseOnBackdrop = false; // AISplitScreenView doesn't allow closing via backdrop
+    modalContent = (
       <AISplitScreenView
         proposedFolderUpdates={uploadState.proposedFolderUpdates}
         documentsList={uploadState.documentsList}
@@ -114,7 +115,7 @@ export const UploadModal = ({
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div
-        className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${canCloseOnBackdrop ? "cursor-default" : "pointer-events-none"}`}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={canCloseOnBackdrop ? uploadState.handleClose : undefined}
       ></div>
       {modalContent}

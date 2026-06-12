@@ -1,15 +1,22 @@
 import { useState } from "react";
-import { notify } from "../../../components/ui/ToastEngine";
-import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
+import { ConfirmDialog } from "../../../components/ui/feedback/ConfirmDialog";
 export const DangerZoneSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleClearCache = () => {
-    // Wipes ALL local storage, including auth tokens
+  const handleClearCache = async () => {
+    const electronAPI = (window as any).electronAPI;
+    const user = await electronAPI.store.get("context_user");
+    await electronAPI.store.delete("context_token");
+    await electronAPI.store.delete("context_analytics_session");
+    await electronAPI.store.delete("app_notifications");
+
     localStorage.clear();
     sessionStorage.clear();
 
-    notify("Local Storage Cleared. Reloading...", "success");
+    if (user) await electronAPI.store.set("context_user", user);
+
+    notify("Local Cache Cleared. Reloading...", "success");
     
     // Force a hard reload so React/Redux drops all in-memory state
     setTimeout(() => {
@@ -27,9 +34,9 @@ export const DangerZoneSection = () => {
 
         <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pl-8">
           <div>
-            <p className="font-extrabold text-sm text-light-text dark:text-white">Clear Local Storage</p>
+            <p className="font-extrabold text-sm text-light-text dark:text-white">Clear Local Cache</p>
             <p className="text-xs font-medium text-light-text/80 dark:text-dark-text/60 mt-1 max-w-xl">
-              This will completely wipe your browser's local storage (including your login session) and force the app to reload. 
+              This will completely wipe your app's local cache and force the app to reload (your login session will be preserved). 
               <strong> Your files in the cloud will not be deleted.</strong>
             </p>
           </div>
@@ -48,9 +55,9 @@ export const DangerZoneSection = () => {
           setIsModalOpen(false);
           handleClearCache();
         }}
-        title="Clear Local Storage"
-        message="This will completely wipe your browser's local storage, log you out, and force the app to reload. Your files in the cloud will not be deleted."
-        confirmText="Clear Storage"
+        title="Clear Local Cache"
+        message="This will completely wipe your app's local cache and force the app to reload. Your files in the cloud will not be deleted."
+        confirmText="Clear Cache"
         isDestructive
       />
     </section>

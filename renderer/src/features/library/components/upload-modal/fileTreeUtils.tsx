@@ -1,4 +1,4 @@
-import { Icon } from "../../../../components/ui/Icons";
+import { Icon } from "../../../../components/ui/core/Icons";
 
 export interface UploadTreeNode {
   name: string;
@@ -52,18 +52,18 @@ export const FileTreeViewer = ({
       {sortedNodes.map((node, index) => (
         <div key={`${node.name}-${index}`}>
           <div
-            className="flex items-center gap-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md pr-2 w-full overflow-hidden"
+            className="flex items-center gap-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md pr-2"
             style={{ paddingLeft: `${level * 20 + 8}px` }}
           >
             <Icon
               name={node.isFolder ? "folder" : "description"}
               className={`text-sm shrink-0 ${
                 node.isFolder
-                  ? "text-yellow-500"
-                  : "text-light-text/50 dark:text-white/40"
+                  ? "text-light-text dark:text-white"
+                  : "text-light-text/60 dark:text-white/50"
               }`}
             />
-            <span className="font-mono text-sm font-medium text-light-text/80 dark:text-white/70 truncate flex-1 min-w-0">
+            <span className="font-mono text-sm font-medium text-light-text/80 dark:text-white/70 truncate">
               {node.name}
             </span>
           </div>

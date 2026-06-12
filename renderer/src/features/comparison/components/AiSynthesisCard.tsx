@@ -1,4 +1,4 @@
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { ComparisonData } from "../api/comparisonService";
 
 interface AiSynthesisCardProps {

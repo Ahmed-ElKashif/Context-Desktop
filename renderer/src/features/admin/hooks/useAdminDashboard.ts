@@ -14,10 +14,7 @@ import {
   fetchAdminStats,
   fetchAdminUsers,
   toggleSuspendUser,
-  setSearch,
-  setPage,
-  setSort,
-} from "../../../store/adminSlice";
+} from "../../../store/admin/adminSlice";
 import { adminService } from "../api/adminService";
 
 export const useAdminDashboard = () => {
@@ -45,11 +42,8 @@ export const useAdminDashboard = () => {
     }
   }, [dispatch]); // intentionally omit statsStatus — only run on mount
 
-  // ── Sync URL params → Redux → API on every URL change ─────────────────────
+  // ── Sync API on every URL change ─────────────────────
   useEffect(() => {
-    dispatch(setSearch(search));
-    dispatch(setPage(page));
-    dispatch(setSort({ sortBy, sortOrder }));
     dispatch(fetchAdminUsers({ search, page, limit: 10, sortBy, sortOrder }));
   }, [dispatch, search, page, sortBy, sortOrder]);
 

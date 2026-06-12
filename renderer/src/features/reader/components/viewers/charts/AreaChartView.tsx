@@ -30,7 +30,7 @@ export const AreaChartView = ({ chartData, xAxisKey, yAxisKey, yIsDate }: AreaCh
       />
       <Tooltip
         contentStyle={DarkTooltipStyle}
-        formatter={(v: any) => [yIsDate ? formatDateTick(v as number) : v.toLocaleString(), yAxisKey]}
+        formatter={(v: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => [yIsDate ? formatDateTick(v as number) : v.toLocaleString(), yAxisKey]}
       />
       <Legend iconType="circle" wrapperStyle={{ fontSize: 11, paddingTop: 12 }} />
       <Area

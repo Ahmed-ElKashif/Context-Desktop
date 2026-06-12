@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { Icon } from "../ui/Icons";
+import { Icon } from "../ui/core/Icons";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { logout } from "../../store/authSlice";
+import { logout } from "../../store/auth/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { GlobalSearch } from "../../features/search/components/GlobalSearch";
-import { ContextLogo } from "../ui/ContextLogo";
+import { ContextLogo } from "../ui/core/ContextLogo";
 import {
   addNotification,
   loadNotifications,
   markAllAsRead,
   removeNotification,
   clearAllNotifications,
-} from "../../store/notificationSlice";
+} from "../../store/ui/notificationSlice";
 
 export const TopNav = () => {
   const { user } = useAppSelector((state) => state.auth);
