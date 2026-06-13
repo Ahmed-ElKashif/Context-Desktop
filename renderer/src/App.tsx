@@ -115,13 +115,6 @@ function App() {
     const cleanupCLI = (window as any).electronAPI?.app?.onCLIArgs?.(
       (action: string, filePath: string) => {
         if (action === "upload") {
-          if (!(window as any).pendingExternalUpload) {
-            (window as any).pendingExternalUpload = [];
-          }
-          if (!(window as any).pendingExternalUpload.includes(filePath)) {
-            (window as any).pendingExternalUpload.push(filePath);
-          }
-          
           navigate("/library");
           
           // Debounce the event dispatch to batch rapid OS calls

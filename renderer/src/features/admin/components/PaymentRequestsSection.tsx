@@ -5,10 +5,12 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { paymentService, PaymentRequest } from "../../settings/api/paymentService";
+import { createPortal } from "react-dom";
+import {
+  paymentService,
+  PaymentRequest,
+} from "../../settings/api/paymentService";
 import { Icon } from "../../../components/ui/core/Icons";
-import { ScreenshotLightbox } from "./ScreenshotLightbox";
-import { ConfirmActionModal } from "./ConfirmActionModal";
 
 // ─── Status filter tabs ───────────────────────────────────────────────────────
 
@@ -74,7 +76,12 @@ const getStatusBadge = (status: string) => {
 
 export const PaymentRequestsSection: React.FC = () => {
   const [requests, setRequests] = useState<PaymentRequest[]>([]);
-  const [counts, setCounts] = useState({ all: 0, pending: 0, approved: 0, rejected: 0 });
+  const [counts, setCounts] = useState({
+    all: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [page, setPage] = useState(1);
@@ -115,7 +122,10 @@ export const PaymentRequestsSection: React.FC = () => {
 
   // ── Actions ─────────────────────────────────────────────────────────
 
-  const handleStatusUpdate = async (requestId: string, status: "approved" | "rejected") => {
+  const handleStatusUpdate = async (
+    requestId: string,
+    status: "approved" | "rejected",
+  ) => {
     setActionLoading(requestId);
     try {
       await paymentService.updatePaymentStatus(requestId, status);
@@ -124,8 +134,8 @@ export const PaymentRequestsSection: React.FC = () => {
         prev.map((r) =>
           r._id === requestId
             ? { ...r, status, reviewedAt: new Date().toISOString() }
-            : r
-        )
+            : r,
+        ),
       );
       // Update counts
       setCounts((prev) => ({
@@ -145,7 +155,10 @@ export const PaymentRequestsSection: React.FC = () => {
 
   const renderSkeleton = () =>
     Array.from({ length: 4 }).map((_, i) => (
-      <tr key={i} className="border-b border-light-border dark:border-white/[0.04]">
+      <tr
+        key={i}
+        className="border-b border-light-border dark:border-white/[0.04]"
+      >
         <td colSpan={7} className="px-6 py-5">
           <div className="h-5 bg-light-border dark:bg-white/[0.06] rounded animate-pulse w-full" />
         </td>
@@ -176,7 +189,10 @@ export const PaymentRequestsSection: React.FC = () => {
           disabled={isLoading}
           className="flex items-center gap-2 px-4 py-2.5 bg-light-primary/5 dark:bg-dark-primary/10 border border-light-primary/20 dark:border-dark-primary/20 text-light-primary dark:text-dark-primary font-bold rounded-xl hover:bg-light-primary/10 dark:hover:bg-dark-primary/15 active:scale-[0.98] transition-all text-xs self-start"
         >
-          <Icon name="refresh" className={`text-base ${isLoading ? "animate-spin" : ""}`} />
+          <Icon
+            name="refresh"
+            className={`text-base ${isLoading ? "animate-spin" : ""}`}
+          />
           <span>Refresh</span>
         </button>
       </div>
@@ -199,7 +215,9 @@ export const PaymentRequestsSection: React.FC = () => {
                   : "text-light-text/50 dark:text-white/50 bg-transparent hover:text-light-text border border-transparent"
               }`}
             >
-              <span className="material-symbols-rounded text-[16px]">{tab.icon}</span>
+              <span className="material-symbols-rounded text-[16px]">
+                {tab.icon}
+              </span>
               {tab.label}
               <span
                 className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -254,7 +272,10 @@ export const PaymentRequestsSection: React.FC = () => {
                       payments
                     </span>
                     <p className="text-sm text-light-text/40 dark:text-white/30 font-medium">
-                      No payment requests{statusFilter !== "all" ? ` with status "${statusFilter}"` : ""}
+                      No payment requests
+                      {statusFilter !== "all"
+                        ? ` with status "${statusFilter}"`
+                        : ""}
                     </p>
                   </td>
                 </tr>
@@ -269,7 +290,11 @@ export const PaymentRequestsSection: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-light-primary/10 dark:bg-dark-primary/15 flex items-center justify-center shrink-0 overflow-hidden">
                           {req.avatar ? (
-                            <img src={req.avatar} alt="" className="w-full h-full object-cover" />
+                            <img
+                              src={req.avatar}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <span className="text-xs font-black text-light-primary dark:text-dark-primary">
                               {req.username?.charAt(0).toUpperCase() || "?"}
@@ -363,7 +388,9 @@ export const PaymentRequestsSection: React.FC = () => {
                             disabled={actionLoading === req._id}
                             className="flex items-center gap-1.5 px-3 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 font-bold text-xs rounded-lg transition-all active:scale-[0.95] disabled:opacity-50"
                           >
-                            <span className="material-symbols-rounded text-[16px]">check</span>
+                            <span className="material-symbols-rounded text-[16px]">
+                              check
+                            </span>
                             Approve
                           </button>
                           <button
@@ -377,13 +404,17 @@ export const PaymentRequestsSection: React.FC = () => {
                             disabled={actionLoading === req._id}
                             className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs rounded-lg transition-all active:scale-[0.95] disabled:opacity-50"
                           >
-                            <span className="material-symbols-rounded text-[16px]">close</span>
+                            <span className="material-symbols-rounded text-[16px]">
+                              close
+                            </span>
                             Reject
                           </button>
                         </div>
                       ) : (
                         <p className="text-[11px] text-light-text/40 dark:text-white/25 text-right font-medium">
-                          {req.reviewedAt ? `Reviewed ${timeAgo(req.reviewedAt)}` : "—"}
+                          {req.reviewedAt
+                            ? `Reviewed ${timeAgo(req.reviewedAt)}`
+                            : "—"}
                         </p>
                       )}
                     </td>
@@ -421,23 +452,136 @@ export const PaymentRequestsSection: React.FC = () => {
       </div>
 
       {/* ── Screenshot Lightbox Modal ──────────────────────────────────── */}
-      <ScreenshotLightbox
-        url={lightboxUrl}
-        onClose={() => setLightboxUrl(null)}
-      />
+      {lightboxUrl &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setLightboxUrl(null)}
+          >
+            <div
+              className="relative max-w-3xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setLightboxUrl(null)}
+                className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+              >
+                <span className="material-symbols-rounded text-[20px]">
+                  close
+                </span>
+              </button>
+              <img
+                src={lightboxUrl}
+                alt="Payment screenshot — full view"
+                className="max-w-full max-h-[85vh] object-contain bg-white dark:bg-[#1A1A1E]"
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* ── Confirm Action Dialog ──────────────────────────────────────── */}
-      {confirmAction && (
-        <ConfirmActionModal
-          action={confirmAction.action}
-          username={confirmAction.username}
-          isLoading={!!actionLoading}
-          onConfirm={() =>
-            handleStatusUpdate(confirmAction.requestId, confirmAction.action)
-          }
-          onCancel={() => setConfirmAction(null)}
-        />
-      )}
+      {confirmAction &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setConfirmAction(null)}
+          >
+            <div
+              className="bg-white dark:bg-dark-surface border border-light-border dark:border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    confirmAction.action === "approved"
+                      ? "bg-green-500/10"
+                      : "bg-red-500/10"
+                  }`}
+                >
+                  <span
+                    className={`material-symbols-rounded text-[22px] ${
+                      confirmAction.action === "approved"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {confirmAction.action === "approved"
+                      ? "check_circle"
+                      : "cancel"}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-light-text dark:text-white">
+                    {confirmAction.action === "approved" ? "Approve" : "Reject"}{" "}
+                    Payment?
+                  </h3>
+                  <p className="text-xs text-light-text/50 dark:text-white/40">
+                    For user{" "}
+                    <span className="font-bold">@{confirmAction.username}</span>
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm text-light-text/70 dark:text-dark-text/70 mb-6">
+                {confirmAction.action === "approved"
+                  ? "This will activate the user's subscription plan."
+                  : "This will reject the payment. The user can submit a new request."}
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className="flex-1 px-4 py-2.5 border border-light-border dark:border-white/10 rounded-xl text-sm font-bold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() =>
+                    handleStatusUpdate(
+                      confirmAction.requestId,
+                      confirmAction.action,
+                    )
+                  }
+                  disabled={!!actionLoading}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 ${
+                    confirmAction.action === "approved"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
+                >
+                  {actionLoading ? (
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : confirmAction.action === "approved" ? (
+                    "Approve"
+                  ) : (
+                    "Reject"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

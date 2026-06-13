@@ -173,7 +173,16 @@ export async function createWindow() {
   });
 
   mainWindow.webContents.on("did-finish-load", () => {
-    handleCliArgs(process.argv);
+    // Explicitly cache for the pull-based API we added
+    const actionArg = process.argv.find((arg) => arg.startsWith("--action="));
+    const pathArg = process.argv.find((arg) => arg.startsWith("--path="));
+    if (actionArg && pathArg) {
+      let filePath = pathArg.substring("--path=".length);
+      if (filePath.startsWith('"') && filePath.endsWith('"')) {
+        filePath = filePath.substring(1, filePath.length - 1);
+      }
+      initialCliArgs = { action: actionArg.split("=")[1], path: filePath };
+    }
   });
 
   mainWindow.webContents.on(

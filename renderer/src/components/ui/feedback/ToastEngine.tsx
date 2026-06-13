@@ -27,11 +27,17 @@ export const ContextToaster = () => {
 type ToastType = "success" | "error" | "info" | "warning";
 
 // THE FIX 2: Added an optional 'id' parameter to enable Toast Replacement
+// Deduplicate by defaulting id to message.
 export const notify = (
   message: string,
   type: ToastType = "info",
-  id?: string,
+  id: string = message,
 ) => {
+  // Dispatch globally to sync with Notification Center
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("app-notify", { detail: { message, type } }));
+  }
+
   const config = {
     success: {
       icon: "check_circle",
