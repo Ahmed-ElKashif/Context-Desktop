@@ -1,5 +1,5 @@
-import { Icon } from "../../../../../components/ui/Icons";
-import { Button } from "../../../../../components/ui/Button";
+import { Icon } from "../../../../../components/ui/core/Icons";
+import { Button } from "@/components/ui/core/Button";
 import { DropzoneState } from "react-dropzone";
 
 interface DefaultDropzoneViewProps {
@@ -16,7 +16,7 @@ interface DefaultDropzoneViewProps {
   dropzone: DropzoneState;
   hiddenFolderInputRef: React.RefObject<HTMLInputElement | null>;
   handleManualFolderSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleNativeFolderSelect: () => void;
+  handleNativeFolderSelect?: () => void;
 }
 
 export const DefaultDropzoneView = ({
@@ -121,7 +121,11 @@ export const DefaultDropzoneView = ({
                 className="bg-white dark:bg-[#1E1E22] text-xs font-bold"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNativeFolderSelect();
+                  if (handleNativeFolderSelect) {
+                    handleNativeFolderSelect();
+                  } else {
+                    hiddenFolderInputRef.current?.click();
+                  }
                 }}
               >
                 Browse Folders
@@ -140,7 +144,7 @@ export const DefaultDropzoneView = ({
                 onChange={(e) => setSnippetTitle(e.target.value)}
                 disabled={isUploading}
                 placeholder="Enter a descriptive title for this snippet..."
-                className="w-full px-4 py-2.5 rounded-xl border border-light-border dark:border-white/10 bg-light-surface dark:bg-[#121214] text-light-text dark:text-white text-sm outline-none placeholder:text-light-text/40 dark:placeholder:text-white/30 transition-colors focus:border-light-primary dark:focus:border-dark-primary focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 font-semibold"
+                className="w-full px-4 py-2.5 rounded-xl border border-light-border dark:border-white/10 bg-light-surface dark:bg-[#121214] text-light-text dark:text-white text-sm outline-none placeholder:text-light-text/60 dark:placeholder:text-white/50 transition-colors focus:border-light-primary dark:focus:border-dark-primary focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 font-semibold"
               />
             </div>
 
@@ -151,17 +155,9 @@ export const DefaultDropzoneView = ({
               <textarea
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                    e.preventDefault();
-                    if (!isUploading && pastedText.trim() && snippetTitle.trim()) {
-                      handleTextSubmit();
-                    }
-                  }
-                }}
                 disabled={isUploading}
-                placeholder="Paste your text here... (Ctrl+Enter to save)"
-                className="w-full h-36 p-4 rounded-xl border border-light-border dark:border-white/10 bg-light-surface dark:bg-[#121214] text-light-text dark:text-white text-sm outline-none resize-none placeholder:text-light-text/50 dark:placeholder:text-white/40 transition-colors focus:border-light-primary dark:focus:border-dark-primary focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 leading-relaxed"
+                placeholder="Paste your text here..."
+                className="w-full h-36 p-4 rounded-xl border border-light-border dark:border-white/10 bg-light-surface dark:bg-[#121214] text-light-text dark:text-white text-sm outline-none resize-none placeholder:text-light-text/60 dark:placeholder:text-white/50 transition-colors focus:border-light-primary dark:focus:border-dark-primary focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 leading-relaxed"
               />
             </div>
             <div className="flex justify-between items-center mt-2">

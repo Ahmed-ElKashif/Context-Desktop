@@ -1,5 +1,6 @@
 appId: com.contexters.context
 productName: Context
+artifactName: Context-Desktop-${version}.${ext}
 copyright: Copyright © 2026 Context
 directories:
   output: release

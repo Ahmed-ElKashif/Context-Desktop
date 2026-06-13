@@ -1,8 +1,8 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import Cropper from "react-easy-crop";
-import { Icon } from "../../../components/ui/Icons";
-import { Button } from "../../../components/ui/Button";
+import { Icon } from "../../../components/ui/core/Icons";
+import { Button } from "../../../components/ui/core/Button";
 import { useAvatarCrop } from "../hooks/useAvatarCrop";
 
 interface AvatarUploadProps {
@@ -44,12 +44,12 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ userAvatar }) => {
           ) : (
             <Icon
               name="add_a_photo"
-              className="text-[28px] text-light-text/40 dark:text-white/30 group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors"
+              className="text-[28px] text-light-text/60 dark:text-white/50 group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors"
             />
           )}
         </div>
         <input ref={fileInputRef} onChange={onFileChange} type="file" accept="image/*" className="hidden" />
-        <span className="text-[10px] font-mono font-bold tracking-widest text-light-text/50 dark:text-white/40 uppercase">
+        <span className="text-[10px] font-mono font-bold tracking-widest text-light-text/70 dark:text-white/60 uppercase">
           Upload Avatar
         </span>
       </div>
@@ -68,7 +68,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ userAvatar }) => {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-light-text dark:text-white leading-tight">Crop Avatar</h3>
-                    <p className="text-[11px] text-light-text/50 dark:text-white/40">Drag to reposition &bull; scroll to zoom</p>
+                    <p className="text-[11px] text-light-text/70 dark:text-white/60">Drag to reposition &bull; scroll to zoom</p>
                   </div>
                 </div>
                 <Button type="button" variant="ghost" size="icon-sm" onClick={closeCropModal} className="rounded-full -mr-1">
@@ -104,14 +104,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ userAvatar }) => {
                       <img src={previewUrl} alt="Avatar preview" className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <Icon name="person" className="text-lg text-light-text/20 dark:text-white/20" />
+                        <Icon name="person" className="text-lg text-light-text/40 dark:text-white/40" />
                       </div>
                     )}
                   </div>
 
                   {/* Zoom slider */}
                   <div className="flex-1 min-w-0">
-                    <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-light-text/50 dark:text-white/35">
+                    <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-light-text/70 dark:text-white/50">
                       <span>Zoom</span>
                       <span>{Math.round(zoom * 100)}%</span>
                     </div>

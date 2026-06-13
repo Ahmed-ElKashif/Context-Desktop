@@ -58,6 +58,6 @@ export interface AuthUser {
 
 export interface AuthResponse {
   success: boolean;
-  token: string;
+  token?: string;
   user: AuthUser;
 }

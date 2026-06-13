@@ -1,4 +1,4 @@
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 
 interface DeltaBoardProps {
   uniqueToBase: string[];
@@ -31,12 +31,12 @@ export const DeltaBoard = ({
               </h4>
             </div>
             <span className="text-[10px] font-bold font-mono text-light-primary/50 dark:text-dark-secondary/50 bg-light-primary/10 dark:bg-dark-secondary/10 px-2 py-0.5 rounded-full">
-              {uniqueToBase.length}
+              {uniqueToBase?.length || 0}
             </span>
           </div>
 
           <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-            {uniqueToBase.length > 0 ? (
+            {uniqueToBase?.length > 0 ? (
               uniqueToBase.map((item, idx) => (
                 <div
                   key={idx}
@@ -48,7 +48,7 @@ export const DeltaBoard = ({
                 </div>
               ))
             ) : (
-              <p className="text-xs text-light-text/50 dark:text-white/40 italic">
+              <p className="text-xs text-light-text/70 dark:text-white/60 italic">
                 No unique points found.
               </p>
             )}
@@ -70,12 +70,12 @@ export const DeltaBoard = ({
               </h4>
             </div>
             <span className="text-[10px] font-bold font-mono text-white/90 dark:text-dark-primary/80 bg-white/20 dark:bg-dark-primary/20 px-2 py-0.5 rounded-full">
-              {sharedConcepts.length}
+              {sharedConcepts?.length || 0}
             </span>
           </div>
 
           <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-            {sharedConcepts.length > 0 ? (
+            {sharedConcepts?.length > 0 ? (
               sharedConcepts.map((item, idx) => (
                 <div
                   key={idx}
@@ -91,7 +91,7 @@ export const DeltaBoard = ({
                 </div>
               ))
             ) : (
-              <p className="text-xs text-white/70 dark:text-white/40 italic">
+              <p className="text-xs text-white/90 dark:text-white/60 italic">
                 No shared concepts found.
               </p>
             )}
@@ -113,12 +113,12 @@ export const DeltaBoard = ({
               </h4>
             </div>
             <span className="text-[10px] font-bold font-mono text-light-accent/50 dark:text-dark-primary/50 bg-light-accent/10 dark:bg-dark-primary/10 px-2 py-0.5 rounded-full">
-              {uniqueToCompare.length}
+              {uniqueToCompare?.length || 0}
             </span>
           </div>
 
           <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-            {uniqueToCompare.length > 0 ? (
+            {uniqueToCompare?.length > 0 ? (
               uniqueToCompare.map((item, idx) => (
                 <div
                   key={idx}
@@ -131,7 +131,7 @@ export const DeltaBoard = ({
                 </div>
               ))
             ) : (
-              <p className="text-xs text-light-text/50 dark:text-white/40 italic">
+              <p className="text-xs text-light-text/70 dark:text-white/60 italic">
                 No unique points found.
               </p>
             )}

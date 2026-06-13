@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   fetchFolderContents,
   fetchFolderTree,
-} from "../../../store/documentSlice";
+} from "../../../store/library/librarySlice";
 
 /**
  * Debounces a value by `delay` ms.
@@ -47,7 +47,7 @@ export const useLibraryData = ({
   navPendingRef,
 }: UseLibraryDataOptions) => {
   const dispatch = useAppDispatch();
-  const { pagination } = useAppSelector((state) => state.document);
+  const { pagination } = useAppSelector((state) => state.library);
   const limit = pagination?.limit || 10;
 
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
@@ -106,20 +106,5 @@ export const useLibraryData = ({
     );
   };
 
-  const refetchCurrentView = () => {
-    dispatch(
-      fetchFolderContents({
-        folderId: activeFolderId,
-        search: debouncedSearchQuery,
-        tags: activeTag || undefined,
-        page: pagination?.currentPage || 1,
-        limit: pagination?.limit || 10,
-        sortBy,
-        sortOrder,
-      }),
-    );
-    dispatch(fetchFolderTree());
-  };
-
-  return { debouncedSearchQuery, handlePageChange, refetchCurrentView };
+  return { debouncedSearchQuery, handlePageChange };
 };

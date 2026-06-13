@@ -1,9 +1,10 @@
+import { getApiError } from "@/lib/errorHandler";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { notify } from "../../../components/ui/ToastEngine";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { authService } from "../api/authService";
-import { ContextLogo } from "@/components/ui/ContextLogo";
-import { Input } from "@/components/ui/Input";
+import { ContextLogo } from "@/components/ui/core/ContextLogo";
+import { Input } from "@/components/ui/core/Input";
 
 export const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -24,8 +25,8 @@ export const ForgotPasswordForm = () => {
       await authService.forgotPassword(email);
       notify("Recovery instructions sent.", "success");
       setIsSent(true);
-    } catch (error: any) {
-      const msg = error.response?.data?.message || "Failed to transmit request.";
+    } catch (error: unknown) {
+      const msg = getApiError(error, );
       notify(msg, "error");
     } finally {
       setIsLoading(false);

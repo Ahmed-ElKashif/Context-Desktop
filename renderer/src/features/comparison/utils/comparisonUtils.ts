@@ -1,5 +1,5 @@
-import { notify } from "../../../components/ui/ToastEngine";
-import { DocumentData } from "../../../store/documentSlice";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
+import { DocumentData } from "../../../store/library/librarySlice";
 import { ComparisonResponse } from "../api/comparisonService";
 
 export const exportComparisonReport = async (

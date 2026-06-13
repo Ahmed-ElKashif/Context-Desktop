@@ -1,95 +1,19 @@
 import { useState } from "react";
+import { PlanId, BillingCycle } from "../../billing/constants/plans";
+import { UsageEstimator } from "../../billing/components/UsageEstimator";
+import { AddonCard } from "./AddonCard";
 
 interface BillingSectionProps {
   onCheckout: (planId: string, cycle: string) => void;
 }
 
 export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
-  const [selectedPlan, setSelectedPlan] = useState<
-    "sandbox" | "startup" | "growth" | "embed"
-  >("sandbox");
+  const [selectedPlan, setSelectedPlan] = useState<PlanId>("sandbox");
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
-  // Billing cycle state
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
-    "monthly",
-  );
-
-  const handleOpenCheckout = (
-    planId: "sandbox" | "startup" | "growth" | "embed",
-  ) => {
+  const handleOpenCheckout = (planId: PlanId) => {
     onCheckout(planId, billingCycle);
   };
-
-  // Slider states
-  const [docs, setDocs] = useState(500);
-  const [tokens, setTokens] = useState(50000);
-
-  // Plan Details
-  const getPlanDetails = () => {
-    switch (selectedPlan) {
-      case "sandbox":
-        return {
-          price: 0,
-          baseDocs: 50,
-          baseTokens: 10000,
-          docRate: 3,
-          tokenRatePer100k: 12,
-          hasDocOverage: true,
-          hasTokenOverage: true,
-        };
-      case "growth":
-        return {
-          price: billingCycle === "annual" ? 3600 : 4800,
-          baseDocs: Infinity,
-          baseTokens: 150000,
-          docRate: 2.1,
-          tokenRatePer100k: 8.4,
-          hasDocOverage: false,
-          hasTokenOverage: true,
-        };
-      case "embed":
-        return {
-          price: "Custom",
-          baseDocs: Infinity,
-          baseTokens: Infinity,
-          docRate: 0,
-          tokenRatePer100k: 0,
-          hasDocOverage: false,
-          hasTokenOverage: false,
-        };
-      case "startup":
-      default:
-        return {
-          price: billingCycle === "annual" ? 1520 : 1900,
-          baseDocs: 500,
-          baseTokens: 50000,
-          docRate: 3,
-          tokenRatePer100k: 12,
-          hasDocOverage: true,
-          hasTokenOverage: true,
-        };
-    }
-  };
-
-  const planDetails = getPlanDetails();
-
-  // Calculations
-  const extraDocs = planDetails.hasDocOverage
-    ? Math.max(0, docs - planDetails.baseDocs)
-    : 0;
-  const docOverage = extraDocs * planDetails.docRate;
-
-  const extraTokensDaily = planDetails.hasTokenOverage
-    ? Math.max(0, tokens - planDetails.baseTokens)
-    : 0;
-  const tokenOverage = Math.round(
-    (extraTokensDaily / 100000) * planDetails.tokenRatePer100k * 30,
-  );
-
-  const total =
-    typeof planDetails.price === "number"
-      ? planDetails.price + docOverage + tokenOverage
-      : "Custom";
 
   const getPlanClassName = (planId: string) => {
     const isSelected = selectedPlan === planId;
@@ -132,7 +56,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <h2 className="text-sm font-mono font-bold text-light-primary dark:text-dark-primary uppercase tracking-widest mb-1">
             Plans
           </h2>
-          <p className="text-sm text-light-text/60 dark:text-dark-text/60 font-medium">
+          <p className="text-sm text-light-text/70 dark:text-dark-text/70 font-medium">
             Scale your AI document intelligence. Cancel anytime.
           </p>
         </div>
@@ -144,7 +68,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
             className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors ${
               billingCycle === "monthly"
                 ? "text-light-primary dark:text-white bg-white dark:bg-white/10 shadow-sm border border-light-border dark:border-white/10"
-                : "text-light-text/50 dark:text-white/50 bg-transparent hover:text-light-text border border-transparent"
+                : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-light-text border border-transparent"
             }`}
           >
             Monthly
@@ -154,7 +78,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
             className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${
               billingCycle === "annual"
                 ? "text-light-primary dark:text-white bg-white dark:bg-white/10 shadow-sm border border-light-border dark:border-white/10"
-                : "text-light-text/50 dark:text-white/50 bg-transparent hover:text-light-text border border-transparent"
+                : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-light-text border border-transparent"
             }`}
           >
             Annual
@@ -178,7 +102,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <h3 className="text-xl font-bold text-light-text dark:text-white mb-1">
             Sandbox
           </h3>
-          <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 h-8">
+          <p className="text-xs text-light-text/70 dark:text-dark-text/70 mb-4 h-8">
             Try Context inside your product
           </p>
           <div className="mb-2 h-14 flex flex-col justify-center">
@@ -186,12 +110,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
               <span className="text-3xl font-black text-light-text dark:text-white tracking-tighter">
                 0 EGP
               </span>
-              <span className="text-sm font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
+              <span className="text-sm font-semibold text-light-text/70 dark:text-dark-text/70 ml-1">
                 / mo
               </span>
             </div>
           </div>
-          <p className="text-[11px] font-medium text-light-text/50 dark:text-dark-text/50 mb-6 h-8">
+          <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
             Up to 3 seats &middot; no card needed
           </p>
 
@@ -201,7 +125,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
             {renderFeature("Cognitive load on every doc")}
             {renderFeature("Visual Cortex OCR")}
             {renderFeature("RAG chat + semantic search")}
-            {renderFeature("10,000 tokens / day")}
+            {renderFeature("30,000 tokens / day")}
             {renderFeature("DeepThinker comparison", "lock", "", true)}
             {renderFeature("AI folder organizer", "lock", "", true)}
             {renderFeature("Synthesizer", "lock", "", true)}
@@ -234,12 +158,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <h3 className="text-xl font-bold text-light-text dark:text-white mb-1">
             Startup
           </h3>
-          <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 h-8">
+          <p className="text-xs text-light-text/70 dark:text-dark-text/70 mb-4 h-8">
             Growing products embedding Context
           </p>
           <div className="mb-2 h-14 flex flex-col justify-center">
             {billingCycle === "annual" && (
-              <span className="text-xs font-semibold text-light-text/40 dark:text-dark-text/40 line-through mb-0.5">
+              <span className="text-xs font-semibold text-light-text/60 dark:text-dark-text/60 line-through mb-0.5">
                 Was 1,900 EGP / mo
               </span>
             )}
@@ -247,12 +171,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
               <span className="text-3xl font-black text-light-text dark:text-white tracking-tighter">
                 {billingCycle === "annual" ? "1,520" : "1,900"} EGP
               </span>
-              <span className="text-sm font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
+              <span className="text-sm font-semibold text-light-text/70 dark:text-dark-text/70 ml-1">
                 / mo
               </span>
             </div>
           </div>
-          <p className="text-[11px] font-medium text-light-text/50 dark:text-dark-text/50 mb-6 h-8">
+          <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
             Up to 10 seats &middot;{" "}
             {billingCycle === "annual" ? "billed annually" : "billed monthly"}
           </p>
@@ -260,7 +184,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <div className="flex-1 border-t border-light-primary/20 dark:border-dark-primary/20 pt-6">
             {renderFeature("500 documents / month")}
             {renderFeature("Everything in Sandbox")}
-            {renderFeature("50,000 tokens / day")}
+            {renderFeature("150,000 tokens / day")}
             {renderFeature("DeepThinker comparison")}
             {renderFeature("AI folder organizer")}
             {renderFeature("Document synthesizer")}
@@ -296,12 +220,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <h3 className="text-xl font-bold text-light-text dark:text-white mb-1">
             Growth
           </h3>
-          <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 h-8">
+          <p className="text-xs text-light-text/70 dark:text-dark-text/70 mb-4 h-8">
             High-volume or multi-product teams
           </p>
           <div className="mb-2 h-14 flex flex-col justify-center">
             {billingCycle === "annual" && (
-              <span className="text-xs font-semibold text-light-text/40 dark:text-dark-text/40 line-through mb-0.5">
+              <span className="text-xs font-semibold text-light-text/60 dark:text-dark-text/60 line-through mb-0.5">
                 Was 4,800 EGP / mo
               </span>
             )}
@@ -309,12 +233,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
               <span className="text-3xl font-black text-light-text dark:text-white tracking-tighter">
                 {billingCycle === "annual" ? "3,600" : "4,800"} EGP
               </span>
-              <span className="text-sm font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
+              <span className="text-sm font-semibold text-light-text/70 dark:text-dark-text/70 ml-1">
                 / mo
               </span>
             </div>
           </div>
-          <p className="text-[11px] font-medium text-light-text/50 dark:text-dark-text/50 mb-6 h-8">
+          <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
             Up to 30 seats &middot;{" "}
             {billingCycle === "annual" ? "billed annually" : "billed monthly"}
           </p>
@@ -322,7 +246,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <div className="flex-1 border-t border-light-border/50 dark:border-white/5 pt-6">
             {renderFeature("Unlimited documents")}
             {renderFeature("Everything in Startup")}
-            {renderFeature("150,000 tokens / day")}
+            {renderFeature("450,000 tokens / day")}
             {renderFeature("Custom persona fine-tuning")}
             {renderFeature("Priority AI processing queue")}
             {renderFeature("Isolated tenant namespace")}
@@ -358,7 +282,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <h3 className="text-xl font-bold text-light-text dark:text-white mb-1">
             Embed
           </h3>
-          <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 h-8">
+          <p className="text-xs text-light-text/70 dark:text-dark-text/70 mb-4 h-8">
             White-label inside your platform
           </p>
           <div className="mb-2 h-14 flex items-center">
@@ -366,7 +290,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
               Custom
             </span>
           </div>
-          <p className="text-[11px] font-medium text-light-text/50 dark:text-dark-text/50 mb-6 h-8">
+          <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
             Revenue share or flat licence
           </p>
 
@@ -404,7 +328,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
       </div>
 
       {/* Footer Text */}
-      <div className="flex items-center gap-2 text-[11px] font-semibold text-light-text/60 dark:text-dark-text/50 mb-12">
+      <div className="flex items-center gap-2 text-[11px] font-semibold text-light-text/70 dark:text-dark-text/70 mb-12">
         <div className="w-2 h-2 rounded-full bg-[#8b5cf6]"></div>
         <p>
           Purple lock icons = paywalled features (DeepThinker, AI folder
@@ -413,273 +337,65 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
       </div>
 
       {/* Estimator Section */}
-      <h2 className="text-sm font-mono font-bold text-light-text/60 dark:text-dark-text/50 uppercase tracking-widest mb-4">
-        Usage Estimator —{" "}
-        {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan
-      </h2>
-      <div className="bg-white dark:bg-dark-surface rounded-2xl p-6 border border-light-border dark:border-white/5 shadow-sm mb-10">
-        <h3 className="text-base font-extrabold text-light-text dark:text-white mb-6">
-          Estimate your monthly bill
-        </h3>
-
-        {/* Sliders */}
-        <div className="space-y-6 max-w-4xl">
-          {/* Docs Slider */}
-          <div className="flex items-center gap-6">
-            <div className="w-40 shrink-0 text-sm font-bold text-light-text/80 dark:text-white/80">
-              Documents / month
-            </div>
-            <div className="flex-1 relative flex items-center">
-              <input
-                type="range"
-                min="0"
-                max="2000"
-                step="50"
-                value={docs}
-                onChange={(e) => setDocs(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-light-primary dark:accent-dark-primary"
-              />
-            </div>
-            <div className="w-20 shrink-0 text-right text-sm font-black font-mono">
-              {docs.toLocaleString()}
-            </div>
-          </div>
-
-          {/* Tokens Slider */}
-          <div className="flex items-center gap-6">
-            <div className="w-40 shrink-0 text-sm font-bold text-light-text/80 dark:text-white/80">
-              Tokens / day (avg)
-            </div>
-            <div className="flex-1 relative flex items-center">
-              <input
-                type="range"
-                min="0"
-                max="200000"
-                step="5000"
-                value={tokens}
-                onChange={(e) => setTokens(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-light-primary dark:accent-dark-primary"
-              />
-            </div>
-            <div className="w-20 shrink-0 text-right text-sm font-black font-mono">
-              {tokens.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        {/* Calculation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <div className="bg-light-bg/40 dark:bg-white/[0.02] border border-light-border/70 dark:border-white/5 rounded-xl p-4 flex flex-col">
-            <span className="text-[11px] font-bold text-light-text/50 dark:text-white/40 mb-1 uppercase tracking-wide">
-              Base plan
-            </span>
-            <span className="text-xl font-black text-light-text dark:text-white">
-              {typeof planDetails.price === "number"
-                ? `${planDetails.price.toLocaleString()} EGP`
-                : planDetails.price}
-            </span>
-            <span className="text-xs text-light-text/60 dark:text-white/50 font-medium">
-              {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} /
-              month
-            </span>
-          </div>
-          <div className="bg-light-bg/40 dark:bg-white/[0.02] border border-light-border/70 dark:border-white/5 rounded-xl p-4 flex flex-col">
-            <span className="text-[11px] font-bold text-light-text/50 dark:text-white/40 mb-1 uppercase tracking-wide">
-              Doc overage
-            </span>
-            <span className="text-xl font-black text-light-text dark:text-white">
-              {docOverage.toLocaleString()} EGP
-            </span>
-            <span className="text-xs text-light-text/60 dark:text-white/50 font-medium">
-              {extraDocs} extra docs
-            </span>
-          </div>
-          <div className="bg-light-bg/40 dark:bg-white/[0.02] border border-light-border/70 dark:border-white/5 rounded-xl p-4 flex flex-col">
-            <span className="text-[11px] font-bold text-light-text/50 dark:text-white/40 mb-1 uppercase tracking-wide">
-              Token overage
-            </span>
-            <span className="text-xl font-black text-light-text dark:text-white">
-              {tokenOverage.toLocaleString()} EGP
-            </span>
-            <span className="text-xs text-light-text/60 dark:text-white/50 font-medium">
-              {extraTokensDaily.toLocaleString()} extra / day
-            </span>
-          </div>
-          <div className="bg-light-bg/40 dark:bg-white/[0.02] border-2 border-light-primary dark:border-dark-primary rounded-xl p-4 flex flex-col shadow-sm">
-            <span className="text-[11px] font-bold text-light-text/50 dark:text-white/40 mb-1 uppercase tracking-wide">
-              Total est.
-            </span>
-            <span className="text-xl font-black text-light-primary dark:text-dark-primary">
-              {typeof total === "number"
-                ? `${total.toLocaleString()} EGP`
-                : total}
-            </span>
-            <span className="text-xs text-light-text/60 dark:text-white/50 font-medium">
-              / month
-            </span>
-          </div>
-        </div>
-      </div>
+      <UsageEstimator selectedPlan={selectedPlan} billingCycle={billingCycle} />
 
       {/* Add-ons Package Section */}
       <h2 className="text-sm font-mono font-bold text-light-primary dark:text-dark-primary uppercase tracking-widest mb-4">
         Add-ons Package
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        {/* Extra Documents Card */}
-        <div className="bg-white dark:bg-dark-surface border border-light-border dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between hover:border-light-primary/30 dark:hover:border-dark-primary/30 hover:shadow-[0_4px_20px_rgba(16,55,102,0.04)] dark:hover:shadow-[0_4px_20px_rgba(139,92,246,0.05)] transition-all duration-300">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center mb-4">
-              <span className="material-symbols-rounded text-[22px] text-green-600 dark:text-green-400">
-                description
-              </span>
-            </div>
-            <h3 className="text-lg font-bold text-light-text dark:text-white mb-1">
-              Extra Documents
-            </h3>
-            <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 min-h-8">
-              Increase document capacity and intelligence limits instantly
-            </p>
-            <div className="mb-4">
-              <span className="text-2xl font-black text-light-text dark:text-white">
-                500 EGP
-              </span>
-              <span className="text-xs font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
-                / one-time
-              </span>
-            </div>
-            <div className="border-t border-light-border/50 dark:border-white/5 pt-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-green-500">
-                  check
-                </span>
-                <span>Pay-as-you-go flexibility</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-green-500">
-                  check
-                </span>
-                <span>Unlocks extra source file uploads</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <button
-              onClick={() => onCheckout("extra_docs", "monthly")}
-              className="w-full py-2 bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white font-bold text-xs rounded-lg flex justify-center items-center gap-1 shadow-sm transition-all duration-300"
-            >
-              Get Started{" "}
-              <span className="material-symbols-rounded text-[14px]">
-                arrow_outward
-              </span>
-            </button>
-          </div>
-        </div>
+        <AddonCard
+          icon="description"
+          iconBgClass="bg-green-500/10"
+          iconTextClass="text-green-600 dark:text-green-400"
+          checkClass="text-green-500"
+          title="Extra Documents"
+          description="Increase document capacity and intelligence limits instantly"
+          priceText="500 EGP"
+          cycleText="/ one-time"
+          features={[
+            "Pay-as-you-go flexibility",
+            "Unlocks extra source file uploads"
+          ]}
+          onAction={() => onCheckout("extra_docs", "monthly")}
+        />
 
-        {/* Extra Tokens Card */}
-        <div className="bg-white dark:bg-dark-surface border border-light-border dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between hover:border-light-primary/30 dark:hover:border-dark-primary/30 hover:shadow-[0_4px_20px_rgba(16,55,102,0.04)] dark:hover:shadow-[0_4px_20px_rgba(139,92,246,0.05)] transition-all duration-300">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
-              <span className="material-symbols-rounded text-[22px] text-purple-600 dark:text-purple-400">
-                memory
-              </span>
-            </div>
-            <h3 className="text-lg font-bold text-light-text dark:text-white mb-1">
-              Extra Tokens
-            </h3>
-            <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 min-h-8">
-              Extend daily LLM token quotas for high-volume execution
-            </p>
-            <div className="mb-4">
-              <span className="text-2xl font-black text-light-text dark:text-white">
-                700 EGP
-              </span>
-              <span className="text-xs font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
-                / one-time
-              </span>
-            </div>
-            <div className="border-t border-light-border/50 dark:border-white/5 pt-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-purple-500">
-                  check
-                </span>
-                <span>Expanded daily AI usage limit</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-purple-500">
-                  check
-                </span>
-                <span>Saves processing priority queue</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <button
-              onClick={() => onCheckout("extra_tokens", "monthly")}
-              className="w-full py-2 bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white font-bold text-xs rounded-lg flex justify-center items-center gap-1 shadow-sm transition-all duration-300"
-            >
-              Get Started{" "}
-              <span className="material-symbols-rounded text-[14px]">
-                arrow_outward
-              </span>
-            </button>
-          </div>
-        </div>
+        <AddonCard
+          icon="memory"
+          iconBgClass="bg-purple-500/10"
+          iconTextClass="text-purple-600 dark:text-purple-400"
+          checkClass="text-purple-500"
+          title="Extra Tokens"
+          description="Extend daily LLM token quotas for high-volume execution"
+          priceText="700 EGP"
+          cycleText="/ one-time"
+          features={[
+            "Expanded daily AI usage limit",
+            "Saves processing priority queue"
+          ]}
+          onAction={() => onCheckout("extra_tokens", "monthly")}
+        />
 
-        {/* High-Speed Storage Card */}
-        <div className="bg-white dark:bg-dark-surface border border-light-border dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between hover:border-light-primary/30 dark:hover:border-dark-primary/30 hover:shadow-[0_4px_20px_rgba(16,55,102,0.04)] dark:hover:shadow-[0_4px_20px_rgba(139,92,246,0.05)] transition-all duration-300">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
-              <span className="material-symbols-rounded text-[22px] text-blue-600 dark:text-blue-400">
-                dns
-              </span>
-            </div>
-            <h3 className="text-lg font-bold text-light-text dark:text-white mb-1">
-              High-Speed Storage
-            </h3>
-            <p className="text-xs text-light-text/60 dark:text-dark-text/60 mb-4 min-h-8">
-              Extend cloud database capacity for massive knowledge repositories
-            </p>
-            <div className="mb-4">
-              <span className="text-2xl font-black text-light-text dark:text-white">
-                Custom
-              </span>
-              <span className="text-xs font-semibold text-light-text/50 dark:text-dark-text/50 ml-1">
-                / pay-as-you-go
-              </span>
-            </div>
-            <div className="border-t border-light-border/50 dark:border-white/5 pt-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-blue-500">
-                  check
-                </span>
-                <span>7 EGP / GB / month over 20 GB</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-light-text/80 dark:text-dark-text/80">
-                <span className="material-symbols-rounded text-[14px] text-blue-500">
-                  check
-                </span>
-                <span>Secure high-availability hosting</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <button
-              onClick={() =>
-                window.open(
-                  "https://mail.google.com/mail/?view=cm&fs=1&to=marioemad426@gmail.com",
-                  "_blank",
-                )
-              }
-              className="w-full py-2 bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white font-bold text-xs rounded-lg flex justify-center items-center gap-1 shadow-sm transition-all duration-300"
-            >
-              Get Started{" "}
-              <span className="material-symbols-rounded text-[14px]">
-                arrow_outward
-              </span>
-            </button>
-          </div>
-        </div>
+        <AddonCard
+          icon="dns"
+          iconBgClass="bg-blue-500/10"
+          iconTextClass="text-blue-600 dark:text-blue-400"
+          checkClass="text-blue-500"
+          title="High-Speed Storage"
+          description="Extend cloud database capacity for massive knowledge repositories"
+          priceText="Custom"
+          cycleText="/ pay-as-you-go"
+          features={[
+            "7 EGP / GB / month over 20 GB",
+            "Secure high-availability hosting"
+          ]}
+          onAction={() =>
+            window.open(
+              "https://mail.google.com/mail/?view=cm&fs=1&to=marioemad426@gmail.com",
+              "_blank"
+            )
+          }
+        />
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Icon } from "../../../components/ui/Icons";
-import { Input } from "../../../components/ui/Input";
-import { Button } from "../../../components/ui/Button";
+import { Icon } from "../../../components/ui/core/Icons";
+import { Input } from "../../../components/ui/core/Input";
+import { Button } from "../../../components/ui/core/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
 import { useSecurityForm } from "../hooks/useSecurityForm";
 
@@ -13,16 +13,16 @@ export const SecurityForm: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="flex-1">
       <Form {...securityForm}>
-        <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-5 max-w-xl">
+        <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-5">
           <FormField control={securityForm.control} name="currentPassword" render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs font-bold text-light-text/80 dark:text-white/80">Current Master Key</FormLabel>
               <FormControl>
                 <div className="relative flex items-center">
                   <Input type={showCurrentPassword ? "text" : "password"} placeholder="••••••••" className="bg-light-surface dark:bg-[#121214] border-light-border dark:border-white/10 shadow-none py-5 pr-12" {...field} />
-                  <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showCurrentPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
+                  <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 text-light-text/70 hover:text-light-primary dark:text-white/50 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showCurrentPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
                 </div>
               </FormControl>
               <FormMessage />
@@ -35,7 +35,7 @@ export const SecurityForm: React.FC = () => {
                 <FormControl>
                   <div className="relative flex items-center">
                     <Input type={showNewPassword ? "text" : "password"} placeholder="••••••••" className="bg-light-surface dark:bg-[#121214] border-light-border dark:border-white/10 shadow-none py-5 pr-12" {...field} />
-                    <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showNewPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
+                    <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 text-light-text/70 hover:text-light-primary dark:text-white/50 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showNewPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -47,7 +47,7 @@ export const SecurityForm: React.FC = () => {
                 <FormControl>
                   <div className="relative flex items-center">
                     <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" className="bg-light-surface dark:bg-[#121214] border-light-border dark:border-white/10 shadow-none py-5 pr-12" {...field} />
-                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showConfirmPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 text-light-text/70 hover:text-light-primary dark:text-white/50 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"><Icon name={showConfirmPassword ? "visibility_off" : "visibility"} className="text-sm" /></button>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -55,7 +55,7 @@ export const SecurityForm: React.FC = () => {
             )} />
           </div>
           <div className="pt-4 flex justify-end">
-            <Button type="submit" disabled={isUpdatingSecurity} className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-5 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md">
+            <Button type="submit" disabled={isUpdatingSecurity} className="bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 font-bold px-6 py-5 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-sm">
               {isUpdatingSecurity ? <Icon name="sync" className="animate-spin text-lg mr-2" /> : <Icon name="key" className="text-lg mr-2" />}
               Change Master Key
             </Button>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Icon } from "../../../components/ui/Icons";
-import { FolderData } from "../../../store/documentSlice";
+import { Icon } from "../../../components/ui/core/Icons";
+import { FolderData } from "../../../store/library/librarySlice";
 // 🛠️ THE FIX 1: Bring in useAppSelector to grab our hierarchical breadcrumbs from the backend!
 import { useAppSelector } from "../../../store/hooks";
 
@@ -24,7 +24,7 @@ export const LibraryHeader = ({
   onNavigate,
 }: LibraryHeaderProps) => {
   // 🛠️ THE FIX 2: Grab the ancestor breadcrumbs (array of real folder objects) from Redux
-  const { breadcrumbs } = useAppSelector((state) => state.document);
+  const { breadcrumbs } = useAppSelector((state) => state.library);
 
   // Unified navigate function for all buttons
   const handleNavigate = (folderId?: string) => {
@@ -45,7 +45,7 @@ export const LibraryHeader = ({
         <h1 className="text-base md:text-lg font-bold text-light-text dark:text-white tracking-tight flex items-center gap-2">
           <button
             onClick={() => handleNavigate(undefined)}
-            className="text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white transition-colors bg-light-border/20 dark:bg-white/5 rounded-lg w-7 h-7 flex items-center justify-center"
+            className="text-light-text/70 dark:text-white/60 hover:text-light-text dark:hover:text-white transition-colors bg-light-border/20 dark:bg-white/5 rounded-lg w-7 h-7 flex items-center justify-center"
             title="Go Back to Root"
           >
             <Icon name="arrow_back" className="text-lg" />
@@ -76,7 +76,7 @@ export const LibraryHeader = ({
         {!isRoot && (
           <button
             onClick={handleGoBack}
-            className="mr-2 text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white transition-colors flex items-center justify-center bg-light-border/20 dark:bg-white/5 rounded-lg w-7 h-7 md:w-8 md:h-8 flex-shrink-0"
+            className="mr-2 text-light-text/70 dark:text-white/60 hover:text-light-text dark:hover:text-white transition-colors flex items-center justify-center bg-light-border/20 dark:bg-white/5 rounded-lg w-7 h-7 md:w-8 md:h-8 flex-shrink-0"
             title="Go Back"
           >
             <Icon name="arrow_back" className="text-lg md:text-xl" />
@@ -91,7 +91,7 @@ export const LibraryHeader = ({
             <React.Fragment key={node._id || "root"}>
               {/* Show the slash/chevron between items */}
               {index > 0 && (
-                <span className={`text-light-text/30 dark:text-white/20 material-symbols-rounded text-base md:text-lg mt-0.5 shrink-0 mx-1 ${!isLast ? 'hidden sm:block' : ''}`}>
+                <span className={`text-light-text/50 dark:text-white/40 material-symbols-rounded text-base md:text-lg mt-0.5 shrink-0 mx-1 ${!isLast ? 'hidden sm:block' : ''}`}>
                   chevron_right
                 </span>
               )}
@@ -102,7 +102,7 @@ export const LibraryHeader = ({
                 disabled={isLast}
                 className={`transition-colors whitespace-nowrap min-w-0 shrink truncate text-left ${isLast
                     ? "text-light-text dark:text-white cursor-default" // Current folder
-                    : "text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white cursor-pointer hidden sm:block" // Parent folders
+                    : "text-light-text/70 dark:text-white/60 hover:text-light-text dark:hover:text-white cursor-pointer hidden sm:block" // Parent folders
                   }`}
               >
                 {node.name}
@@ -152,7 +152,7 @@ export const LibraryHeader = ({
                   onBlur={() => {
                     if (!searchQuery) setSearchOpen(false);
                   }}
-                  className="pl-8 pr-3 w-36 h-9 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-l-lg text-sm text-light-text dark:text-white font-medium focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/50 dark:placeholder:text-dark-text/50"
+                  className="pl-8 pr-3 w-36 h-9 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-l-lg text-sm text-light-text dark:text-white font-medium focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/60 dark:placeholder:text-white/60"
                 />
               </div>
             ) : (
@@ -175,7 +175,7 @@ export const LibraryHeader = ({
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-8 pr-3 w-40 md:w-80 h-9 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-l-lg rounded-r-none text-sm text-light-text dark:text-white font-medium focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/50 dark:placeholder:text-dark-text/50 border-r-0"
+              className="pl-8 pr-3 w-40 md:w-80 h-9 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-l-lg rounded-r-none text-sm text-light-text dark:text-white font-medium focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/60 dark:placeholder:text-white/60 border-r-0"
             />
           </div>
         </div>

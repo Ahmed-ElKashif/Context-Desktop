@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
-import { notify } from "../../../components/ui/ToastEngine";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 // Shadcn components
 import {
@@ -16,12 +16,16 @@ import {
 
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { loginUser } from "../../../store/authSlice";
-import { ContextLogo } from "@/components/ui/ContextLogo";
-import { Input } from "@/components/ui/Input";
+import { loginUser } from "../../../store/auth/authSlice";
+import { ContextLogo } from "@/components/ui/core/ContextLogo";
+import { Input } from "@/components/ui/core/Input";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const plan = searchParams.get("plan");
+  const cycle = searchParams.get("cycle");
+
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.auth);
   const isLoading = status === "loading";
@@ -42,13 +46,15 @@ export const LoginForm = () => {
       const res = await dispatch(loginUser(data)).unwrap();
       notify("Access granted.", "success");
       sessionStorage.setItem("context_boot_after_auth", "1");
-      if (res.user?.role === "admin") {
+      if (plan) {
+        navigate(`/settings?checkoutPlan=${plan}&cycle=${cycle || "monthly"}`);
+      } else if (res.user?.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/dashboard");
+        navigate("/workspace");
       }
-    } catch (error: any) {
-      notify(error || "Authentication failed.", "error");
+    } catch (error: unknown) {
+      notify((error as string) || "Authentication failed.", "error");
     }
   };
 
@@ -119,7 +125,7 @@ export const LoginForm = () => {
                   </FormLabel>
                   <Link
                     to="/forgot-password"
-                    className="text-[10px] text-light-text/60 dark:text-white/40 hover:text-light-primary dark:hover:text-dark-primary transition-colors uppercase tracking-wider font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-sm px-1"
+                    className="text-[10px] text-light-text/60 dark:text-white/40 hover:text-light-primary dark:hover:text-dark-primary transition-colors uppercase tracking-wider font-mono"
                   >
                     Lost Key?
                   </Link>
@@ -139,9 +145,7 @@ export const LoginForm = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="pr-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-full flex items-center justify-center m-1 p-1"
-                        aria-label="Toggle password visibility"
-                        aria-pressed={showPassword}
+                        className="pr-4 text-light-text/50 hover:text-light-primary dark:text-white/30 dark:hover:text-dark-primary transition-colors focus:outline-none flex items-center justify-center"
                       >
                         <span className="material-symbols-rounded text-sm">
                           {showPassword ? "visibility_off" : "visibility"}
@@ -159,7 +163,7 @@ export const LoginForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-6 bg-light-primary dark:bg-dark-primary text-white dark:text-black font-bold py-4 rounded-xl shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary dark:focus-visible:ring-offset-[#18181B]"
+            className="w-full mt-6 bg-light-primary dark:bg-dark-primary text-white dark:text-black font-bold py-4 rounded-xl shadow-[0_4px_14px_rgba(16,55,102,0.3)] dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
           >
             {isLoading ? (
               <span className="material-symbols-rounded animate-spin">
@@ -179,8 +183,8 @@ export const LoginForm = () => {
         <p className="text-sm font-medium text-light-text/80 dark:text-white/60">
           New to the network?
           <Link
-            to="/register"
-            className="text-light-primary dark:text-white font-bold hover:opacity-80 dark:hover:text-dark-primary transition-opacity ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-sm px-1"
+            to={`/register${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
+            className="text-light-primary dark:text-white font-bold hover:opacity-80 dark:hover:text-dark-primary transition-opacity ml-1"
           >
             Initialize System
           </Link>

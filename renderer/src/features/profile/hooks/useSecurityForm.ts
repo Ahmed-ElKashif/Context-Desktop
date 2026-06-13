@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch } from "../../../store/hooks";
-import { updateProfile } from "../../../store/authSlice";
-import { notify } from "../../../components/ui/ToastEngine";
+import { updateProfile } from "../../../store/auth/authSlice";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { securitySchema, SecurityFormValues } from "../schemas/profileSchemas";
 import { extractErrorMessage } from "../utils/errorUtils";
 

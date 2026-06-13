@@ -1,4 +1,4 @@
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import { useTheme } from "../../../hooks/useTheme";
 
 export const AppearanceSection = () => {
@@ -22,8 +22,8 @@ export const AppearanceSection = () => {
               onClick={() => setTheme("light")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
                 theme === "light"
-                  ? "text-light-primary dark:text-light-text/60 bg-white shadow-sm border border-light-border dark:border-transparent"
-                  : "text-light-text/50 dark:text-light-text/50 bg-transparent hover:text-light-text border border-transparent"
+                  ? "bg-light-bg text-light-primary border-light-border/50 shadow-sm"
+                  : "text-light-text/70 dark:text-light-text/70 bg-transparent hover:text-light-text border border-transparent"
               }`}
             >
               <Icon name="light_mode" className="text-sm" /> Light
@@ -32,8 +32,8 @@ export const AppearanceSection = () => {
               onClick={() => setTheme("dark")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
                 theme === "dark"
-                  ? "text-light-text/60 dark:text-dark-primary bg-white dark:bg-white/10 shadow-sm border border-light-border dark:border-white/10"
-                  : "text-light-text/50 dark:text-white bg-transparent hover:text-light-text border border-transparent"
+                  ? "bg-[#252528] text-dark-primary border-white/10 shadow-sm"
+                  : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-white border border-transparent"
               }`}
             >
               <Icon name="dark_mode" className="text-sm" /> Dark

@@ -3,7 +3,7 @@ import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tour.css";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { updateProfile, updateUserLocalState } from "../../store/authSlice";
+import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
 
 /**
  * Tour step definitions — each targets a DOM element by its ID.
@@ -11,9 +11,9 @@ import { updateProfile, updateUserLocalState } from "../../store/authSlice";
  */
 const TOUR_STEPS: DriveStep[] = [
   {
-    element: "#tour-sidebar-workspace-overview",
+    element: "#tour-sidebar-workspace",
     popover: {
-      title: "🏠 Your Dashboard",
+      title: "🏠 Your Workspace",
       description:
         "Your personalized command center. AI surfaces the most important documents for you to focus on, ranked by cognitive load and recency.",
       side: "right",
@@ -21,7 +21,7 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: "#tour-sidebar-smart-library",
+    element: "#tour-sidebar-library",
     popover: {
       title: "📚 Smart Library",
       description:
@@ -55,7 +55,7 @@ const TOUR_STEPS: DriveStep[] = [
     popover: {
       title: "⚙️ Settings",
       description:
-        "Customize your experience — theme, language, and AI token budget tracking. You can also restart this tour anytime from here.",
+        "Customize your experience — theme and AI token budget tracking. You can also restart this tour anytime from here.",
       side: "right",
       align: "center",
     },
@@ -100,7 +100,7 @@ export const ProductTour = () => {
     // Wait a moment for the layout to fully mount, especially after the boot sequence
     const timer = setTimeout(() => {
       // Final check — the dashboard element must exist (layout is mounted)
-      const dashboardEl = document.getElementById("tour-sidebar-workspace-overview");
+      const dashboardEl = document.getElementById("tour-sidebar-workspace");
       if (!dashboardEl) return;
 
       hasStartedRef.current = true;

@@ -40,7 +40,7 @@ export const CHART_TYPES: { type: ChartType; label: string; icon: string; desc: 
 
 /** True if the value looks like a common date string (M/D/YY, YYYY-MM-DD, etc.) */
 export function looksLikeDate(value: string): boolean {
-  return /^\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}$/.test(value.trim());
+  return /^\d{1,4}[/.-]\d{1,2}[/.-]\d{2,4}$/.test(value.trim());
 }
 
 /** True if >50% of non-empty values in a column are dates */

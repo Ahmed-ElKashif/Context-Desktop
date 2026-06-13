@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Icon } from "../../../components/ui/Icons";
-import { DocumentData } from "../../../store/documentSlice";
+import { Icon } from "../../../components/ui/core/Icons";
+import { DocumentData } from "../../../store/library/librarySlice";
 import { getTagColorClass } from "../../../lib/tagUtils";
 import { handleDownload, downloadTextAsFile } from "../shared/downloadUtils";
 
@@ -13,7 +13,6 @@ interface ReaderHeaderProps {
 export const ReaderHeader = ({
   document,
   fileUrl,
-  toggleSidebar: _toggleSidebar,
 }: ReaderHeaderProps) => {
 
   const getLoadColor = (load?: string) => {
@@ -38,7 +37,7 @@ export const ReaderHeader = ({
     <header className="h-16 border-b border-light-border dark:border-white/5 bg-light-surface dark:bg-dark-surface flex items-center justify-between px-6 shrink-0 z-50 shadow-sm relative">
       <div className="flex items-center gap-4 overflow-hidden">
         <Link
-          to="/dashboard"
+          to="/workspace"
           className="w-8 h-8 flex items-center justify-center shrink-0 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
           title="Back to Dashboard"
         >

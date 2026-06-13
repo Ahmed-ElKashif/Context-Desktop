@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "../../../components/ui/Icons";
-import { DocumentData } from "../../../store/documentSlice";
+import { Icon } from "../../../components/ui/core/Icons";
+import { DocumentData } from "../../../store/library/librarySlice";
 
 interface DocumentSelectorModalProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ export const DocumentSelectorModal = ({
           </h3>
           <button
             onClick={onClose}
-            className="text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white transition-colors"
+            className="text-light-text/70 dark:text-white/60 hover:text-light-text dark:hover:text-white transition-colors"
           >
             <Icon name="close" className="text-[24px]" />
           </button>
@@ -57,14 +57,14 @@ export const DocumentSelectorModal = ({
           <div className="relative flex items-center">
             <Icon
               name="search"
-              className="absolute left-3 text-[20px] text-light-text/40 dark:text-white/30"
+              className="absolute left-3 text-[20px] text-light-text/60 dark:text-white/50"
             />
             <input
               type="text"
               placeholder="Search documents by title or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-[#121214] border border-light-border dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-light-primary dark:focus:border-dark-primary transition-colors text-light-text dark:text-white placeholder:text-light-text/40 dark:placeholder:text-white/30"
+              className="w-full bg-white dark:bg-[#121214] border border-light-border dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-light-primary dark:focus:border-dark-primary transition-colors text-light-text dark:text-white placeholder:text-light-text/60 dark:placeholder:text-white/60"
             />
           </div>
         </div>
@@ -102,7 +102,7 @@ export const DocumentSelectorModal = ({
                     <h4 className="text-sm font-bold text-light-text dark:text-white truncate group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
                       {doc.title}
                     </h4>
-                    <p className="text-xs text-light-text/50 dark:text-white/40 mt-0.5 truncate font-mono">
+                    <p className="text-xs text-light-text/70 dark:text-white/60 mt-0.5 truncate font-mono">
                       {doc.semanticPath || "Uncategorized"}
                     </p>
                   </div>
@@ -113,9 +113,9 @@ export const DocumentSelectorModal = ({
             <div className="flex flex-col items-center justify-center h-40 text-center">
               <Icon
                 name="search_off"
-                className="text-light-text/30 dark:text-white/20 text-[32px] mb-2"
+                className="text-light-text/50 dark:text-white/40 text-[32px] mb-2"
               />
-              <p className="text-sm font-medium text-light-text/60 dark:text-white/50">
+              <p className="text-sm font-medium text-light-text/70 dark:text-white/70">
                 No documents found.
               </p>
             </div>

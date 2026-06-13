@@ -1,9 +1,10 @@
+import { getApiError } from "@/lib/errorHandler";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { notify } from "../../../components/ui/ToastEngine";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { authService } from "../api/authService";
-import { ContextLogo } from "@/components/ui/ContextLogo";
-import { Input } from "@/components/ui/Input";
+import { ContextLogo } from "@/components/ui/core/ContextLogo";
+import { Input } from "@/components/ui/core/Input";
 
 export const ResetPasswordForm = () => {
   const [password, setPassword] = useState("");
@@ -59,8 +60,8 @@ export const ResetPasswordForm = () => {
       await authService.resetPassword(token, password);
       notify("Access key updated successfully. You can now authenticate.", "success");
       navigate("/login");
-    } catch (error: any) {
-      const msg = error.response?.data?.message || "Failed to update access key.";
+    } catch (error: unknown) {
+      const msg = getApiError(error, );
       notify(msg, "error");
     } finally {
       setIsLoading(false);

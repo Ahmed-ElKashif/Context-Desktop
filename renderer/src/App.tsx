@@ -6,29 +6,27 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
-import { ContextToaster } from "./components/ui/ToastEngine";
+import { ContextToaster } from "./components/ui/feedback/ToastEngine";
 import AdminGuard from "./features/auth/components/AdminGuard";
 import { useAnalytics } from "./features/analytics/hooks/useAnalytics";
 import { ServerErrorPage } from "./pages/ServerErrorPage";
-import { PageLoader } from "./components/ui/PageLoader";
+import { PageLoader } from "./components/ui/loaders/PageLoader";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "./store/store";
-import { initializeAuth, logout } from "./store/authSlice";
-import { addNotification } from "./store/notificationSlice";
+import { initializeAuth, logout } from "./store/auth/authSlice";
 import { BootSequence } from "./components/layout/BootSequence";
 
-const Dashboard = lazy(() => import("./pages/dashboard"));
+const Workspace = lazy(() => import("./pages/workspace"));
 const Library = lazy(() => import("./pages/Smartlibrary"));
-const Reader = lazy(() => import("./pages/read/Reader"));
+const Reader = lazy(() => import("./pages/Reader"));
 const Compare = lazy(() => import("./pages/compare"));
 const Settings = lazy(() => import("./pages/settings"));
-
 const Profile = lazy(() => import("./pages/profile"));
 const AdminPage = lazy(() => import("./pages/admin"));
 // Smart root redirect: desktop apps never show a landing page
 const DesktopRoot = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ? "/workspace" : "/login"} replace />;
 };
 
 function App() {
@@ -68,7 +66,7 @@ function App() {
     const handleApiError = (e: Event) => {
       const msg = (e as CustomEvent).detail?.message;
       if (msg) {
-        import("./components/ui/ToastEngine").then(({ notify }) => {
+        import("./components/ui/feedback/ToastEngine").then(({ notify }) => {
           notify(msg, "error");
         });
       }
@@ -78,7 +76,9 @@ function App() {
       const { message, type } = (e as CustomEvent).detail || {};
       // Filter out transient info toasts like "Authenticating..."
       if (message && type && type !== "info") {
-        dispatch(addNotification({ message, type, silent: true }));
+        import("./store/ui/notificationSlice").then(({ addNotification }) => {
+          dispatch(addNotification({ message, type, silent: true }));
+        });
       }
     };
 
@@ -100,6 +100,13 @@ function App() {
             (window as any).pendingExternalUpload.push(filePath);
           }
           navigate("/library");
+          
+          // Fire event for cold starts since LibraryDropzone might have already mounted
+          setTimeout(() => {
+            window.dispatchEvent(
+              new CustomEvent("external-upload", { detail: [filePath] })
+            );
+          }, 500);
         }
       }).catch(console.error);
     }
@@ -185,9 +192,8 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<AuthGuard />}>
-
               <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/workspace" element={<Workspace />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="/read/:id" element={<Reader />} />
                 <Route path="/compare" element={<Compare />} />

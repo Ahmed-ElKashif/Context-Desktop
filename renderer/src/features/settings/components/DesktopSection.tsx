@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Icon } from "../../../components/ui/Icons";
-import { notify } from "../../../components/ui/ToastEngine";
+import { Icon } from "../../../components/ui/core/Icons";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 export const DesktopSection = () => {
   const [startupEnabled, setStartupEnabled] = useState(false);

@@ -11,8 +11,12 @@ import { getStore } from "./utils/store";
 import { cleanupStaleRegistryKeys } from "./registry";
 
 // 1. Initialize Error Logger and Crash Reporter
+app.setPath('crashDumps', app.getPath('userData') + '/Crashpad');
 crashReporter.start({ submitURL: '', uploadToServer: false });
 setupErrorLogger();
+
+// Required for Windows 11 Desktop Toast Notifications
+app.setAppUserModelId("com.context.desktop");
 
 // 2. Ensure Single Instance
 const gotTheLock = app.requestSingleInstanceLock();
@@ -87,7 +91,9 @@ if (!gotTheLock) {
 // 7. App Lifecycle Cleanup
 app.on("will-quit", () => {
   console.log("[Main Process] Commencing graceful shutdown...");
-  globalShortcut.unregisterAll();
+  if (app.isReady()) {
+    globalShortcut.unregisterAll();
+  }
   ipcMain.removeAllListeners();
   
   const mainWindow = getMainWindow();

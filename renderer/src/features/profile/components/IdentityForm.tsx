@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Icon } from "../../../components/ui/Icons";
-import { Input } from "../../../components/ui/Input";
-import { Button } from "../../../components/ui/Button";
+import { Icon } from "../../../components/ui/core/Icons";
+import { Input } from "../../../components/ui/core/Input";
+import { Button } from "../../../components/ui/core/Button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
 import { useIdentityForm } from "../hooks/useIdentityForm";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { updateProfile } from "../../../store/authSlice";
-import { notify } from "../../../components/ui/ToastEngine";
+import { updateProfile } from "../../../store/auth/authSlice";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 const PERSONAS = [
   { id: "general", label: "General" },
@@ -93,7 +93,7 @@ export const IdentityForm: React.FC = () => {
                 className="w-full bg-light-surface dark:bg-[#121214] border border-light-border dark:border-white/10 rounded-xl text-sm font-semibold p-3 outline-none focus:ring-2 focus:ring-light-primary/20 dark:focus:ring-dark-primary/20 text-light-text dark:text-white transition-all flex justify-between items-center group"
               >
                 <span>{currentPersonaLabel}</span>
-                <Icon name="expand_more" className={`text-light-text/60 dark:text-white/40 transition-transform duration-200 ${isPersonaDropdownOpen ? "rotate-180" : ""}`} />
+                <Icon name="expand_more" className={`text-light-text/70 dark:text-white/60 transition-transform duration-200 ${isPersonaDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {isPersonaDropdownOpen && (

@@ -1,4 +1,4 @@
-import { Icon } from "../Icons";
+import { Icon } from "../core/Icons";
 
 export const BatchEngineSkeleton = ({
   fileCount = 0,

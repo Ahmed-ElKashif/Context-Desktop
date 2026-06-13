@@ -19,14 +19,20 @@ export function getInitialCliArgs() {
 
 export function handleCliArgs(argv: string[]) {
   const actionArg = argv.find((arg) => arg.startsWith("--action="));
-  const pathArg = argv.find((arg) => arg.startsWith("--path="));
+  const pathIndex = argv.findIndex((arg) => arg.startsWith("--path="));
 
-  if (actionArg && pathArg) {
+  if (actionArg && pathIndex !== -1) {
     const action = actionArg.split("=")[1];
-    let filePath = pathArg.substring("--path=".length);
-    if (filePath.startsWith('"') && filePath.endsWith('"')) {
-      filePath = filePath.substring(1, filePath.length - 1);
+    
+    // Reconstruct path in case Windows split it at spaces
+    let pathArgStr = argv[pathIndex];
+    for (let i = pathIndex + 1; i < argv.length; i++) {
+      if (argv[i].startsWith("--")) break;
+      pathArgStr += " " + argv[i];
     }
+    
+    let filePath = pathArgStr.substring("--path=".length);
+    filePath = filePath.replace(/^["']+|["']+$/g, '');
 
     if (!mainWindow) {
       initialCliArgs = { action, path: filePath };
@@ -111,7 +117,17 @@ export async function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, "../../renderer/index.html"));
+  if (isDev) {
+    try {
+      await mainWindow.loadURL("http://localhost:5173");
+      // Optional: mainWindow.webContents.openDevTools();
+    } catch (e) {
+      console.log("Vite dev server not found, falling back to built file...");
+      mainWindow.loadFile(path.join(__dirname, "../../renderer/index.html"));
+    }
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "../../renderer/index.html"));
+  }
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const scriptSrc = isDev 
@@ -130,6 +146,19 @@ export async function createWindow() {
         ],
       },
     });
+  });
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    // Explicitly cache for the pull-based API we added
+    const actionArg = process.argv.find((arg) => arg.startsWith("--action="));
+    const pathArg = process.argv.find((arg) => arg.startsWith("--path="));
+    if (actionArg && pathArg) {
+      let filePath = pathArg.substring("--path=".length);
+      if (filePath.startsWith('"') && filePath.endsWith('"')) {
+        filePath = filePath.substring(1, filePath.length - 1);
+      }
+      initialCliArgs = { action: actionArg.split("=")[1], path: filePath };
+    }
   });
 
   mainWindow.on("closed", () => {

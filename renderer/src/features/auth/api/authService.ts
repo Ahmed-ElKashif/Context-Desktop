@@ -5,8 +5,19 @@ export const authService = {
   // Call POST /api/auth/login
   login: async (credentials: LoginFormValues): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>('/auth/login', credentials);
-    // Your backend returns { success: true, token: "...", user: {...} }
+    // Your backend returns { success: true, user: {...} } (cookie is set automatically)
     return response.data; 
+  },
+
+  getMe: async (): Promise<AuthResponse> => {
+    const response = await api.get<AuthResponse>('/auth/me', {
+      _skipAuthExpired: true,
+    } as any);
+    return response.data;
+  },
+
+  logout: async (): Promise<void> => {
+    await api.post('/auth/logout');
   },
 
   // Call POST /api/auth/register

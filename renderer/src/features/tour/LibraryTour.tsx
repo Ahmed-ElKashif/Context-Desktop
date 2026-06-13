@@ -3,7 +3,7 @@ import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tour.css";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { updateProfile, updateUserLocalState } from "../../store/authSlice";
+import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
 import { useLocation } from "react-router-dom";
 
 const LIBRARY_TOUR_STEPS: DriveStep[] = [
@@ -22,7 +22,7 @@ const LIBRARY_TOUR_STEPS: DriveStep[] = [
     popover: {
       title: "🗄️ File Explorer",
       description:
-        "Double-click any folder to enter it, or double-click a document to open it in the Context Engine view. You can also drag and drop files directly here!",
+        "Double-click any folder to enter it, or double-click a document to open it in the Workspace viewer. You can also drag and drop files directly here!",
       side: "top",
       align: "center",
     },
@@ -54,7 +54,7 @@ export const LibraryTour = () => {
     if (user && !user.hasCompletedLibraryTour) {
       hasStartedRef.current = false;
     }
-  }, [user?.hasCompletedLibraryTour]);
+  }, [user, user?.hasCompletedLibraryTour]);
 
   useEffect(() => {
     // Only run if they are on the library page, haven't completed this tour yet.

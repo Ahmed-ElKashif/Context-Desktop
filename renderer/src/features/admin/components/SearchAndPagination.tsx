@@ -13,8 +13,8 @@ interface SearchAndPaginationProps {
   totalPages: number;
   total: number;
   onPage: (page: number) => void;
-  onExportCSV: () => void;
   isLoading?: boolean;
+  hidePagination?: boolean;
 }
 
 const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
@@ -24,8 +24,8 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
   totalPages,
   total,
   onPage,
-  onExportCSV,
   isLoading,
+  hidePagination,
 }) => {
   // Local input state so typing feels instant; debounce syncs to URL
   const [inputValue, setInputValue] = useState(search);
@@ -88,17 +88,8 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
           {total.toLocaleString()} users
         </span>
 
-        {/* Export CSV */}
-        <button
-          onClick={onExportCSV}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-light-surface dark:bg-white/[0.04] border border-light-border dark:border-white/[0.08] rounded-xl text-light-text/70 dark:text-white/60 hover:text-light-text dark:hover:text-white hover:border-light-primary/30 dark:hover:border-dark-primary/30 transition-all"
-        >
-          <span className="material-symbols-rounded text-[15px]">download</span>
-          Export CSV
-        </button>
-
         {/* Pagination */}
-        {totalPages > 1 && (
+        {!hidePagination && totalPages > 1 && (
           <div className="flex items-center gap-1">
             <button
               onClick={() => onPage(page - 1)}

@@ -13,8 +13,9 @@ import UserTable from "./UserTable";
 import SearchAndPagination from "./SearchAndPagination";
 import { AIUsageSection } from "./AIUsageSection";
 import { api } from "../../../lib/axios";
-import { Icon } from "../../../components/ui/Icons";
+import { Icon } from "../../../components/ui/core/Icons";
 import Settings from "../../../pages/settings";
+import { ProfileFeature } from "../../profile/ProfileFeature";
 import { PaymentRequestsSection } from "./PaymentRequestsSection";
 
 const AdminDashboard: React.FC = () => {
@@ -37,7 +38,7 @@ const AdminDashboard: React.FC = () => {
   } = useAdminDashboard();
 
   // Active tab state
-  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "top-ai" | "ai" | "settings" | "payments">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "top-ai" | "ai" | "profile" | "settings" | "payments">("dashboard");
 
   // AI Usage state for top-ai and charts
   const [aiUsage, setAIUsage] = useState<any>(null);
@@ -179,13 +180,23 @@ const AdminDashboard: React.FC = () => {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
               
               {/* Header */}
-              <div>
-                <h1 className="text-2xl font-black text-light-text dark:text-white tracking-tight">
-                  User Management
-                </h1>
-                <p className="mt-1 text-sm font-semibold text-light-text/50 dark:text-white/40">
-                  Manage accounts, view status, and suspend users
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-light-text dark:text-white tracking-tight">
+                    User Management
+                  </h1>
+                  <p className="mt-1 text-sm font-semibold text-light-text/50 dark:text-white/40">
+                    Manage accounts, view status, and suspend users
+                  </p>
+                </div>
+                <button
+                  onClick={handleExportCSV}
+                  disabled={isUsersLoading || !users.length}
+                  className="flex items-center gap-2 px-5 py-3 bg-light-primary dark:bg-dark-primary text-white dark:text-black font-extrabold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-xs shadow-sm self-start"
+                >
+                  <Icon name="download" className="text-base" />
+                  <span>Export as CSV</span>
+                </button>
               </div>
 
               {/* Search & Action bar */}
@@ -206,8 +217,8 @@ const AdminDashboard: React.FC = () => {
                   totalPages={pagination.totalPages}
                   total={pagination.total}
                   onPage={handlePage}
-                  onExportCSV={handleExportCSV}
                   isLoading={isUsersLoading}
+                  hidePagination={true}
                 />
 
                 <UserTable
@@ -230,7 +241,6 @@ const AdminDashboard: React.FC = () => {
                       totalPages={pagination.totalPages}
                       total={pagination.total}
                       onPage={handlePage}
-                      onExportCSV={handleExportCSV}
                       isLoading={isUsersLoading}
                     />
                   </div>
@@ -348,6 +358,12 @@ const AdminDashboard: React.FC = () => {
           {activeTab === "settings" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 h-full -m-8 lg:-m-10">
               <Settings />
+            </div>
+          )}
+
+          {activeTab === "profile" && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 h-full -m-8 lg:-m-10">
+              <ProfileFeature />
             </div>
           )}
 

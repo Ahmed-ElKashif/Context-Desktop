@@ -3,7 +3,7 @@ import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tour.css";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { updateProfile, updateUserLocalState } from "../../store/authSlice";
+import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
 
 const COMPARISON_TOUR_STEPS: DriveStep[] = [
   {
@@ -61,7 +61,7 @@ export const ComparisonTour = () => {
 
   // Reset the guard when hasCompletedComparisonTour is set back to false (e.g. via Restart Tour)
   useEffect(() => {
-    if (user && !(user as any).hasCompletedComparisonTour) {
+    if (user && !(user as any /* eslint-disable-line @typescript-eslint/no-explicit-any */).hasCompletedComparisonTour) {
       hasStartedRef.current = false;
     }
   }, [user]);
@@ -71,7 +71,7 @@ export const ComparisonTour = () => {
     // AND they are actually on the comparison page (indicated by the presence of tour-compare-selectors in the DOM)
     if (
       !user || 
-      (user as any).hasCompletedComparisonTour || 
+      (user as any /* eslint-disable-line @typescript-eslint/no-explicit-any */).hasCompletedComparisonTour || 
       hasStartedRef.current
     ) {
       return;

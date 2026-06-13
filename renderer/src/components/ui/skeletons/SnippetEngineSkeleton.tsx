@@ -1,5 +1,5 @@
-import { DocumentData } from "../../../store/documentSlice";
-import { Icon } from "../Icons"; // Make sure your path to Icons is correct!
+import { DocumentData } from "../../../store/library/librarySlice";
+import { Icon } from "../core/Icons"; // Make sure your path to Icons is correct!
 
 export const SnippetEngineSkeleton = ({
   activeDocument,

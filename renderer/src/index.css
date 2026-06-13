@@ -255,6 +255,25 @@
     stroke-dashoffset: -12;
   }
 }
+@keyframes progress-indeterminate {
+  0% {
+    width: 0%;
+    transform: translateX(0);
+  }
+  50% {
+    width: 30%;
+    transform: translateX(150%);
+  }
+  100% {
+    width: 100%;
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress-indeterminate {
+  animation: progress-indeterminate 1.5s infinite linear;
+  transform-origin: left;
+}
 
 .neural-bg {
   background-color: transparent;

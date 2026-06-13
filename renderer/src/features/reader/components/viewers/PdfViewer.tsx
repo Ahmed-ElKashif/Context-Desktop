@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { pdfjs, Document, Page } from "react-pdf";
+import { useState, useEffect, useRef, memo } from "react";
+import { pdfjs, Document } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Icon } from "../../../../components/ui/Icons";
+import { Icon } from "../../../../components/ui/core/Icons";
+import { LazyPage, LazyThumbnail } from "./components/LazyPdfPage";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -11,100 +12,13 @@ interface PdfViewerProps {
   zoomLevel: number;
 }
 
-// ── Lazy Loading Components ──────────────────────────────────────────────────
-
-const PageSkeleton = () => (
-  <div className="w-[600px] h-[800px] bg-white dark:bg-[#121214] flex flex-col items-center justify-center gap-4 rounded-lg border border-light-border dark:border-white/10 shadow-sm animate-pulse">
-    <Icon name="description" className="text-[48px] text-light-text/20 dark:text-white/10" />
-    <div className="flex flex-col items-center gap-2">
-      <div className="h-3 w-32 bg-light-border dark:bg-white/5 rounded-full"></div>
-      <div className="h-2 w-48 bg-light-border dark:bg-white/5 rounded-full"></div>
-      <div className="h-2 w-40 bg-light-border dark:bg-white/5 rounded-full"></div>
-    </div>
-  </div>
-);
-
-const ThumbnailSkeleton = () => (
-  <div className="w-[160px] h-[220px] bg-white dark:bg-[#121214] flex flex-col items-center justify-center gap-3 rounded border border-light-border dark:border-white/10 animate-pulse">
-    <Icon name="draft" className="text-[24px] text-light-text/20 dark:text-white/10" />
-    <div className="flex flex-col items-center gap-1.5">
-      <div className="h-1.5 w-16 bg-light-border dark:bg-white/5 rounded-full"></div>
-      <div className="h-1 w-20 bg-light-border dark:bg-white/5 rounded-full"></div>
-    </div>
-  </div>
-);
-
-const LazyPage = ({ pageNumber, zoomLevel }: { pageNumber: number; zoomLevel: number }) => {
-  const [isRendered, setIsRendered] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsRendered(true);
-      },
-      { rootMargin: "1500px 0px" } // Render when within 1500px of viewport
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="min-h-[800px] flex justify-center items-center">
-      {isRendered ? (
-        <Page
-          pageNumber={pageNumber}
-          scale={zoomLevel}
-          renderTextLayer={true}
-          renderAnnotationLayer={true}
-          loading={<PageSkeleton />}
-        />
-      ) : (
-        <PageSkeleton />
-      )}
-    </div>
-  );
-};
-
-const LazyThumbnail = ({ pageNumber }: { pageNumber: number }) => {
-  const [isRendered, setIsRendered] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsRendered(true);
-      },
-      { rootMargin: "800px 0px" } // Render when within 800px of viewport
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="min-h-[220px] w-[160px] flex justify-center items-center">
-      {isRendered ? (
-        <Page
-          pageNumber={pageNumber}
-          width={160}
-          renderTextLayer={false}
-          renderAnnotationLayer={false}
-          loading={<ThumbnailSkeleton />}
-        />
-      ) : (
-        <ThumbnailSkeleton />
-      )}
-    </div>
-  );
-};
-
 /**
  * Renders a PDF document using react-pdf.
  * Includes:
  *  - Scrollable main canvas with per-page containers for scroll tracking
  *  - Sticky right-side thumbnail panel for quick page navigation
  */
-export const PdfViewer = ({ fileUrl, zoomLevel }: PdfViewerProps) => {
+export const PdfViewer = memo(({ fileUrl, zoomLevel }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [activePage, setActivePage] = useState<number>(1);
   const pdfScrollRef = useRef<HTMLDivElement>(null);
@@ -225,4 +139,4 @@ export const PdfViewer = ({ fileUrl, zoomLevel }: PdfViewerProps) => {
       )}
     </div>
   );
-};
+});

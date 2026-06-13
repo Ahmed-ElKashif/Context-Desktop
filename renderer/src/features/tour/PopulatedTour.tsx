@@ -3,7 +3,7 @@ import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import "./tour.css";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { updateProfile, updateUserLocalState } from "../../store/authSlice";
+import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
 
 const POPULATED_TOUR_STEPS: DriveStep[] = [
   {
@@ -11,7 +11,7 @@ const POPULATED_TOUR_STEPS: DriveStep[] = [
     popover: {
       title: "📄 Document Header",
       description:
-        "Check your document's processing status, path, and access quick actions like downloading, sharing, or deleting.",
+        "Check your document's processing status, toggle between Original and Prettify viewing modes, and control your zoom.",
       side: "bottom",
       align: "center",
     },
@@ -19,9 +19,9 @@ const POPULATED_TOUR_STEPS: DriveStep[] = [
   {
     element: "#tour-exec-summary",
     popover: {
-      title: "🧠 Executive Summary",
+      title: "🧠 Metadata & Summary",
       description:
-        "AI automatically extracts the core meaning, entities, and a structured summary so you don't have to read the whole file.",
+        "AI automatically extracts the core meaning, tags, and evaluates the cognitive load of the document so you don't have to read the whole file.",
       side: "right",
       align: "start",
     },
@@ -51,7 +51,8 @@ const POPULATED_TOUR_STEPS: DriveStep[] = [
 export const PopulatedTour = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const { activeDocument, isUploading } = useAppSelector((state) => state.document);
+  const { isUploading } = useAppSelector((state) => state.library);
+  const { activeDocument } = useAppSelector((state) => state.workspace);
   const hasStartedRef = useRef(false);
 
   const completeTour = useCallback(() => {
