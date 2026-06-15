@@ -12,6 +12,16 @@ export const translateApiError = (status: number | undefined, rawMessage: string
   const genericBackendMessages = ["unauthorized", "internal server error", "not found"];
   const isGenericBackend = genericBackendMessages.includes(lowerMessage);
 
+  // 1b. Safety net: intercept raw AI provider errors that leaked through the backend
+  const isLeakedProviderError = lowerMessage.includes("platform.openai.com") ||
+    lowerMessage.includes("docs.langchain") ||
+    lowerMessage.includes("exceeded your current quota") ||
+    lowerMessage.includes("api.groq.com");
+
+  if (isLeakedProviderError) {
+    return "The AI service is temporarily at capacity. Please try again in a moment.";
+  }
+
   // 2. If the backend sent a specific, non-generic message, prioritize it!
   if (rawMessage && !isGenericAxios && !isGenericBackend) {
     return rawMessage;
@@ -37,7 +47,7 @@ export const translateApiError = (status: number | undefined, rawMessage: string
     case 413:
       return "The uploaded file is too large. Please select a smaller file.";
     case 429:
-      return "You have exceeded your rate limit. Please wait a moment before trying again.";
+      return "The AI service is temporarily unavailable. Please try again later.";
     case 500:
       return "The server encountered an unexpected condition. Our team has been notified.";
     case 502:

@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 // Inline IPC channels to avoid sandbox module resolution restrictions
 const IPC_CHANNELS = {
@@ -63,6 +63,7 @@ const electronAPI = {
       ipcRenderer.on(IPC_CHANNELS.FILE.DND_FILES_DROPPED, listener);
       return () => ipcRenderer.removeListener(IPC_CHANNELS.FILE.DND_FILES_DROPPED, listener);
     },
+    getPathForFile: (file: File) => webUtils.getPathForFile(file),
   },
   updater: {
     checkForUpdates: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATER.CHECK_FOR_UPDATES),

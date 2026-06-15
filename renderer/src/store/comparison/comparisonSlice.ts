@@ -6,6 +6,7 @@ import { DocumentData } from "../library/librarySlice";
 import { ChatMessage, chatService } from "../../features/comparison/api/chatService";
 import { fetchSettings } from "../settings/settingsSlice";
 import { updateProfile } from "../auth/authSlice";
+import { reloadDocumentThunk, reanalyzeDocumentThunk } from "../library/thunks/documentThunks";
 
 interface ComparisonState {
   history: ComparisonHistoryItem[];
@@ -272,7 +273,24 @@ const comparisonSlice = createSlice({
       })
       // Delete Record
       .addCase(deleteComparisonRecord.fulfilled, (state, action) => {
-    state.history = state.history.filter(i => i._id !== action.payload);
+        state.history = state.history.filter(i => i._id !== action.payload);
+      })
+      // Sync document updates from library (e.g. SSE status changes)
+      .addCase(reloadDocumentThunk.fulfilled, (state, action) => {
+        if (state.baseDoc?._id === action.payload._id) {
+          state.baseDoc = action.payload;
+        }
+        if (state.compareDoc?._id === action.payload._id) {
+          state.compareDoc = action.payload;
+        }
+      })
+      .addCase(reanalyzeDocumentThunk.fulfilled, (state, action) => {
+        if (state.baseDoc?._id === action.payload._id) {
+          state.baseDoc = action.payload;
+        }
+        if (state.compareDoc?._id === action.payload._id) {
+          state.compareDoc = action.payload;
+        }
       });
   },
 });

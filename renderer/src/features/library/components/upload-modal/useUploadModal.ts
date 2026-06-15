@@ -9,6 +9,7 @@ import {
   clearProposedStructure,
 } from "../../../../store/library/librarySlice";
 import { resolveUniqueName } from "../../utils/tableUtils";
+import { getDesktopFilesFromEvent, handleDesktopFolderSelect } from "@/lib/desktop-dropzone";
 
 export interface UseUploadModalProps {
   onClose: () => void;
@@ -60,7 +61,7 @@ export const useUploadModal = ({
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
-    const filesToProcess = acceptedFiles.slice(0, 10);
+    const filesToProcess = acceptedFiles.slice(0, 5);
 
     const rawPaths = filesToProcess.map((file: any) => {
       if (file.webkitRelativePath) return file.webkitRelativePath;
@@ -256,38 +257,13 @@ export const useUploadModal = ({
 
   const handleNativeFolderSelect = async () => {
     try {
-      const electronAPI = (window as any).electronAPI;
-      if (!electronAPI?.localFiles?.selectBatchFolder) {
-        hiddenFolderInputRef.current?.click();
-        return;
+      const nativeFiles = await handleDesktopFolderSelect();
+      if (nativeFiles) {
+        onDrop(nativeFiles);
       }
-
-      const result = await electronAPI.localFiles.selectBatchFolder();
-      if (!result || !result.files || result.files.length === 0) return;
-
-      const { files, folderPath } = result;
-      
-      const fakeFiles = files.map((f: any) => {
-        let relativePath = f.clientPath || f.webkitRelativePath || "";
-        if (!relativePath.includes("/") && folderPath) {
-           const folderName = folderPath.split(/[\\/]/).filter(Boolean).pop() || "Folder";
-           relativePath = `${folderName}/${f.name}`;
-        }
-        
-        return {
-          name: f.name,
-          path: f.path,
-          size: f.size || 0,
-          type: f.type || "",
-          webkitRelativePath: relativePath,
-          isNativeFile: true,
-        };
-      });
-
-      onDrop(fakeFiles as any as File[]);
     } catch (err: any) {
       console.error("Native folder select error:", err);
-      notify("Failed to read folder recursively.", "error");
+      notify("Failed to select folder.", "error");
     }
   };
 
@@ -314,6 +290,7 @@ export const useUploadModal = ({
     disabled: isUploading,
     noClick: true,
     noKeyboard: true,
+    getFilesFromEvent: getDesktopFilesFromEvent,
   });
 
   return {

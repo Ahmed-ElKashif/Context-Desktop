@@ -58,6 +58,8 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
                 className={`max-w-[85%] p-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed ${
                   msg.role === "user"
                     ? "bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-br-none"
+                    : msg.role === "error"
+                    ? "bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-200 rounded-bl-none"
                     : "bg-light-bg dark:bg-white/5 text-light-text dark:text-white rounded-bl-none border border-light-border dark:border-white/10"
                 }`}
               >

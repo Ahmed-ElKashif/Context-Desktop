@@ -101,6 +101,7 @@ export async function unregisterFileContextMenu(): Promise<void> {
   // Clean up ALL legacy global wildcard registrations
   await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextAppFile');
   await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextApp');
+  await regDeleteTree(FILE_KEY_PATH); // THE FIX: Delete the global wildcard if it exists from older dev installs
 
   for (const ext of SUPPORTED_EXTENSIONS) {
     const keyPath = `\\Software\\Classes\\SystemFileAssociations\\${ext}\\shell\\Upload to Context`;
@@ -120,6 +121,7 @@ export async function cleanupStaleRegistryKeys(): Promise<void> {
   // Remove them
   await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextApp');
   await regDeleteTree('\\Software\\Classes\\*\\shell\\ContextAppFile');
+  await regDeleteTree(FILE_KEY_PATH); // THE FIX: Clean up any old global wildcards
   await regDeleteTree('\\Software\\Classes\\Directory\\shell\\ContextApp');
 
   // If stale keys existed, the user had context menu enabled via the old installer.

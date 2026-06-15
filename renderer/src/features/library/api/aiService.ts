@@ -3,7 +3,7 @@ import { ENV } from "../../../config/env";
 import { DocumentData, SemanticUpdate } from "../../../store/library/librarySlice";
 
 export interface ChatMessage {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "error";
   content: string;
   createdAt?: string;
 }
@@ -55,7 +55,12 @@ export const aiService = {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to stream chat");
+      let errorMsg = "Failed to stream chat";
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.message || errorData.error || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
     }
 
     const reader = response.body?.getReader();
@@ -79,10 +84,16 @@ export const aiService = {
               if (dataStr === '[DONE]') continue;
               try {
                 const data = JSON.parse(dataStr);
+                if (data.error) {
+                  throw new Error(data.error);
+                }
                 if (data.content !== undefined) {
                   onChunk(data.content);
                 }
               } catch (e) {
+                if (e instanceof Error && e.message !== "Unexpected end of JSON input") {
+                  throw e;
+                }
                 console.error("SSE Parse error", e, dataStr);
               }
             }
