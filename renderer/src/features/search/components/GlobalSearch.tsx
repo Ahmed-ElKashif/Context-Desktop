@@ -9,6 +9,7 @@ export const GlobalSearch = () => {
   const [searchResults, setSearchResults] = useState<SemanticSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,8 +51,10 @@ export const GlobalSearch = () => {
         const result = await searchService.searchDocuments(searchQuery, 5);
         setSearchResults(result.data);
         setIsDropdownOpen(true);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Semantic search failed:", error);
+        setSearchError(error.message || "Semantic search failed");
+        setIsDropdownOpen(true);
       } finally {
         setIsSearching(false);
       }
@@ -79,6 +82,7 @@ export const GlobalSearch = () => {
           onChange={(e) => {
             const val = e.target.value;
             setSearchQuery(val);
+            setSearchError(null);
             if (!val.trim()) {
               setSearchResults([]);
               setIsDropdownOpen(false);
@@ -105,7 +109,12 @@ export const GlobalSearch = () => {
 
       {isDropdownOpen && (
         <div className="absolute top-full mt-2 w-full bg-white dark:bg-[#121214] border border-light-border dark:border-white/10 rounded-xl shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          {searchResults.length > 0 ? (
+          {searchError ? (
+            <div className="p-6 text-center">
+              <Icon name="error_outline" className="text-red-500/80 dark:text-red-400/80 text-[32px] mx-auto mb-2" />
+              <p className="text-sm font-bold text-red-600 dark:text-red-400">{searchError}</p>
+            </div>
+          ) : searchResults.length > 0 ? (
             <ul className="max-h-80 overflow-y-auto p-2">
               <li className="px-3 py-2 text-xs font-bold text-light-text/80 dark:text-white/80 tracking-wide border-b border-light-border/50 dark:border-white/5 mb-1">
                 Semantic Matches

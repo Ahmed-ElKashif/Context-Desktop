@@ -7,6 +7,8 @@ import { useAppSelector } from "../../../../store/hooks";
 
 // Shadcn Imports
 import { Button } from "@/components/ui/core/Button";
+import { getDesktopFilesFromEvent, handleDesktopFolderSelect } from "@/lib/desktop-dropzone";
+import { notify } from "../../../../components/ui/feedback/ToastEngine";
 
 export const DropzoneArea = ({
   onFilesDropped,
@@ -17,7 +19,22 @@ export const DropzoneArea = ({
   // 🛠️ THE FIX 1: Add a ref to control the hidden folder input
   const hiddenFolderInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to handle the manual hidden folder selection
+  const handleNativeFolderSelect = async () => {
+    try {
+      const nativeFiles = await handleDesktopFolderSelect();
+      if (nativeFiles) {
+        onDrop(nativeFiles);
+      } else {
+        // Fallback for Web MVC
+        hiddenFolderInputRef.current?.click();
+      }
+    } catch (err: any) {
+      console.error("Native folder select error:", err);
+      notify("Failed to select folder.", "error");
+    }
+  };
+
+  // Helper to handle the manual hidden folder selection (Web Fallback)
   const handleManualFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       onDrop(Array.from(e.target.files));
@@ -47,6 +64,7 @@ export const DropzoneArea = ({
     noClick: true, // Prevents the whole box from triggering the file picker
     noKeyboard: true, // Prevents spacebar from triggering it
     maxSize: 10 * 1024 * 1024,
+    getFilesFromEvent: getDesktopFilesFromEvent,
     accept: {
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
@@ -139,7 +157,7 @@ export const DropzoneArea = ({
           <Button
             onClick={(e) => {
               e.preventDefault();
-              hiddenFolderInputRef.current?.click(); // Opens Folder Picker
+              handleNativeFolderSelect(); // Use native OS dialog securely
             }}
             disabled={isUploading}
             variant="outline"

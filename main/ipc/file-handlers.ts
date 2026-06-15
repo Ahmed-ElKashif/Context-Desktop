@@ -97,10 +97,16 @@ export function registerFileHandlers() {
 
     const folderPath = result.filePaths[0];
     const fileList: any[] = [];
+    let iterations = 0;
 
     const walkSync = (dir: string) => {
+      if (fileList.length >= 5) return;
       const files = fs.readdirSync(dir);
       for (const file of files) {
+        if (++iterations > 2000) return;
+        if (fileList.length >= 5) break;
+        if (file === "node_modules" || file === ".git") continue;
+        
         const filepath = path.join(dir, file);
         const stat = fs.statSync(filepath);
         if (stat.isDirectory()) {
@@ -114,6 +120,7 @@ export function registerFileHandlers() {
               name: file,
               path: filepath,
               clientPath: clientPath,
+              type: fileMime,
               mimeType: fileMime,
               size: stat.size,
             });
@@ -170,10 +177,16 @@ export function registerFileHandlers() {
     if (!paths || paths.length === 0) return null;
 
     const fileList: any[] = [];
+    let iterations = 0;
 
     const walkSync = (dir: string, rootFolder: string) => {
+      if (fileList.length >= 5) return;
       const files = fs.readdirSync(dir);
       for (const file of files) {
+        if (++iterations > 2000) return;
+        if (fileList.length >= 5) break;
+        if (file === "node_modules" || file === ".git") continue;
+        
         const filepath = path.join(dir, file);
         const stat = fs.statSync(filepath);
         if (stat.isDirectory()) {
@@ -187,6 +200,7 @@ export function registerFileHandlers() {
               name: file,
               path: filepath,
               clientPath: clientPath,
+              type: fileMime,
               mimeType: fileMime,
               size: stat.size,
             });
@@ -196,6 +210,8 @@ export function registerFileHandlers() {
     };
 
     for (const itemPath of paths) {
+      if (++iterations > 2000) break;
+      if (fileList.length >= 5) break;
       try {
         if (!fs.existsSync(itemPath)) continue;
         const stat = fs.statSync(itemPath);
@@ -208,6 +224,7 @@ export function registerFileHandlers() {
               name: path.basename(itemPath),
               path: itemPath,
               clientPath: path.basename(itemPath),
+              type: fileMime,
               mimeType: fileMime,
               size: stat.size,
             });

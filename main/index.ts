@@ -15,8 +15,8 @@ app.setPath('crashDumps', app.getPath('userData') + '/Crashpad');
 crashReporter.start({ submitURL: '', uploadToServer: false });
 setupErrorLogger();
 
-// Required for Windows 11 Desktop Toast Notifications
-app.setAppUserModelId("com.context.desktop");
+// Required for Windows 10/11 Desktop Toast Notifications
+app.setAppUserModelId("com.contexters.context");
 
 // 2. Ensure Single Instance
 const gotTheLock = app.requestSingleInstanceLock();

@@ -61,8 +61,16 @@ export function registerAppHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.APP.GET_INITIAL_CLI_ARGS, () => {
-    // Import dynamically to avoid circular dependencies if any
-    const { getInitialCliArgs } = require("../windows/window-manager");
-    return getInitialCliArgs();
+    const actionArg = process.argv.find((arg) => arg.startsWith("--action="));
+    const pathArg = process.argv.find((arg) => arg.startsWith("--path="));
+    
+    if (actionArg && pathArg) {
+      const action = actionArg.split("=")[1];
+      let filePath = pathArg.substring("--path=".length);
+      filePath = filePath.replace(/^["']+|["']+$/g, '');
+      return { action, path: filePath };
+    }
+    
+    return null;
   });
 }

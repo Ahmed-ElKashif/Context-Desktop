@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { notify } from "../../../components/ui/feedback/ToastEngine";
+import { extractPathsFromEvent, applyPrototypeBridge } from "@/lib/desktop-dropzone";
 
 export const useLibraryDropzone = (openUploadModal: () => void) => {
   const [globalDroppedFiles, setGlobalDroppedFiles] = useState<File[]>([]);
@@ -16,8 +17,14 @@ export const useLibraryDropzone = (openUploadModal: () => void) => {
               window as any
             ).electronAPI.localFiles.processDroppedPaths(pathsToUpload);
             if (result && result.files) {
-              setGlobalDroppedFiles(result.files);
-              setGlobalDroppedPaths(result.files.map((f: any) => f.clientPath));
+              if (result.files.length === 0) {
+                notify("No supported files found in the dropped items.", "error");
+                return;
+              }
+              // We apply the prototype bridge to the raw IPC JSON response
+              const nativeFiles = applyPrototypeBridge(result.files);
+              setGlobalDroppedFiles(nativeFiles);
+              setGlobalDroppedPaths(nativeFiles.map((f: any) => f.webkitRelativePath || f.clientPath));
               openUploadModal();
             }
           } catch (err) {
@@ -52,7 +59,7 @@ export const useLibraryDropzone = (openUploadModal: () => void) => {
       return;
     }
 
-    const filesToProcess = realFiles.slice(0, 10);
+    const filesToProcess = realFiles.slice(0, 5);
 
     const paths = filesToProcess.map((file: any) => {
       if (file.webkitRelativePath) return file.webkitRelativePath;
@@ -70,8 +77,23 @@ export const useLibraryDropzone = (openUploadModal: () => void) => {
     noClick: true,
     noKeyboard: true,
     maxSize: 10 * 1024 * 1024,
-    onDropRejected: (rejections) =>
-      notify(`File type not supported: ${rejections[0]?.file?.name}`, "error"),
+    getFilesFromEvent: async (event: any) => {
+      const files = event.dataTransfer ? event.dataTransfer.files : event.target?.files;
+      if (files && files.length > 0) {
+        const paths = extractPathsFromEvent(files);
+        if (paths.length > 0) {
+          window.dispatchEvent(new CustomEvent("external-upload", { detail: paths }));
+        }
+      }
+      return []; // Instantly return empty to terminate react-dropzone's synchronous UI-blocking crawl
+    },
+    onDropRejected: (rejections) => {
+      if (rejections.length > 1) {
+        notify("No supported files found in the dropped items.", "error");
+      } else {
+        notify(`File type not supported: ${rejections[0]?.file?.name}`, "error");
+      }
+    },
     accept: {
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],

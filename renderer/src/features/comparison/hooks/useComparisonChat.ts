@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { ChatMessage, chatService } from "../api/chatService";
 
 import {
@@ -79,16 +78,11 @@ export function useComparisonChat() {
         },
       );
     } catch (error: unknown) {
-      notify(
-        (error as Error)?.message ||
-          (error as string) ||
-          "Failed to send message",
-        "error",
-      );
+      const errMsg = (error as Error)?.message || (error as string) || "Failed to send message";
       if (firstChunkReceived) {
-        dispatch(removeLastMessage()); // remove AI msg
+        dispatch(removeLastMessage()); // remove partial AI msg
       }
-      dispatch(removeLastMessage()); // remove User msg
+      dispatch(addUserMessage({ role: "error", content: errMsg }));
     } finally {
       dispatch(setIsChatting(false));
     }

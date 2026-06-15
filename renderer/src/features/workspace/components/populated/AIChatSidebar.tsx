@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from "react";
 import { Icon } from "../../../../components/ui/core/Icons";
 import { DocumentData } from "../../../../store/library/librarySlice";
 import { aiService, ChatMessage } from "../../../library/api/aiService";
-import { notify } from "../../../../components/ui/feedback/ToastEngine";
 import { useAppDispatch } from "../../../../store/hooks";
 import { fetchSettings } from "../../../../store/settings/settingsSlice";
 import { ContextMarkdown } from "../../../../components/ui/display/ContextMarkdown";
@@ -105,9 +104,8 @@ export const AIChatSidebar = ({
       });
       dispatch(fetchSettings()); // Refresh AI budget!
     } catch (error: unknown) {
-      const errMsg = getApiError(error, );
-      notify(errMsg, "error");
-      setMessages((prev) => prev.slice(0, -1)); // Revert if failed
+      const errMsg = getApiError(error);
+      setMessages((prev) => [...prev, { role: "error", content: errMsg }]);
     } finally {
       setIsTyping(false);
     }
@@ -175,6 +173,8 @@ export const AIChatSidebar = ({
                 className={`max-w-[90%] p-3.5 rounded-xl text-sm font-medium leading-relaxed shadow-sm ${
                   msg.role === "user"
                     ? "self-end bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-tr-sm"
+                    : msg.role === "error"
+                    ? "self-start bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-200 rounded-tl-sm"
                     : "self-start bg-light-bg dark:bg-[#121214] border border-light-border dark:border-white/5 text-light-text dark:text-white/90 rounded-tl-sm"
                 }`}
               >
