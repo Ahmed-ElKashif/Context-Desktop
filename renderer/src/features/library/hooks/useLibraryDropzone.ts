@@ -21,6 +21,10 @@ export const useLibraryDropzone = (openUploadModal: () => void) => {
                 notify("No supported files found in the dropped items.", "error");
                 return;
               }
+              if (result.files.length > 5) {
+                notify("Upload rejected. You can only upload up to 5 files at a time. Please select specific files.", "error");
+                return;
+              }
               // We apply the prototype bridge to the raw IPC JSON response
               const nativeFiles = applyPrototypeBridge(result.files);
               setGlobalDroppedFiles(nativeFiles);
@@ -58,8 +62,12 @@ export const useLibraryDropzone = (openUploadModal: () => void) => {
       notify("Cannot upload an empty folder.", "error");
       return;
     }
+    if (realFiles.length > 5) {
+      notify("Upload rejected. You can only upload up to 5 files at a time. Please select specific files.", "error");
+      return;
+    }
 
-    const filesToProcess = realFiles.slice(0, 5);
+    const filesToProcess = realFiles;
 
     const paths = filesToProcess.map((file: any) => {
       if (file.webkitRelativePath) return file.webkitRelativePath;

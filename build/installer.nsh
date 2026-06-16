@@ -4,7 +4,8 @@
 ; ── Per-extension registration macros (SystemFileAssociations) ──
 !macro _RegisterExtension _ext
   WriteRegStr SHCTX "Software\Classes\SystemFileAssociations\${_ext}\shell\ContextAppFile" "" "Upload to Context"
-  WriteRegStr SHCTX "Software\Classes\SystemFileAssociations\${_ext}\shell\ContextAppFile" "Icon" '"$INSTDIR\Context.exe"'
+  WriteRegStr SHCTX "Software\Classes\SystemFileAssociations\${_ext}\shell\ContextAppFile" "MUIVerb" "Upload to Context"
+  WriteRegStr SHCTX "Software\Classes\SystemFileAssociations\${_ext}\shell\ContextAppFile" "Icon" '"$INSTDIR\Context.exe",0'
   WriteRegStr SHCTX "Software\Classes\SystemFileAssociations\${_ext}\shell\ContextAppFile\command" "" '"$INSTDIR\Context.exe" --action=upload --path="%1"'
 !macroend
 
@@ -76,7 +77,8 @@ FunctionEnd
 
   ${If} $CheckboxDirs_State == ${BST_CHECKED}
     WriteRegStr SHCTX "Software\Classes\Directory\shell\ContextApp" "" "Upload to Context"
-    WriteRegStr SHCTX "Software\Classes\Directory\shell\ContextApp" "Icon" '"$INSTDIR\Context.exe"'
+    WriteRegStr SHCTX "Software\Classes\Directory\shell\ContextApp" "MUIVerb" "Upload to Context"
+    WriteRegStr SHCTX "Software\Classes\Directory\shell\ContextApp" "Icon" '"$INSTDIR\Context.exe",0'
     WriteRegStr SHCTX "Software\Classes\Directory\shell\ContextApp\command" "" '"$INSTDIR\Context.exe" --action=upload --path="%V"'
   ${EndIf}
 !macroend

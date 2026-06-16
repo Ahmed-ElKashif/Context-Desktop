@@ -125,7 +125,7 @@ export const LoginForm = () => {
                   </FormLabel>
                   <Link
                     to="/forgot-password"
-                    className="text-[10px] text-light-text/60 dark:text-white/40 hover:text-light-primary dark:hover:text-dark-primary transition-colors uppercase tracking-wider font-mono"
+                    className="text-[11px] font-bold text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity uppercase tracking-wider font-mono"
                   >
                     Lost Key?
                   </Link>

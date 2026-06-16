@@ -132,7 +132,7 @@ export async function createWindow() {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const scriptSrc = isDev 
       ? "'self' 'unsafe-inline' 'unsafe-eval'" 
-      : "'self' 'unsafe-inline'";
+      : "'self'";
 
     const connectSrc = isDev
       ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com"
@@ -142,7 +142,7 @@ export async function createWindow() {
       responseHeaders: {
         ...details.responseHeaders,
         "Content-Security-Policy": [
-          `default-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src ${scriptSrc}; img-src 'self' data: *; connect-src ${connectSrc}`,
+          `default-src 'self'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src ${scriptSrc}; img-src 'self' data: *; connect-src ${connectSrc}`,
         ],
       },
     });
@@ -170,6 +170,19 @@ export async function createWindow() {
       require('electron').shell.openExternal(url);
     }
     return { action: 'deny' };
+  });
+
+  // SECURITY: Prevent the main app window from navigating away from the app
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    try {
+      const parsedUrl = new URL(url);
+      if (parsedUrl.protocol !== 'file:' && parsedUrl.hostname !== 'localhost') {
+        event.preventDefault();
+        require('electron').shell.openExternal(url);
+      }
+    } catch {
+      event.preventDefault();
+    }
   });
 
   mainWindow.webContents.on("did-finish-load", () => {

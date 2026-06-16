@@ -48,7 +48,7 @@ const electronAPI = {
   localFiles: {
     selectBatchFolder: () => ipcRenderer.invoke(IPC_CHANNELS.FILE.SELECT_BATCH_FOLDER),
     selectDirectory: () => ipcRenderer.invoke(IPC_CHANNELS.FILE.SELECT_DIRECTORY),
-    exportOrganizedFiles: (baseDir: string, files: { url: string; relativePath: string; localSourcePath?: string }[]) => ipcRenderer.invoke(IPC_CHANNELS.FILE.EXPORT_ORGANIZED_FILES, baseDir, files),
+    exportOrganizedFiles: (files: { url: string; relativePath: string; localSourcePath?: string }[]) => ipcRenderer.invoke(IPC_CHANNELS.FILE.EXPORT_ORGANIZED_FILES, files),
     processDroppedPaths: (paths: string[]) => ipcRenderer.invoke(IPC_CHANNELS.FILE.PROCESS_DROPPED_PATHS, paths),
     getFileIcon: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.FILE.GET_FILE_ICON, filePath),
     saveComparisonReport: (content: string, defaultFilename: string) => ipcRenderer.invoke(IPC_CHANNELS.FILE.SAVE_COMPARISON_REPORT, content, defaultFilename),

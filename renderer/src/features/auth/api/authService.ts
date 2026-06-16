@@ -33,6 +33,10 @@ export const authService = {
     const response = await api.post('/auth/reset-password', { token, password: passwordStr });
     return response.data;
   },
+  verifyEmail: async (token: string): Promise<AuthResponse> => {
+    const response = await api.get<AuthResponse>(`/auth/verify-email?token=${token}`);
+    return response.data;
+  },
   updateProfile : async (userData: { persona?: string; fullName?: string; username?: string; email?: string; password?: string; currentPassword?: string }) => {
   const response = await api.patch("/users/profile", userData);
   

@@ -61,7 +61,13 @@ export const useUploadModal = ({
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
-    const filesToProcess = acceptedFiles.slice(0, 5);
+
+    if (acceptedFiles.length > 5) {
+      notify("Upload rejected. You can only upload up to 5 files at a time. Please select specific files.", "error");
+      return;
+    }
+
+    const filesToProcess = acceptedFiles;
 
     const rawPaths = filesToProcess.map((file: any) => {
       if (file.webkitRelativePath) return file.webkitRelativePath;
@@ -205,13 +211,10 @@ export const useUploadModal = ({
     if (!proposedFolderUpdates) return;
     try {
       const electronAPI = (window as any).electronAPI;
-      if (!electronAPI?.localFiles?.selectDirectory) {
+      if (!electronAPI?.localFiles?.exportOrganizedFiles) {
         notify("Local export is only available in the Desktop App.", "error");
         return;
       }
-
-      const directoryPath = await electronAPI.localFiles.selectDirectory();
-      if (!directoryPath) return; // User canceled
 
       const toastId = "ai-export-flow";
       notify("Exporting organized files to your PC...", "info", toastId);
@@ -241,7 +244,6 @@ export const useUploadModal = ({
       }
 
       const result = await electronAPI.localFiles.exportOrganizedFiles(
-        directoryPath,
         filesToExport,
       );
       if (result?.success) {
@@ -291,6 +293,18 @@ export const useUploadModal = ({
     noClick: true,
     noKeyboard: true,
     getFilesFromEvent: getDesktopFilesFromEvent,
+    accept: {
+      "application/pdf": [".pdf"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "image/jpeg": [".jpeg", ".jpg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+      // Excel & CSV Formats
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.ms-excel": [".xls"],
+      "text/csv": [".csv"],
+    },
   });
 
   return {

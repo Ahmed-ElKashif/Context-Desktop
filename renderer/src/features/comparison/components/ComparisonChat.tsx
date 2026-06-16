@@ -134,7 +134,7 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
               disabled={isChatting}
               className="text-[10px] font-semibold bg-light-bg dark:bg-white/5 px-2.5 py-1 rounded-md border border-light-border dark:border-white/10 text-light-text/70 dark:text-dark-text/70 hover:border-light-primary dark:hover:border-dark-primary disabled:opacity-40 transition-colors whitespace-nowrap"
             >
-              "{prompt}"
+              {prompt}
             </button>
           ))}
         </div>

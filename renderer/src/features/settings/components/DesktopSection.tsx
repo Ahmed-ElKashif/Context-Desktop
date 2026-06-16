@@ -4,7 +4,6 @@ import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 export const DesktopSection = () => {
   const [startupEnabled, setStartupEnabled] = useState(false);
-  const [contextMenuEnabled, setContextMenuEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [version, setVersion] = useState("Unknown");
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "available" | "downloaded">("idle");
@@ -12,14 +11,11 @@ export const DesktopSection = () => {
   const electronAPI = (window as any).electronAPI;
   const isDesktop = !!electronAPI;
 
-  const [isUpdatingContextMenu, setIsUpdatingContextMenu] = useState(false);
-
   useEffect(() => {
     if (!isDesktop) return;
 
     // Load initial states
     electronAPI.app.getStartup().then((val: boolean) => setStartupEnabled(!!val)).catch(console.error);
-    electronAPI.app.getContextMenuStatus().then((val: boolean) => setContextMenuEnabled(!!val)).catch(console.error);
     electronAPI.app.getVersion().then((v: string) => setVersion(v || "Unknown")).catch(console.error);
     electronAPI.store.get('notificationsEnabled').then((val: boolean) => {
       if (val !== undefined) setNotificationsEnabled(!!val);
@@ -60,27 +56,6 @@ export const DesktopSection = () => {
     setStartupEnabled(newVal);
     await electronAPI.app.setStartup(newVal);
     notify(newVal ? "App will launch on startup" : "Auto-launch disabled", "success");
-  };
-
-  const toggleContextMenu = async () => {
-    if (!isDesktop || isUpdatingContextMenu) return;
-    setIsUpdatingContextMenu(true);
-    try {
-      if (contextMenuEnabled) {
-        await electronAPI.app.unregisterContextMenu();
-        setContextMenuEnabled(false);
-        notify("Context menu removed", "success");
-      } else {
-        await electronAPI.app.registerContextMenu();
-        setContextMenuEnabled(true);
-        notify("Context menu added", "success");
-      }
-    } catch (err) {
-      console.error(err);
-      notify("Failed to update context menu.", "error");
-    } finally {
-      setIsUpdatingContextMenu(false);
-    }
   };
 
   const toggleNotifications = async () => {
@@ -137,29 +112,6 @@ export const DesktopSection = () => {
           >
             <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
               startupEnabled ? "translate-x-6" : "translate-x-0"
-            }`} />
-          </button>
-        </div>
-
-        {/* Context Menu Toggle */}
-        <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="font-extrabold text-light-text dark:text-white">Windows Context Menu</p>
-            <p className="text-xs font-medium text-light-text/80 dark:text-dark-text/60 mt-1">
-              Add "Upload to Context" when you right-click files and folders.
-            </p>
-          </div>
-          <button
-            onClick={toggleContextMenu}
-            disabled={isUpdatingContextMenu}
-            className={`relative w-12 h-6 rounded-full transition-colors ${
-              isUpdatingContextMenu ? "opacity-50 cursor-not-allowed" : ""
-            } ${
-              contextMenuEnabled ? "bg-light-primary dark:bg-dark-primary" : "bg-light-border dark:bg-white/10"
-            }`}
-          >
-            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
-              contextMenuEnabled ? "translate-x-6" : "translate-x-0"
             }`} />
           </button>
         </div>

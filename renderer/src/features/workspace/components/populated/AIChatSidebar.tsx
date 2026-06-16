@@ -157,7 +157,7 @@ export const AIChatSidebar = ({
                     onClick={() => handleSendMessage(suggestion)}
                     className="text-left text-xs font-semibold bg-white dark:bg-dark-surface px-3 py-2 rounded-lg border border-light-border dark:border-white/10 text-light-text/80 dark:text-dark-text/70 hover:border-light-primary dark:hover:border-dark-primary hover:text-light-primary dark:hover:text-dark-primary transition-colors shadow-sm flex justify-between items-center group"
                   >
-                    "{suggestion}"
+                    {suggestion}
                     <Icon
                       name="arrow_forward"
                       className="text-[14px] opacity-0 group-hover:opacity-100 transition-opacity"

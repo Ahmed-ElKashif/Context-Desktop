@@ -7,9 +7,6 @@ export const IPC_CHANNELS = {
     GET_STARTUP: 'app:get-startup',
     SHOW_NOTIFICATION: 'app:show-notification',
     NOTIFICATION_CLICKED: 'app:notification-clicked',
-    REG_CONTEXT_MENU: 'app:reg-context-menu',
-    UNREG_CONTEXT_MENU: 'app:unreg-context-menu',
-    GET_CONTEXT_MENU_STATUS: 'app:get-context-menu-status',
   },
   WINDOW: {
     MINIMIZE: 'window:minimize',

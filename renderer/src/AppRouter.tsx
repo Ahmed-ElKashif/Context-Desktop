@@ -6,6 +6,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
+import VerifyEmail from "./pages/verify-email";
 import { ContextToaster } from "./components/ui/feedback/ToastEngine";
 import AdminGuard from "./features/auth/components/AdminGuard";
 import { useAnalytics } from "./features/analytics/hooks/useAnalytics";
@@ -15,6 +16,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "./store/store";
 import { logout } from "./store/auth/authSlice";
 import { BootSequence } from "./components/layout/BootSequence";
+import { notify } from "./components/ui/feedback/ToastEngine";
+import { addNotification } from "./store/ui/notificationSlice";
 
 const Workspace = lazy(() => import("./pages/workspace"));
 const Library = lazy(() => import("./pages/Smartlibrary"));
@@ -46,19 +49,16 @@ export function AppRouter({ showBootSequence, isBootComplete }: { showBootSequen
     const handleApiError = (e: Event) => {
       const msg = (e as CustomEvent).detail?.message;
       if (msg) {
-        import("./components/ui/feedback/ToastEngine").then(({ notify }) => {
-          notify(msg, "error");
-        });
+        notify(msg, "error");
       }
     };
 
     const handleAppNotify = (e: Event) => {
-      const { message, type } = (e as CustomEvent).detail || {};
+      const { message, type, systemNotify } = (e as CustomEvent).detail || {};
       // Filter out transient info toasts like "Authenticating..."
       if (message && type && type !== "info") {
-        import("./store/ui/notificationSlice").then(({ addNotification }) => {
-          dispatch(addNotification({ message, type, silent: true }));
-        });
+        // Pass silent: !systemNotify so OS Banners trigger only when requested and app is hidden
+        dispatch(addNotification({ message, type, silent: !systemNotify }));
       }
     };
 
@@ -145,6 +145,7 @@ export function AppRouter({ showBootSequence, isBootComplete }: { showBootSequen
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           <Route element={<AuthGuard />}>
             <Route element={<MainLayout />}>

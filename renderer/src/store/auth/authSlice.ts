@@ -77,11 +77,24 @@ export const registerUser = createAsyncThunk(
   async (userData: RegisterFormValues, { rejectWithValue }) => {
     try {
       const data = await authService.register(userData);
+      // Don't store user or token — they must verify email first
+      return data;
+    } catch (error: unknown) {
+      return rejectWithValue(getErrorMessage(error, "Registration failed"));
+    }
+  },
+);
+
+export const verifyEmail = createAsyncThunk(
+  "auth/verifyEmail",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const data = await authService.verifyEmail(token);
       await (window as any).electronAPI.store.set("context_token", data.token);
       await (window as any).electronAPI.store.set("context_user", JSON.stringify(data.user));
       return data;
     } catch (error: unknown) {
-      return rejectWithValue(getErrorMessage(error, "Registration failed"));
+      return rejectWithValue(getErrorMessage(error, "Email verification failed"));
     }
   },
 );
@@ -155,15 +168,29 @@ const authSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
+        // Registration succeeded — user must now verify their email.
+        // Do NOT set isAuthenticated. Show a "check your email" screen.
+        state.status = "succeeded";
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // Handle verifyEmail
+      .addCase(verifyEmail.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(verifyEmail.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.token = action.payload.token || null;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(verifyEmail.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload as string;
+        state.error = (action.payload as string) || "Email verification failed";
       })
       // Handle Update Profile
       .addCase(updateProfile.pending, (state) => {

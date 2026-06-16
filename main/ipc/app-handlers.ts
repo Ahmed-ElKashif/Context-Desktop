@@ -1,7 +1,6 @@
 import { app, ipcMain, Notification } from "electron";
 import { IPC_CHANNELS } from "../../shared/ipc-channels";
 import { getMainWindow } from "../windows/window-manager";
-import { getContextMenuStatus, registerFolderContextMenu, registerFileContextMenu, unregisterFolderContextMenu, unregisterFileContextMenu } from "../registry";
 
 export function registerAppHandlers() {
   ipcMain.handle(IPC_CHANNELS.APP.GET_VERSION, () => app.getVersion());
@@ -44,21 +43,7 @@ export function registerAppHandlers() {
     }
   });
 
-  ipcMain.handle(IPC_CHANNELS.APP.GET_CONTEXT_MENU_STATUS, async () => {
-    return await getContextMenuStatus();
-  });
 
-  ipcMain.handle(IPC_CHANNELS.APP.REG_CONTEXT_MENU, async () => {
-    await registerFolderContextMenu();
-    await registerFileContextMenu();
-    return true;
-  });
-
-  ipcMain.handle(IPC_CHANNELS.APP.UNREG_CONTEXT_MENU, async () => {
-    await unregisterFolderContextMenu();
-    await unregisterFileContextMenu();
-    return true;
-  });
 
   ipcMain.handle(IPC_CHANNELS.APP.GET_INITIAL_CLI_ARGS, () => {
     const actionArg = process.argv.find((arg) => arg.startsWith("--action="));

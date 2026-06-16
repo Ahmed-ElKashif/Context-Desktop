@@ -78,12 +78,7 @@ export const addNotification = createAsyncThunk(
           electronAPI.app.showNotification("Context", message, { id: newNotification.id });
         }
       }
-      try {
-        const { playNotificationSound } = await import("../../utils/audioUtils");
-        playNotificationSound(type === "error" ? "error" : "success");
-      } catch (err) {
-        console.warn("Could not play notification sound", err);
-      }
+      // Audio is handled by ToastEngine or OS directly, removed duplicate ping here.
     }
 
     return newNotification;
