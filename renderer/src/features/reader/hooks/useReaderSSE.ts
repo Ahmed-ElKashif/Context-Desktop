@@ -4,7 +4,6 @@ import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { ENV } from "../../../config/env";
 import { setActiveDocument } from "../../../store/workspace/workspaceSlice";
 import { readerService } from "../index";
-import { playNotificationSound } from "../../../utils/audioUtils";
 
 export const useReaderSSE = (id: string | undefined, aiStatus: string | undefined) => {
   const dispatch = useAppDispatch();
@@ -27,17 +26,15 @@ export const useReaderSSE = (id: string | undefined, aiStatus: string | undefine
         if (parsed.documentId === id) {
           if (parsed.aiStatus === "Analyzed" && parsed.document) {
             dispatch(setActiveDocument(parsed.document));
-            playNotificationSound("success");
             const title = parsed.document?.title || "Document";
-            notify(`"${title}" analyzed successfully!`, "success", "ai-success");
+            notify(`"${title}" analyzed successfully!`, "success", "ai-success", true);
             es.close();
           } else if (parsed.aiStatus === "Failed") {
             // Reload from backend so we have the latest data
             const docData = await readerService.getDocumentDetails(id);
             dispatch(setActiveDocument(docData));
-            playNotificationSound("error");
             const title = docData?.title || "Document";
-            notify(`Analysis failed for "${title}". Please try again.`, "error", "ai-failed");
+            notify(`Analysis failed for "${title}". Please try again.`, "error", "ai-failed", true);
             es.close();
           }
         }

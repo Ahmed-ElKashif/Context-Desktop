@@ -8,7 +8,6 @@ import { registerStoreHandlers } from "./ipc/store-handlers";
 import { registerUpdaterHandlers, checkForUpdatesOnStartup } from "./ipc/updater-handlers";
 import { registerFileHandlers } from "./ipc/file-handlers";
 import { getStore } from "./utils/store";
-import { cleanupStaleRegistryKeys } from "./registry";
 
 // 1. Initialize Error Logger and Crash Reporter
 app.setPath('crashDumps', app.getPath('userData') + '/Crashpad');
@@ -38,9 +37,6 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(async () => {
-    // 2.5. Clean up stale registry keys from older installers (self-heal)
-    await cleanupStaleRegistryKeys();
-
     // 3. Register all IPC Handlers
     registerAppHandlers();
     registerWindowHandlers();

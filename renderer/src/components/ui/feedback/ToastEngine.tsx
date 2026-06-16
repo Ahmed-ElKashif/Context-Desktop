@@ -32,10 +32,19 @@ export const notify = (
   message: string,
   type: ToastType = "info",
   id: string = message,
+  systemNotify: boolean = false
 ) => {
+  // TRUE BIG TECH: Only escalate to OS if the app is currently hidden/minimized!
+  const isAppHidden = typeof document !== "undefined" && !document.hasFocus();
+  const shouldTriggerOSBanner = systemNotify && isAppHidden;
+
   // Dispatch globally to sync with Notification Center
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("app-notify", { detail: { message, type } }));
+    window.dispatchEvent(
+      new CustomEvent("app-notify", {
+        detail: { message, type, systemNotify: shouldTriggerOSBanner },
+      }),
+    );
   }
 
   const config = {
@@ -68,6 +77,7 @@ export const notify = (
   const style = config[type];
   const hash = Math.random().toString(36).substring(2, 8).toUpperCase();
 
+  // Audio: Always play custom in-app audio because the Main Process OS banner is explicitly configured to be silent (silent: true)
   try {
     import("../../../utils/audioUtils").then(({ playNotificationSound }) => {
       playNotificationSound(type === "error" ? "error" : "success");

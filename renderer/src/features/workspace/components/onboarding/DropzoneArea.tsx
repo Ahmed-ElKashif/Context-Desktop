@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Icon } from "../../../../components/ui/core/Icons";
 
@@ -16,17 +15,12 @@ export const DropzoneArea = ({
   onFilesDropped: (files: File[], paths: string[]) => void;
 }) => {
   const { isUploading } = useAppSelector((state) => state.library);
-  // 🛠️ THE FIX 1: Add a ref to control the hidden folder input
-  const hiddenFolderInputRef = useRef<HTMLInputElement>(null);
 
   const handleNativeFolderSelect = async () => {
     try {
       const nativeFiles = await handleDesktopFolderSelect();
       if (nativeFiles) {
         onDrop(nativeFiles);
-      } else {
-        // Fallback for Web MVC
-        hiddenFolderInputRef.current?.click();
       }
     } catch (err: any) {
       console.error("Native folder select error:", err);
@@ -34,19 +28,17 @@ export const DropzoneArea = ({
     }
   };
 
-  // Helper to handle the manual hidden folder selection (Web Fallback)
-  const handleManualFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      onDrop(Array.from(e.target.files));
-    }
-  };
-
   // THE FIX: Removed useCallback and the dependency array!
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
-    // Limit to 10 files to protect the backend MVP
-    const filesToProcess = acceptedFiles.slice(0, 10);
+    if (acceptedFiles.length > 5) {
+      notify("Upload rejected. You can only upload up to 5 files at a time. Please select specific files.", "error");
+      return;
+    }
+
+    // Process exactly 5 or fewer files
+    const filesToProcess = acceptedFiles;
 
     // Extract the physical folder paths from the dropped files
     const paths = filesToProcess.map(
@@ -65,6 +57,13 @@ export const DropzoneArea = ({
     noKeyboard: true, // Prevents spacebar from triggering it
     maxSize: 10 * 1024 * 1024,
     getFilesFromEvent: getDesktopFilesFromEvent,
+    onDropRejected: (rejections) => {
+      if (rejections.length > 1) {
+        notify(`${rejections.length} files were not supported and were skipped.`, "warning");
+      } else if (rejections.length === 1) {
+        notify(`File type not supported: ${rejections[0]?.file?.name}`, "error");
+      }
+    },
     accept: {
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],
@@ -95,16 +94,6 @@ export const DropzoneArea = ({
       >
         <input {...getInputProps()} />
 
-        {/* 🛠️ THE FIX 3: Hidden Folder Input (Strictly for folder clicking) */}
-        <input
-          type="file"
-          ref={hiddenFolderInputRef}
-          onChange={handleManualFolderSelect}
-          className="hidden"
-          multiple
-          //eslint-disable-next-line
-          {...({ webkitdirectory: "true", directory: "true" } as any)}
-        />
 
         <div
           className={`w-16 h-16 shadow-sm rounded-full flex items-center justify-center mb-6 transition-colors ${

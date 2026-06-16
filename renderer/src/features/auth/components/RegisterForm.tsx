@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Icon } from "../../../components/ui/core/Icons";
 import { notify } from "../../../components/ui/feedback/ToastEngine";
 
@@ -39,10 +39,7 @@ export const RegisterForm = () => {
     },
   });
 
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const plan = searchParams.get("plan");
-  const cycle = searchParams.get("cycle");
 
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.auth);
@@ -57,20 +54,51 @@ export const RegisterForm = () => {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    notify("Initializing new node...", "info");
+    notify("Creating your account...", "info");
     try {
       await dispatch(registerUser(data)).unwrap();
-      notify("Node initialized successfully.", "success");
-      sessionStorage.setItem("context_boot_after_auth", "1");
-      if (plan) {
-        navigate(`/settings?checkoutPlan=${plan}&cycle=${cycle || "monthly"}`);
-      } else {
-        navigate("/workspace");
-      }
+      notify("Account created successfully. Please check your email.", "success");
+      // Don't navigate away; the UI will now show the verification screen
     } catch (error: unknown) {
-      notify((error as string) || "Failed to initialize node.", "error");
+      notify((error as string) || "Failed to create account.", "error");
     }
   };
+
+  const registeredEmail = form.getValues("email");
+
+  if (status === "succeeded") {
+    return (
+      <div className="w-full max-w-2xl bg-white/90 dark:bg-[#18181B]/90 border border-light-border dark:border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col md:flex-row relative">
+        <div className="w-full md:w-2 bg-light-bg dark:bg-white/5 md:h-auto h-2 relative shrink-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-light-primary dark:bg-dark-primary shadow-[0_0_15px_rgba(16,55,102,0.5)] dark:shadow-[0_0_15px_rgba(139,92,246,0.5)]"></div>
+        </div>
+        <div className="flex flex-col items-center justify-center flex-1 p-10 lg:p-16 text-center gap-6">
+          <div className="w-20 h-20 rounded-full bg-light-primary/10 dark:bg-dark-primary/10 border border-light-primary/20 dark:border-dark-primary/20 flex items-center justify-center">
+            <span className="material-symbols-rounded text-4xl text-light-primary dark:text-dark-primary">mail</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-light-text dark:text-white font-display mb-2">Check your inbox</h2>
+            <p className="text-sm text-light-text/60 dark:text-white/50 leading-relaxed">
+              We sent a verification link to<br />
+              <span className="font-semibold text-light-primary dark:text-dark-primary">{registeredEmail}</span>
+            </p>
+          </div>
+          <p className="text-xs text-light-text/40 dark:text-white/30 leading-relaxed max-w-xs">
+            Click the link in the email to activate your account. The link expires in 24 hours.
+          </p>
+          <div className="flex flex-col items-center gap-3 w-full pt-2 border-t border-light-border dark:border-white/5">
+            <p className="text-xs text-light-text/40 dark:text-white/30">Already verified?</p>
+            <Link
+              to="/login"
+              className="text-sm font-bold text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity"
+            >
+              Go to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-2xl bg-white/90 dark:bg-[#18181B]/90 border border-light-border dark:border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col md:flex-row relative">

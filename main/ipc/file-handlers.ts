@@ -39,8 +39,20 @@ export function registerFileHandlers() {
 
   ipcMain.handle(
     IPC_CHANNELS.FILE.EXPORT_ORGANIZED_FILES,
-    async (_event, baseDir: string, files: { url: string; relativePath: string; localSourcePath?: string }[]) => {
+    async (_event, files: { url: string; relativePath: string; localSourcePath?: string }[]) => {
       try {
+        const mainWindow = getMainWindow();
+        if (!mainWindow) throw new Error("No main window");
+        
+        // Force explicit user consent by asking for the destination directory in the backend!
+        const result = await dialog.showOpenDialog(mainWindow, {
+          title: "Select Destination to Export Files",
+          properties: ["openDirectory", "createDirectory"],
+        });
+
+        if (result.canceled || result.filePaths.length === 0) return null;
+        const baseDir = result.filePaths[0];
+
         console.log(`[Main Process] Exporting ${files.length} files to ${baseDir}`);
         for (const file of files) {
           if (!file.url && !file.localSourcePath) continue;
@@ -57,11 +69,11 @@ export function registerFileHandlers() {
           const targetDir = path.dirname(targetPath);
           
           if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
+            await fs.promises.mkdir(targetDir, { recursive: true });
           }
           
           if (file.localSourcePath && fs.existsSync(file.localSourcePath)) {
-            fs.copyFileSync(file.localSourcePath, targetPath);
+            await fs.promises.copyFile(file.localSourcePath, targetPath);
           } else if (file.url) {
             const response = await axios({
               method: 'GET',
@@ -99,43 +111,59 @@ export function registerFileHandlers() {
     const fileList: any[] = [];
     let iterations = 0;
 
-    const walkSync = (dir: string) => {
-      if (fileList.length >= 5) return;
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        if (++iterations > 2000) return;
-        if (fileList.length >= 5) break;
-        if (file === "node_modules" || file === ".git") continue;
-        
-        const filepath = path.join(dir, file);
-        const stat = fs.statSync(filepath);
-        if (stat.isDirectory()) {
-          walkSync(filepath);
-        } else {
-          const fileMime = mime.lookup(filepath) || "";
-          if (SUPPORTED_TYPES.includes(fileMime)) {
-            const rootParent = path.dirname(folderPath);
-            const clientPath = path.relative(rootParent, filepath).replace(/\\/g, '/');
-            fileList.push({
-              name: file,
-              path: filepath,
-              clientPath: clientPath,
-              type: fileMime,
-              mimeType: fileMime,
-              size: stat.size,
-            });
+    const walkAsync = async (dir: string) => {
+      if (fileList.length >= 6) return;
+      try {
+        const files = await fs.promises.readdir(dir);
+        for (const file of files) {
+          if (++iterations > 2000) return;
+          if (fileList.length >= 6) break;
+          if (file === "node_modules" || file === ".git") continue;
+          
+          const filepath = path.join(dir, file);
+          const stat = await fs.promises.stat(filepath);
+          if (stat.isDirectory()) {
+            await walkAsync(filepath);
+          } else {
+            const fileMime = mime.lookup(filepath) || "";
+            if (SUPPORTED_TYPES.includes(fileMime)) {
+              const rootParent = path.dirname(folderPath);
+              const clientPath = path.relative(rootParent, filepath).replace(/\\/g, '/');
+              fileList.push({
+                name: file,
+                path: filepath,
+                clientPath: clientPath,
+                type: fileMime,
+                mimeType: fileMime,
+                size: stat.size,
+              });
+            }
           }
         }
+      } catch (err) {
+        console.error(`[Main Process] Error reading directory ${dir}:`, err);
       }
     };
 
-    walkSync(folderPath);
+    await walkAsync(folderPath);
     return { folderPath, files: fileList };
   });
 
   ipcMain.handle(IPC_CHANNELS.FILE.INGEST_BATCH_START, async (event, { token, apiUrl, files, clientPaths, folderId }) => {
     const mainWindow = getMainWindow();
     if (!mainWindow) return;
+
+    // SECURITY CHECK: Lock down the API URL using strict hostname parsing to prevent subdomain bypasses
+    try {
+      const parsedUrl = new URL(apiUrl);
+      const allowedHostnames = ['context-sfs.up.railway.app', 'localhost'];
+      if (!allowedHostnames.includes(parsedUrl.hostname)) {
+        throw new Error("Hostname not in allowed list");
+      }
+    } catch (err) {
+      console.error(`[Security] Blocked unauthorized upload attempt to: ${apiUrl}`);
+      throw new Error("Unauthorized API URL");
+    }
     
     try {
       const formData = new FormData();
@@ -179,44 +207,48 @@ export function registerFileHandlers() {
     const fileList: any[] = [];
     let iterations = 0;
 
-    const walkSync = (dir: string, rootFolder: string) => {
-      if (fileList.length >= 5) return;
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        if (++iterations > 2000) return;
-        if (fileList.length >= 5) break;
-        if (file === "node_modules" || file === ".git") continue;
-        
-        const filepath = path.join(dir, file);
-        const stat = fs.statSync(filepath);
-        if (stat.isDirectory()) {
-          walkSync(filepath, rootFolder);
-        } else {
-          const fileMime = mime.lookup(filepath) || "";
-          if (SUPPORTED_TYPES.includes(fileMime)) {
-            const rootParent = path.dirname(rootFolder);
-            const clientPath = path.relative(rootParent, filepath).replace(/\\/g, '/');
-            fileList.push({
-              name: file,
-              path: filepath,
-              clientPath: clientPath,
-              type: fileMime,
-              mimeType: fileMime,
-              size: stat.size,
-            });
+    const walkAsync = async (dir: string, rootFolder: string) => {
+      if (fileList.length >= 6) return;
+      try {
+        const files = await fs.promises.readdir(dir);
+        for (const file of files) {
+          if (++iterations > 2000) return;
+          if (fileList.length >= 6) break;
+          if (file === "node_modules" || file === ".git") continue;
+          
+          const filepath = path.join(dir, file);
+          const stat = await fs.promises.stat(filepath);
+          if (stat.isDirectory()) {
+            await walkAsync(filepath, rootFolder);
+          } else {
+            const fileMime = mime.lookup(filepath) || "";
+            if (SUPPORTED_TYPES.includes(fileMime)) {
+              const rootParent = path.dirname(rootFolder);
+              const clientPath = path.relative(rootParent, filepath).replace(/\\/g, '/');
+              fileList.push({
+                name: file,
+                path: filepath,
+                clientPath: clientPath,
+                type: fileMime,
+                mimeType: fileMime,
+                size: stat.size,
+              });
+            }
           }
         }
+      } catch (err) {
+        console.error(`[Main Process] Error reading dropped directory ${dir}:`, err);
       }
     };
 
     for (const itemPath of paths) {
       if (++iterations > 2000) break;
-      if (fileList.length >= 5) break;
+      if (fileList.length >= 6) break;
       try {
         if (!fs.existsSync(itemPath)) continue;
-        const stat = fs.statSync(itemPath);
+        const stat = await fs.promises.stat(itemPath);
         if (stat.isDirectory()) {
-          walkSync(itemPath, itemPath);
+          await walkAsync(itemPath, itemPath);
         } else {
           const fileMime = mime.lookup(itemPath) || "";
           if (SUPPORTED_TYPES.includes(fileMime)) {
