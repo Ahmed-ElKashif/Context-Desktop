@@ -28,7 +28,7 @@ const appReducer = combineReducers({
 });
 
 const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: Action) => {
-  if (action.type === 'auth/logout') {
+  if (action.type === 'auth/logout/fulfilled' || action.type === 'auth/logout') {
     state = undefined;
   }
   return appReducer(state, action);
