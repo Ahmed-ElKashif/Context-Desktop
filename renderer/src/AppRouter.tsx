@@ -36,6 +36,7 @@ const DesktopRoot = () => {
 export function AppRouter({ showBootSequence, isBootComplete }: { showBootSequence: boolean, isBootComplete: boolean }) {
   useAnalytics(); // auto-tracks pageviews
   const [isServerDown, setIsServerDown] = useState(false);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
@@ -56,7 +57,7 @@ export function AppRouter({ showBootSequence, isBootComplete }: { showBootSequen
     const handleAppNotify = (e: Event) => {
       const { message, type, systemNotify } = (e as CustomEvent).detail || {};
       // Filter out transient info toasts like "Authenticating..."
-      if (message && type && type !== "info") {
+      if (isAuthenticated && message && type && type !== "info") {
         // Pass silent: !systemNotify so OS Banners trigger only when requested and app is hidden
         dispatch(addNotification({ message, type, silent: !systemNotify }));
       }
