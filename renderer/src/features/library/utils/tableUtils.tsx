@@ -73,6 +73,19 @@ export const formatDate = (dateString?: string) => {
   if (isToday) return `Today, ${time}`;
   return `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
 }; 
+
+export const formatFileSize = (bytes?: number): string => {
+  if (!bytes || bytes === 0) return '—';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10240 ? 2 : 1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+export const formatItemCount = (count?: number): string => {
+  if (count === undefined) return '--';
+  return count === 1 ? "1 item" : `${count} items`;
+};
+
 // ─── Upload deduplication helpers (Windows-style rename) ─────────────────────
 
 /**
@@ -153,3 +166,35 @@ export const renderCognitiveLoadBars = (load?: string) => {
     </div>
   );
 };
+
+export const CircleCheckbox = ({ checked, onChange, visible }: {
+  checked: boolean;
+  onChange: () => void;
+  visible: boolean;
+}) => (
+  <button
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        onChange();
+      }
+    }}
+    onClick={(e) => { e.stopPropagation(); onChange(); }}
+    className={`w-5 h-5 rounded-full flex items-center justify-center focus-ring-standard
+      transition-all duration-150 shrink-0
+      ${!visible && !checked ? 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100' : 'opacity-100'}
+      ${checked
+        ? 'bg-light-primary dark:bg-dark-primary text-white dark:text-black shadow-sm'
+        : 'border-2 border-gray-400 dark:border-white/40 hover:border-light-primary dark:hover:border-dark-primary'
+      }`}
+    aria-label={checked ? "Deselect" : "Select"}
+  >
+    {checked && (
+      <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+        <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )}
+  </button>
+);

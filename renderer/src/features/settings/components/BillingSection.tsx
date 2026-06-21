@@ -17,7 +17,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
 
   const getPlanClassName = (planId: string) => {
     const isSelected = selectedPlan === planId;
-    return `bg-white dark:bg-dark-surface rounded-2xl p-6 flex flex-col h-full relative cursor-pointer transition-all duration-300 ${
+    return `bg-white dark:bg-dark-surface rounded-2xl p-6 flex flex-col h-full relative cursor-pointer transition-all duration-300 focus-ring-standard outline-none ${
       isSelected
         ? "border-2 border-light-primary dark:border-dark-primary shadow-[0_4px_24px_rgba(16,55,102,0.08)] dark:shadow-[0_4px_24px_rgba(139,92,246,0.1)] transform scale-[1.02] z-10"
         : "border border-light-border dark:border-white/5 shadow-sm group hover:border-light-primary/30 dark:hover:border-dark-primary/30"
@@ -65,7 +65,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
         <div className="flex bg-light-bg dark:bg-[#121214] p-1 rounded-xl border border-light-border dark:border-white/5 shadow-inner w-max">
           <button
             onClick={() => setBillingCycle("monthly")}
-            className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors ${
+            className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors focus-ring-standard ${
               billingCycle === "monthly"
                 ? "text-light-primary dark:text-white bg-white dark:bg-white/10 shadow-sm border border-light-border dark:border-white/10"
                 : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-light-text border border-transparent"
@@ -75,7 +75,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           </button>
           <button
             onClick={() => setBillingCycle("annual")}
-            className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${
+            className={`px-5 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 focus-ring-standard ${
               billingCycle === "annual"
                 ? "text-light-primary dark:text-white bg-white dark:bg-white/10 shadow-sm border border-light-border dark:border-white/10"
                 : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-light-text border border-transparent"
@@ -94,6 +94,8 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
         {/* Sandbox */}
         <div
           onClick={() => setSelectedPlan("sandbox")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedPlan("sandbox"); }}
+          tabIndex={0}
           className={getPlanClassName("sandbox")}
         >
           <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold tracking-wide uppercase mb-4 w-max">
@@ -150,6 +152,8 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
         {/* Startup (Highlighted) */}
         <div
           onClick={() => setSelectedPlan("startup")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedPlan("startup"); }}
+          tabIndex={0}
           className={getPlanClassName("startup")}
         >
           <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary text-[10px] font-bold tracking-wide uppercase mb-4 w-max border border-light-primary/20 dark:border-dark-primary/20">
@@ -212,6 +216,8 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
         {/* Growth */}
         <div
           onClick={() => setSelectedPlan("growth")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedPlan("growth"); }}
+          tabIndex={0}
           className={getPlanClassName("growth")}
         >
           <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#8b5cf6]/10 text-[#8b5cf6] text-[10px] font-bold tracking-wide uppercase mb-4 w-max">
@@ -274,6 +280,8 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
         {/* Embed / Enterprise */}
         <div
           onClick={() => setSelectedPlan("embed")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSelectedPlan("embed"); }}
+          tabIndex={0}
           className={getPlanClassName("embed")}
         >
           <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[10px] font-bold tracking-wide uppercase mb-4 w-max">

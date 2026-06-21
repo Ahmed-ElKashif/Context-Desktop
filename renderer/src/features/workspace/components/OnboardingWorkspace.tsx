@@ -47,7 +47,7 @@ export const OnboardingWorkspace = ({
             <button
               onClick={() => !isUploading && setActiveTab("upload")}
               disabled={isUploading}
-              className={`flex-1 py-5 text-sm flex items-center justify-center gap-2 outline-none border-b-2 transition-colors ${
+              className={`flex-1 py-5 text-sm flex items-center justify-center gap-2 outline-none border-b-2 transition-colors focus-ring-standard ${
                 activeTab === "upload"
                   ? "font-bold text-light-primary dark:text-dark-primary border-light-primary dark:border-dark-primary bg-white dark:bg-[#121214]"
                   : "font-semibold text-light-text/80 dark:text-dark-text/70 border-transparent hover:bg-light-border/50 dark:hover:bg-white/5 hover:text-light-primary dark:hover:text-white"
@@ -60,7 +60,7 @@ export const OnboardingWorkspace = ({
             <button
               onClick={() => !isUploading && setActiveTab("paste")}
               disabled={isUploading}
-              className={`flex-1 py-5 text-sm flex items-center justify-center gap-2 outline-none border-b-2 transition-colors ${
+              className={`flex-1 py-5 text-sm flex items-center justify-center gap-2 outline-none border-b-2 transition-colors focus-ring-standard ${
                 activeTab === "paste"
                   ? "font-bold text-light-primary dark:text-dark-primary border-light-primary dark:border-dark-primary bg-white dark:bg-[#121214]"
                   : "font-semibold text-light-text/80 dark:text-dark-text/70 border-transparent hover:bg-light-border/50 dark:hover:bg-white/5 hover:text-light-primary dark:hover:text-white"

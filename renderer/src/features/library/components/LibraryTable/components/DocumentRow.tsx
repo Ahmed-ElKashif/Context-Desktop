@@ -1,44 +1,34 @@
-import React, { useRef, useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useEffect } from "react";
 import { DocumentData } from "../../../../../store/library/librarySlice";
 import {
   getFileIcon,
   formatDate,
   renderCognitiveLoadBars,
+  formatFileSize,
+  CircleCheckbox,
 } from "../../../utils/tableUtils";
 import { getTagColorClass } from "../../../../../lib/tagUtils";
-import { useClickOutside } from "../../../../../components/ui/hooks/useClickOutside";
 
 interface DocumentRowProps {
   doc: DocumentData;
+  index: number;
   isSelected: boolean;
-  isMenuOpen: boolean;
-  onToggleMenu: (e: React.MouseEvent) => void;
-  onCloseMenu: () => void;
   onToggleSelection: () => void;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   onDoubleClick: () => void;
-  onShare: () => void;
-  onRename: () => void;
-  onDelete: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onDotsClick: (e: React.MouseEvent) => void;
 }
 
 export const DocumentRow = ({
   doc,
   isSelected,
-  isMenuOpen,
-  onToggleMenu,
-  onCloseMenu,
   onToggleSelection,
   onClick,
   onDoubleClick,
-  onShare,
-  onRename,
-  onDelete,
+  onContextMenu,
+  onDotsClick,
 }: DocumentRowProps) => {
-  const menuRef = useRef<HTMLTableCellElement>(null);
-  const portalRef = useRef<HTMLDivElement>(null);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
   const [nativeIcon, setNativeIcon] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,40 +45,31 @@ export const DocumentRow = ({
     return () => { isMounted = false; };
   }, [doc.originalClientPath]);
 
-  useEffect(() => {
-    if (isMenuOpen && menuRef.current) {
-      setMenuRect(menuRef.current.getBoundingClientRect());
-    } else {
-      setMenuRect(null);
-    }
-  }, [isMenuOpen]);
-
-  useClickOutside([menuRef, portalRef], () => {
-    if (isMenuOpen) {
-      onCloseMenu();
-    }
-  });
-
   return (
     <tr
+      data-item-id={doc._id}
+      data-item-type="doc"
+      onClick={onClick}
       onDoubleClick={onDoubleClick}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        onClick();
-        onToggleMenu(e);
+      onContextMenu={onContextMenu}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggleSelection();
+        }
       }}
-      className={`group cursor-pointer transition-colors border-b border-light-border dark:border-white/5 bg-white dark:bg-[#121214] ${
+      className={`group cursor-pointer transition-colors border-b border-light-border dark:border-white/5 focus-ring-standard ${
         isSelected
-          ? "bg-black/5 dark:bg-white/10"
-          : "hover:bg-black/5 dark:hover:bg-white/5"
+          ? "bg-light-primary/30 dark:bg-dark-primary/30"
+          : "bg-white dark:bg-[#121214] hover:bg-light-primary/10 dark:hover:bg-dark-primary/10"
       }`}
     >
       <td className="py-2 pl-3 pr-1 w-8" onClick={(e) => e.stopPropagation()}>
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={onToggleSelection}
-          className="w-3 h-3 cursor-pointer rounded border-gray-300 dark:border-gray-600 bg-transparent text-black dark:text-white focus:ring-0 focus:ring-offset-0 transition-colors"
+        <CircleCheckbox 
+          checked={isSelected} 
+          onChange={onToggleSelection} 
+          visible={isSelected} 
         />
       </td>
       <td className="py-1 pr-2">
@@ -99,11 +80,14 @@ export const DocumentRow = ({
             getFileIcon(doc.fileType)
           )}
           <div className="truncate max-w-[250px] lg:max-w-[400px]">
-            <p className="text-xs font-semibold group-hover:text-black dark:group-hover:text-white transition-colors truncate">
+            <p 
+              className="text-xs font-semibold group-hover:text-black dark:group-hover:text-white hover:underline transition-colors truncate"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDoubleClick();
+              }}
+            >
               {doc.title}
-            </p>
-            <p className="text-[11px] font-semibold text-light-text/60 dark:text-dark-text/50">
-              {doc.fileType} • Active
             </p>
           </div>
         </div>
@@ -148,81 +132,22 @@ export const DocumentRow = ({
       </td>
       <td className="py-1 whitespace-nowrap">{renderCognitiveLoadBars(doc.cognitiveLoad)}</td>
       <td className="py-1 text-light-text/70 dark:text-dark-text/60 font-mono text-[11px] font-semibold whitespace-nowrap">
+        {formatFileSize(doc.fileSize)}
+      </td>
+      <td className="py-1 text-light-text/70 dark:text-dark-text/60 font-mono text-[11px] font-semibold whitespace-nowrap">
         {formatDate(doc.updatedAt)}
       </td>
-      <td
-        ref={menuRef}
-        className={`py-1 pr-2 text-right relative bg-inherit ${isMenuOpen ? "z-[60]" : "z-10"}`}
-        onClick={(e) => e.stopPropagation()}
-        onDoubleClick={(e) => e.stopPropagation()}
-      >
+      <td className="py-1 pr-2 w-10 text-right">
         <div className="flex justify-end items-center pr-2">
           <button
-            onClick={onToggleMenu}
-            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm ${
-              isMenuOpen
-                ? "bg-black/10 dark:bg-white/10 text-light-text dark:text-white"
-                : "opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-light-text/70 dark:text-white/70"
-              }`}
+            onClick={(e) => { e.stopPropagation(); onDotsClick(e); }}
+            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-150 bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-light-text/70 dark:text-white/70 ${
+              isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           >
             <span className="material-symbols-rounded text-[18px]">more_vert</span>
           </button>
         </div>
-
-        {isMenuOpen && menuRect && (() => {
-          const isNearBottom = menuRect.bottom + 170 > window.innerHeight; // A bit taller for DocumentRow since it has more options
-          return createPortal(
-            <div
-              ref={portalRef}
-              className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
-                isNearBottom ? "origin-bottom-right" : "origin-top-right"
-              }`}
-              style={{
-                top: isNearBottom ? undefined : menuRect.top,
-                bottom: isNearBottom ? window.innerHeight - menuRect.bottom : undefined,
-                right: window.innerWidth - menuRect.left + 8 // Position to the LEFT of the button since it's on the right edge
-              }}
-            >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare();
-              }}
-              className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-            >
-              <span className="material-symbols-rounded text-[18px] text-light-primary dark:text-dark-primary">
-                share
-              </span>
-              Share
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onRename();
-              }}
-              className="w-full px-4 py-2.5 text-sm font-semibold text-light-text dark:text-white hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-            >
-              <span className="material-symbols-rounded text-[18px] text-blue-500">
-                edit
-              </span>
-              Rename
-            </button>
-            <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="w-full px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
-            >
-              <span className="material-symbols-rounded text-[18px]">
-                delete
-              </span>
-              Delete
-            </button>
-          </div>,
-          document.body
-        );})()}
       </td>
     </tr>
   );

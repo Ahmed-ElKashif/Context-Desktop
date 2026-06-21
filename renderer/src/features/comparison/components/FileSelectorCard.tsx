@@ -21,8 +21,15 @@ export const FileSelectorCard = ({ type, document, onClick }: FileSelectorCardPr
   return (
     <div
       onClick={onClick}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={cn(
-        "flex-1 w-full bg-white dark:bg-dark-surface p-5 rounded-2xl border border-light-border dark:border-white/5 shadow-sm relative overflow-hidden group transition-colors cursor-pointer min-h-[120px] flex flex-col justify-center",
+        "flex-1 w-full bg-white dark:bg-dark-surface p-5 rounded-2xl border border-light-border dark:border-white/5 shadow-sm relative overflow-hidden group transition-colors cursor-pointer min-h-[120px] flex flex-col justify-center focus-ring-standard",
         hoverBorderColor
       )}
     >

@@ -21,6 +21,7 @@ export interface FolderData {
   parentFolder: string | null;
   path: string;
   isAIGenerated?: boolean;
+  itemCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +36,7 @@ export interface DocumentData {
   summary?: string;
   tags: string[];
   extractedText?: string;
+  fileSize?: number;
 
   // ☁️ Cloudinary (replaces the old local originalFilePath)
   cloudinaryUrl?: string;

@@ -58,4 +58,12 @@ export const documentService = {
     const response = await api.get(`/documents/status?ids=${ids.join(",")}`);
     return response.data;
   },
+
+  downloadBulkZip: async (documentIds: string[], folderIds?: string[]): Promise<Blob> => {
+    const response = await api.post("/documents/download-bulk", { documentIds, folderIds }, {
+      responseType: 'blob',
+      timeout: 0,
+    });
+    return response.data;
+  },
 };

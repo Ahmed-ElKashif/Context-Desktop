@@ -57,14 +57,16 @@ export const LibraryHeader = ({
 
     // --- SCENARIO B: File Explorer (Windows Style) ---
 
-    // 🛠️ THE FIX 3: Construct the full clickable path array!
+    const mappedBreadcrumbs = breadcrumbs.map((b: any) => ({ _id: b.id || b._id, name: b.name }));
+
     const trail = [
       { _id: undefined, name: "All Documents" }, // 1. Always start with Root
-      ...breadcrumbs, // 2. Add all parents (if any)
+      ...mappedBreadcrumbs, // 2. Add all parents (if any)
     ];
 
-    if (currentFolder) {
-      trail.push(currentFolder); // 3. Add the current folder at the end
+    // 3. Add the current folder at the end, but only if it's not already the last item
+    if (currentFolder && trail[trail.length - 1]._id !== currentFolder._id) {
+      trail.push(currentFolder);
     }
 
     // If we're at the root, trail.length is 1. If we are deep, it's > 1.

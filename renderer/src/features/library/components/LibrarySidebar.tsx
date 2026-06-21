@@ -1,23 +1,18 @@
-import { useState, useMemo, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useMemo } from "react";
 import { Icon } from "../../../components/ui/core/Icons";
 import { FolderData } from "../../../store/library/librarySlice";
-import { useAppSelector } from "../../../store/hooks"; // 🛠️ Pulling the global tree directly
-import { useClickOutside } from "../../../components/ui/hooks/useClickOutside";
+import { useAppSelector } from "../../../store/hooks"; 
 
 interface LibrarySidebarProps {
   currentFolder: FolderData | null;
   onNavigate: (folderId?: string) => void;
-  onRenameFolder: (folderId: string) => void;
-  onDeleteFolder: (folderId: string) => void;
-  onDownloadFolder: (folderId: string) => void;
   activeTag: string | null;
   onTagSelect: (tag: string | null) => void;
-  isMobileOpen: boolean; // 🛠️ NEW
-  onCloseMobile: () => void; // 🛠️ NEW
+  isMobileOpen: boolean; 
+  onCloseMobile: () => void; 
+  onContextMenu: (e: React.MouseEvent, folder: FolderData, type: "doc" | "folder") => void;
 }
 
-// --- 🛠️ Helper Component for Recursive Windows-Style Folders ---
 const FolderTreeItem = ({
   folder,
   allFolders,
@@ -31,14 +26,12 @@ const FolderTreeItem = ({
   level?: number;
   currentFolder: FolderData | null;
   onNavigate: (id: string) => void;
-  onContextMenu: (e: React.MouseEvent, id: string) => void;
+  onContextMenu: (e: React.MouseEvent, folder: FolderData, type: "doc" | "folder") => void;
 }) => {
-  // Find sub-folders belonging to this folder
   const children = allFolders.filter((f) => f.parentFolder === folder._id);
   const isActive = currentFolder?._id === folder._id;
   const isDescendantActive = currentFolder?.path.startsWith(`${folder.path}/`);
 
-  // Auto-expand if the current folder is inside this branch
   const [isOpen, setIsOpen] = useState(isDescendantActive || false);
 
   return (
@@ -48,11 +41,11 @@ const FolderTreeItem = ({
             ? "bg-light-primary/10 dark:bg-dark-primary/15"
             : "hover:bg-light-bg dark:hover:bg-white/5"
           }`}
-        style={{ paddingLeft: `${level * 10 + 6}px` }} // Indentation math
+        style={{ paddingLeft: `${level * 10 + 6}px` }} 
       >
         <button
           onClick={() => onNavigate(folder._id)}
-          onContextMenu={(e) => onContextMenu(e, folder._id)}
+          onContextMenu={(e) => onContextMenu(e, folder, "folder")}
           className="flex items-center gap-2 flex-1 overflow-hidden"
         >
           <Icon
@@ -107,55 +100,33 @@ const FolderTreeItem = ({
 export const LibrarySidebar = ({
   currentFolder,
   onNavigate,
-  onRenameFolder,
-  onDeleteFolder,
-  onDownloadFolder,
   activeTag,
   onTagSelect,
   isMobileOpen,
   onCloseMobile,
+  onContextMenu,
 }: LibrarySidebarProps) => {
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useClickOutside(menuRef, () => {
-    if (openMenuId) {
-      setOpenMenuId(null);
-      setMenuRect(null);
-    }
-  });
-
-  // 🛠️ Grab the global tree we added to Redux
   const { globalFolderTree } = useAppSelector((state) => state.library);
 
   const handleAllDocumentsClick = () => {
-    onNavigate(undefined); // Go to Root
+    onNavigate(undefined); 
     onTagSelect(null);
   };
 
   const isAllActive = currentFolder === null && activeTag === null;
 
-  // We only map the ROOT folders here. The recursive component handles the rest.
   const rootFolders = useMemo(() => {
     return globalFolderTree.filter((f) => !f.parentFolder);
   }, [globalFolderTree]);
 
-  const openMenuFolder = useMemo(() => {
-    return globalFolderTree.find((f) => f._id === openMenuId);
-  }, [openMenuId, globalFolderTree]);
-
   return (
     <>
-      {/* 🛠️ NEW: Mobile Backdrop (Clicking it closes the sidebar) */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
           onClick={onCloseMobile}
         />
       )}
-
-      {/* 🛠️ UPDATED: The Sidebar Wrapper */}
 
       <aside
         className={`w-52 flex-shrink-0 bg-light-surface dark:bg-[#0A0A0C] flex flex-col z-50 transition-transform duration-300 absolute md:relative inset-y-0 left-0 h-full
@@ -185,7 +156,6 @@ export const LibrarySidebar = ({
             </button>
           </div>
 
-          {/* --- 🌳 The Windows-Style Recursive Tree --- */}
           {rootFolders.length > 0 && (
             <>
               <div className="h-px w-full bg-light-border/50 dark:bg-white/5 my-4"></div>
@@ -205,88 +175,12 @@ export const LibrarySidebar = ({
                     allFolders={globalFolderTree}
                     currentFolder={currentFolder}
                     onNavigate={onNavigate}
-                    onContextMenu={(e, id) => {
-                      e.preventDefault();
-                      setOpenMenuId(id);
-                      setMenuRect((e.currentTarget as HTMLElement).getBoundingClientRect());
-                    }}
+                    onContextMenu={onContextMenu}
                   />
                 ))}
-
-                {/* RIGHT-CLICK MENU (Portal) */}
-                {openMenuId && menuRect && (() => {
-                  const isNearBottom = menuRect.bottom + 150 > window.innerHeight;
-                  return createPortal(
-                  <div 
-                    ref={menuRef} 
-                    className={`fixed z-[100] w-40 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
-                      isNearBottom ? "origin-bottom-left" : "origin-top-left"
-                    }`}
-                    style={{
-                      top: isNearBottom ? undefined : menuRect.top,
-                      bottom: isNearBottom ? window.innerHeight - menuRect.bottom : undefined,
-                      left: menuRect.right + 4 // Pop to the right of the sidebar item!
-                    }}
-                  >
-                    {!openMenuFolder?.isAIGenerated && openMenuFolder?.name?.toLowerCase() !== "random files" && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onRenameFolder(openMenuId);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-                          >
-                            <span className="material-symbols-rounded text-[16px] text-blue-500">
-                              edit
-                            </span>
-                            Rename
-                          </button>
-                          <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-                        </>
-                      )}
-                      {openMenuFolder?.isAIGenerated && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDownloadFolder(openMenuId);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full px-4 py-2 text-sm font-semibold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
-                          >
-                            <span className="material-symbols-rounded text-[16px] text-green-500">
-                              download
-                            </span>
-                            Download
-                          </button>
-                          <div className="h-px w-full bg-light-border dark:bg-white/10 my-1"></div>
-                        </>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteFolder(openMenuId);
-                          setOpenMenuId(null);
-                        }}
-                        className="w-full px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-3 transition-colors"
-                      >
-                        <span className="material-symbols-rounded text-[18px]">
-                          delete
-                        </span>
-                        Delete
-                      </button>
-                    </div>,
-                    document.body
-                  );
-                })()}
               </div>
             </>
           )}
-
-     
-        
         </div>
       </aside>
     </>

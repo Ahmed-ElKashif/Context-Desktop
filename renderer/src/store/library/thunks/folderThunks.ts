@@ -44,7 +44,7 @@ export const deleteFolderThunk = createAppAsyncThunk(
 export const downloadFolderZipThunk = createAppAsyncThunk(
   "document/downloadFolderZip",
   async (folderId: string) => {
-    await folderService.downloadFolderZip(folderId);
-    return folderId;
+    const blob = await folderService.downloadFolderZip(folderId);
+    return blob;
   }
 );

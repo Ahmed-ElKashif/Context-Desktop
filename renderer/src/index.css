@@ -557,6 +557,10 @@ html.dark input:-webkit-autofill:active {
       stroke-dashoffset: -200;
     }
   }
+
+  .focus-ring-standard {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary/50 dark:focus-visible:ring-dark-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-light-surface dark:focus-visible:ring-offset-[#121214];
+  }
 }
 /* 🛠️ Hide scrollbar for Chrome, Safari and Opera */
 .hide-scrollbar::-webkit-scrollbar {

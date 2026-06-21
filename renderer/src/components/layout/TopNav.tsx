@@ -110,7 +110,7 @@ export const TopNav = () => {
       ) : (
         <Link
           to="/admin"
-          className="flex items-center gap-3 focus:outline-none group [webkit-app-region:no-drag]"
+          className="flex items-center gap-3 group [webkit-app-region:no-drag] focus-ring-standard rounded-lg p-1"
         >
           <div className="w-8 h-8 bg-light-surface dark:bg-dark-surface/80 border border-light-border dark:border-white/10 rounded-lg flex items-center justify-center shadow-sm group-hover:border-light-primary/50 dark:group-hover:border-dark-primary/50 transition-colors">
             <div className="scale-[0.7]">
@@ -131,7 +131,7 @@ export const TopNav = () => {
         >
           <button
             onClick={() => setIsNotifOpen((prev) => !prev)}
-            className={`relative p-2 rounded-full transition-colors ${
+            className={`relative p-2 rounded-full transition-colors focus-ring-standard ${
               isNotifOpen
                 ? "bg-black/5 dark:bg-white/10"
                 : "hover:bg-black/5 dark:hover:bg-white/5"
@@ -241,7 +241,7 @@ export const TopNav = () => {
           {/* Trigger Button */}
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            className={`flex items-center gap-3 p-1.5 pr-4 rounded-full transition-all duration-300 border group ${
+            className={`flex items-center gap-3 p-1.5 pr-4 rounded-full transition-all duration-300 border group focus-ring-standard ${
               isOpen
                 ? "bg-white dark:bg-[#1E1E22] border-light-border dark:border-white/10 shadow-sm"
                 : "bg-transparent border-transparent hover:bg-white/60 dark:hover:bg-[#1E1E22]/60 hover:border-light-border/50 dark:hover:border-white/5"

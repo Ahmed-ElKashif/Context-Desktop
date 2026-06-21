@@ -74,7 +74,7 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
         {inputValue && (
           <button
             onClick={() => { setInputValue(""); onSearch(""); }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-light-text/30 dark:text-white/30 hover:text-light-text dark:hover:text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-light-text/30 dark:text-white/30 hover:text-light-text dark:hover:text-white transition-colors focus-ring-standard rounded-md"
           >
             <span className="material-symbols-rounded text-[16px]">close</span>
           </button>
@@ -94,7 +94,7 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
             <button
               onClick={() => onPage(page - 1)}
               disabled={page === 1 || isLoading}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white hover:bg-light-border dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white hover:bg-light-border dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all focus-ring-standard"
             >
               <span className="material-symbols-rounded text-[18px]">chevron_left</span>
             </button>
@@ -109,7 +109,7 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
                   key={p}
                   onClick={() => onPage(p as number)}
                   disabled={isLoading}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all focus-ring-standard ${
                     p === page
                       ? "bg-light-primary dark:bg-dark-primary text-white shadow-sm"
                       : "text-light-text/60 dark:text-white/40 hover:bg-light-border dark:hover:bg-white/[0.06]"
@@ -123,7 +123,7 @@ const SearchAndPagination: React.FC<SearchAndPaginationProps> = ({
             <button
               onClick={() => onPage(page + 1)}
               disabled={page === totalPages || isLoading}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white hover:bg-light-border dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-light-text/50 dark:text-white/40 hover:text-light-text dark:hover:text-white hover:bg-light-border dark:hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all focus-ring-standard"
             >
               <span className="material-symbols-rounded text-[18px]">chevron_right</span>
             </button>

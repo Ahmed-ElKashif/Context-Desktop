@@ -204,7 +204,7 @@ export const CheckoutSection = ({
       <div className="bg-white dark:bg-dark-surface border border-light-border dark:border-white/5 rounded-2xl max-w-[540px] w-full p-8 shadow-[0_4px_24px_rgba(16,55,102,0.08)] dark:shadow-[0_4px_24px_rgba(139,92,246,0.1)] relative">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm font-semibold text-light-text/60 dark:text-dark-text/60 hover:text-light-primary dark:hover:text-dark-primary transition-colors mb-6"
+          className="flex items-center gap-2 text-sm font-semibold text-light-text/60 dark:text-dark-text/60 hover:text-light-primary dark:hover:text-dark-primary transition-colors mb-6 focus-ring-standard rounded-md"
         >
           <span className="material-symbols-rounded text-[18px]">
             arrow_back
@@ -224,7 +224,9 @@ export const CheckoutSection = ({
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div
                 onClick={() => setActiveCycle("monthly")}
-                className={`rounded-xl p-4 cursor-pointer relative transition-all ${!isAnnual ? "border-2 border-light-primary dark:border-dark-primary bg-light-primary/5 dark:bg-dark-primary/10" : "border border-light-border dark:border-white/10 hover:border-light-primary/30 dark:hover:border-dark-primary/30 bg-white dark:bg-dark-surface"}`}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveCycle("monthly"); }}
+                tabIndex={0}
+                className={`rounded-xl p-4 cursor-pointer relative transition-all focus-ring-standard ${!isAnnual ? "border-2 border-light-primary dark:border-dark-primary bg-light-primary/5 dark:bg-dark-primary/10" : "border border-light-border dark:border-white/10 hover:border-light-primary/30 dark:hover:border-dark-primary/30 bg-white dark:bg-dark-surface"}`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div
@@ -245,7 +247,9 @@ export const CheckoutSection = ({
 
               <div
                 onClick={() => setActiveCycle("annual")}
-                className={`rounded-xl p-4 cursor-pointer relative transition-all ${isAnnual ? "border-2 border-light-primary dark:border-dark-primary bg-light-primary/5 dark:bg-dark-primary/10" : "border border-light-border dark:border-white/10 hover:border-light-primary/30 dark:hover:border-dark-primary/30 bg-white dark:bg-dark-surface"}`}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveCycle("annual"); }}
+                tabIndex={0}
+                className={`rounded-xl p-4 cursor-pointer relative transition-all focus-ring-standard ${isAnnual ? "border-2 border-light-primary dark:border-dark-primary bg-light-primary/5 dark:bg-dark-primary/10" : "border border-light-border dark:border-white/10 hover:border-light-primary/30 dark:hover:border-dark-primary/30 bg-white dark:bg-dark-surface"}`}
               >
                 <div className="absolute top-3 right-3 bg-light-primary/10 dark:bg-dark-primary/20 text-light-primary dark:text-dark-primary text-xs font-bold px-2 py-1 rounded-md">
                   Save {savePercentage}%
