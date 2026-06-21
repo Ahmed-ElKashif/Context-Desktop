@@ -111,7 +111,10 @@ export const LibraryFeature = () => {
 
   // 9. Context Menu
   const { openMenu } = useContextMenu({
-    onOpenDoc: (doc: DocumentData) => {
+    onOpenDocReader: (doc: DocumentData) => {
+      navigate(`/read/${doc._id}`);
+    },
+    onOpenDocWorkspace: (doc: DocumentData) => {
       dispatch(setActiveDocument(doc));
       dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
       dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
@@ -168,10 +171,7 @@ export const LibraryFeature = () => {
     (item, type) => {
       if (type === "doc") {
         const doc = item as DocumentData;
-        dispatch(setActiveDocument(doc));
-        dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
-        dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
-        navigate("/workspace");
+        navigate(`/read/${doc._id}`);
       } else {
         const folderId = (item as FolderData)._id;
         if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
@@ -300,10 +300,7 @@ export const LibraryFeature = () => {
                   onRowDoubleClick={(item, type) => {
                     if (type === "doc") {
                       const doc = item as DocumentData;
-                      dispatch(setActiveDocument(doc));
-                      dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
-                      dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
-                      navigate("/workspace");
+                      navigate(`/read/${doc._id}`);
                     } else {
                       const folderId = (item as FolderData)._id;
                       if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
