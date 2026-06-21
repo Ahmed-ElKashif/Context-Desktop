@@ -109,7 +109,7 @@ export const LibraryTable = React.memo(({
         onContextMenu={onTableContextMenu}
       >
     <thead className="group sticky top-0 bg-light-surface/95 dark:bg-[#121214]/95 backdrop-blur-md z-20 border-b border-light-border dark:border-white/5 shadow-sm">
-      <tr className="text-xs font-mono font-bold text-light-text/70 dark:text-dark-text/60 uppercase tracking-widest">
+      <tr className="text-[13px] font-medium text-light-text/80 dark:text-white/70">
         <th className="py-1.5 pl-3 pr-1 w-8">
           <CircleCheckbox
             checked={isAllSelected}
@@ -122,7 +122,7 @@ export const LibraryTable = React.memo(({
               className="py-1.5 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("title")}
             >
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-start gap-1.5">
                 {selectedCount > 0 ? `${selectedCount} selected` : <>Name {renderSortArrow("title")}</>}
               </div>
             </th>
@@ -133,8 +133,8 @@ export const LibraryTable = React.memo(({
               className="py-1.5 w-40 sm:w-48 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("cognitiveLoad")}
             >
-              <div className="flex items-center gap-1">
-                {selectedCount > 0 ? "" : <>Cognitive Load {renderSortArrow("cognitiveLoad")}</>}
+              <div className="flex items-center justify-start gap-1.5">
+                {selectedCount > 0 ? "" : <>Cognitive load {renderSortArrow("cognitiveLoad")}</>}
               </div>
             </th>
 
@@ -142,8 +142,8 @@ export const LibraryTable = React.memo(({
               className="py-1.5 w-24 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("fileSize")}
             >
-              <div className="flex items-center gap-1">
-                {selectedCount > 0 ? "" : <>File Size {renderSortArrow("fileSize")}</>}
+              <div className="flex items-center justify-start gap-1.5">
+                {selectedCount > 0 ? "" : <>File size {renderSortArrow("fileSize")}</>}
               </div>
             </th>
 
@@ -151,8 +151,8 @@ export const LibraryTable = React.memo(({
               className="py-1.5 w-32 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("updatedAt")}
             >
-              <div className="flex items-center gap-1">
-                {selectedCount > 0 ? "" : <>Last Modified {renderSortArrow("updatedAt")}</>}
+              <div className="flex items-center justify-start gap-1.5">
+                {selectedCount > 0 ? "" : <>Modified {renderSortArrow("updatedAt")}</>}
               </div>
             </th>
 

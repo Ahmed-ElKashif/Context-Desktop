@@ -4,7 +4,8 @@ import { ContextMenuItem } from "../../../components/ui/feedback/ContextMenu";
 import { handleDownload, downloadTextAsFile } from "../../../utils/downloadUtils";
 
 interface UseContextMenuOptions {
-  onOpenDoc: (doc: DocumentData) => void;
+  onOpenDocReader: (doc: DocumentData) => void;
+  onOpenDocWorkspace: (doc: DocumentData) => void;
   onOpenFolder: (folder: FolderData) => void;
   onRenameDoc: (doc: DocumentData) => void;
   onRenameFolder: (folderPath: string) => void;
@@ -22,7 +23,8 @@ interface UseContextMenuOptions {
 }
 
 export const useContextMenu = ({
-  onOpenDoc,
+  onOpenDocReader,
+  onOpenDocWorkspace,
   onOpenFolder,
   onRenameDoc,
   onRenameFolder,
@@ -69,12 +71,12 @@ export const useContextMenu = ({
           label: "Open in Reader",
           icon: "menu_book",
           shortcut: "Enter",
-          onClick: () => onOpenDoc(doc),
+          onClick: () => onOpenDocReader(doc),
         },
         {
           label: "Open in Workspace",
           icon: "space_dashboard",
-          onClick: () => onOpenDoc(doc),
+          onClick: () => onOpenDocWorkspace(doc),
         },
         { isSeparator: true },
         {
