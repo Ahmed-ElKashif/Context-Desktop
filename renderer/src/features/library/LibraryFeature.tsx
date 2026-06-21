@@ -1,24 +1,22 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setActiveDocument } from "../../store/workspace/workspaceSlice";
 import { updateProfile, updateUserLocalState } from "../../store/auth/authSlice";
-import {
-  clearSelection,
-  toggleDocSelection,
-  toggleFolderSelection,
-  toggleAllVisibleSelection,
-} from "../../store/library/selectionSlice";
+import { clearSelection } from "../../store/library/selectionSlice";
 import { Icon } from "../../components/ui/core/Icons";
 import { useLibraryUI } from "./hooks/useLibraryUI";
-import { handleShareClick } from "./utils/tableUtils";
-import { FolderData } from "../../store/library/librarySlice";
+import { FolderData, DocumentData } from "../../store/library/librarySlice";
 
 // Hooks
 import { useLibraryNavigation } from "./hooks/useLibraryNavigation";
 import { useLibraryData } from "./hooks/useLibraryData";
+import { useLibraryKeyboardShortcuts } from "./hooks/useLibraryKeyboardShortcuts";
 import { useLibraryDropzone } from "./hooks/useLibraryDropzone";
 import { useLibraryActions } from "./hooks/useLibraryActions";
+import { useSelectionManager, LibraryItem } from "./hooks/useSelectionManager";
+import { useRubberBand } from "./hooks/useRubberBand";
+import { useContextMenu } from "./hooks/useContextMenu";
 
 // Components
 import { LibraryTable } from "./components/LibraryTable/LibraryTable";
@@ -29,8 +27,8 @@ import { UploadModal } from "./components/UploadModal";
 import { LibrarySidebar } from "./components/LibrarySidebar";
 import { LibraryDragOverlay } from "./components/LibraryDragOverlay";
 import { LibraryHeader } from "./components/LibraryHeader";
-import { BulkActionBar } from "./components/BulkActionBar";
 import { SynthesisModal } from "./components/SynthesisModal";
+
 
 export const LibraryFeature = () => {
   const dispatch = useAppDispatch();
@@ -71,7 +69,9 @@ export const LibraryFeature = () => {
   });
 
   // Derived visible items
-  const visibleFolders = debouncedSearchQuery ? [] : foldersList;
+  const visibleFolders = useMemo(() => {
+    return debouncedSearchQuery ? [] : foldersList;
+  }, [debouncedSearchQuery, foldersList]);
   const visibleItemsCount = documentsList.length + visibleFolders.length;
   const isAllSelected = visibleItemsCount > 0 &&
     documentsList.every(doc => selectedDocIds.includes(doc._id)) &&
@@ -97,6 +97,113 @@ export const LibraryFeature = () => {
     selectedFolderIds,
   });
 
+  // 7. Selection Manager
+  const { handleItemClick, handleSelectAll } = useSelectionManager(selectedDocs, selectedFolders);
+
+  const allOrderedItems = useMemo<LibraryItem[]>(() => [
+    ...visibleFolders.map(f => ({ type: "folder" as const, item: f })),
+    ...documentsList.map(d => ({ type: "doc" as const, item: d }))
+  ], [visibleFolders, documentsList]);
+
+  // 8. Rubber Band Lasso
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const { rubberBandOverlay } = useRubberBand(tableContainerRef, allOrderedItems, selectedDocs, selectedFolders);
+
+  // 9. Context Menu
+  const { openMenu } = useContextMenu({
+    onOpenDoc: (doc: DocumentData) => {
+      dispatch(setActiveDocument(doc));
+      dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
+      dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
+      navigate("/workspace");
+    },
+    onOpenFolder: (folder: FolderData) => {
+      const folderId = folder._id;
+      if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
+      ui.filters.setSearchQuery("");
+      setActiveFolderId(folderId);
+    },
+    onRenameDoc: (doc: DocumentData) => console.log("Rename document", doc),
+    onRenameFolder: (folderPath: string) => ui.folderRenameModal.open(folderPath),
+    onDeleteDoc: () => ui.bulkDeleteModal.open(),
+    onDeleteFolder: (folderPath: string) => ui.folderDeleteModal.open(folderPath),
+    onBulkDelete: () => ui.bulkDeleteModal.open(),
+    onDownloadFolder: (folderId: string, folderName: string) => actions.executeDownloadFolder(folderId, folderName),
+    onBulkDownload: () => actions.executeBulkDownload(),
+    onOrganizeAI: (folderId?: string) => actions.executeAIOrganization(folderId),
+    onSynthesizeAI: (folderId?: string) => actions.executeAISynthesis(folderId),
+    onUploadClick: () => ui.uploadModal.open(),
+    onSelectAll: () => handleSelectAll(documentsList, visibleFolders),
+    selectedDocIds,
+    selectedFolderIds,
+  });
+
+  // 10. Polish: Pagination Clear
+  useEffect(() => {
+    dispatch(clearSelection());
+  }, [pagination?.currentPage, debouncedSearchQuery, activeFolderId, dispatch]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input/textarea
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA" || (document.activeElement as HTMLElement)?.isContentEditable) {
+        return;
+      }
+
+      // Ctrl+A / Cmd+A : Select All
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        handleSelectAll(documentsList, visibleFolders);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [documentsList, visibleFolders, handleSelectAll]);
+
+  useLibraryKeyboardShortcuts(
+    allOrderedItems,
+    selectedDocIds,
+    selectedFolderIds,
+    (item, type) => {
+      if (type === "doc") {
+        const doc = item as DocumentData;
+        dispatch(setActiveDocument(doc));
+        dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
+        dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
+        navigate("/workspace");
+      } else {
+        const folderId = (item as FolderData)._id;
+        if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
+        ui.filters.setSearchQuery("");
+        setActiveFolderId(folderId);
+      }
+    },
+    () => {
+      if (selectedDocIds.length > 0 && selectedFolderIds.length === 0) {
+        if (selectedDocIds.length === 1) {
+          const doc = documentsList.find(d => d._id === selectedDocIds[0]);
+          if (doc) ui.deleteModal.open(doc);
+        } else {
+          ui.bulkDeleteModal.open();
+        }
+      } else if (selectedFolderIds.length === 1 && selectedDocIds.length === 0) {
+        const folder = visibleFolders.find(f => f._id === selectedFolderIds[0]);
+        if (folder) ui.folderDeleteModal.open(folder._id);
+      }
+    },
+    (item, type) => {
+      if (type === "doc") {
+        ui.renameModal.open(item as DocumentData);
+      } else {
+        const folder = item as FolderData;
+        if (!folder.isAIGenerated && folder.name?.toLowerCase() !== "random files") {
+          ui.folderRenameModal.open(folder._id);
+        }
+      }
+    }
+  );
+
   const findFolderById = (folders: FolderData[], id: string): FolderData | undefined => {
     return folders.find((f) => f._id === id);
   };
@@ -108,6 +215,13 @@ export const LibraryFeature = () => {
     <div
       {...getRootProps()}
       className="flex-1 flex flex-row overflow-hidden relative overscroll-contain outline-none bg-light-surface dark:bg-[#0A0A0C]"
+      onMouseDown={(e) => {
+        // Clear selection when clicking on empty area outside the table
+        // But only if it's the main container (not the sidebar or inner elements)
+        if (e.target === e.currentTarget) {
+          dispatch(clearSelection());
+        }
+      }}
     >
       <input {...getInputProps()} />
       <LibraryDragOverlay isDragActive={isDragActive} />
@@ -120,13 +234,11 @@ export const LibraryFeature = () => {
             ui.filters.setSearchQuery("");
             setActiveFolderId(folderId);
           }}
-          onRenameFolder={ui.folderRenameModal.open}
-          onDeleteFolder={ui.folderDeleteModal.open}
-          onDownloadFolder={actions.executeDownloadFolder}
           activeTag={ui.filters.activeTag}
           onTagSelect={ui.filters.handleTagSelect}
           isMobileOpen={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
+          onContextMenu={(e: React.MouseEvent, folder: any, type: any) => openMenu(e, { type: "folder", item: folder }, type)}
         />
       </div>
 
@@ -148,12 +260,25 @@ export const LibraryFeature = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-0 bg-light-bg dark:bg-dark-bg scroll-smooth relative">
-          <div id="tour-library-table" className="w-full h-full bg-white dark:bg-dark-surface rounded-xl border border-light-border dark:border-white/5 shadow-sm relative flex flex-col overflow-hidden">
+            <div 
+            id="tour-library-table" 
+            ref={tableContainerRef}
+            className="w-full h-full bg-white dark:bg-dark-surface rounded-xl border border-light-border dark:border-white/5 shadow-sm relative flex flex-col overflow-hidden"
+            onContextMenu={(e) => {
+              // Only open generic context menu if right clicking in empty space of the container
+              if (e.target === e.currentTarget) {
+                openMenu(e);
+              }
+            }}
+          >
             {(isRevalidating || (isFetchingLibrary && !isHardLoading)) && (
               <div className="absolute top-0 left-0 w-full h-0.5 z-50 overflow-hidden bg-primary/20">
                 <div className="h-full bg-primary animate-progress-indeterminate"></div>
               </div>
             )}
+            
+            {rubberBandOverlay}
+
             <div className="w-full flex-1 overflow-hidden flex flex-col relative">
               {isHardLoading ? (
                 <div className="flex items-center justify-center h-64 text-light-text/60 dark:text-white/60">
@@ -165,43 +290,31 @@ export const LibraryFeature = () => {
                   childFolders={visibleFolders}
                   currentPage={pagination?.currentPage}
                   isAllSelected={isAllSelected}
-                  onFolderDoubleClick={(folderId) => {
-                    if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
-                    ui.filters.setSearchQuery("");
-                    setActiveFolderId(folderId);
-                  }}
-                  onFolderRenameClick={ui.folderRenameModal.open}
-                  onFolderDeleteClick={ui.folderDeleteModal.open}
-                  onFolderDownloadClick={actions.executeDownloadFolder}
-                  onRowClick={() => { }}
-                  onRowDoubleClick={(doc) => {
-                    dispatch(setActiveDocument(doc));
-                    dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
-                    dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
-                    navigate("/workspace");
-                  }}
-                  onShareClick={(doc) => handleShareClick(doc.cloudinaryUrl)}
-                  onRenameClick={ui.renameModal.open}
-                  onDeleteClick={ui.deleteModal.open}
+                  selectedDocIds={selectedDocIds}
+                  selectedFolderIds={selectedFolderIds}
                   sortBy={ui.sorting.sortBy}
                   sortOrder={ui.sorting.sortOrder}
                   onSort={ui.sorting.handleSort}
-                  selectedDocIds={selectedDocIds}
-                  selectedFolderIds={selectedFolderIds}
-                  onToggleSelection={(id, type) => {
-                    if (type === "document") {
-                      const doc = documentsList.find(d => d._id === id);
-                      if (doc) dispatch(toggleDocSelection(doc));
+                  onToggleAll={() => handleSelectAll(documentsList, visibleFolders)}
+                  onRowClick={handleItemClick}
+                  onRowDoubleClick={(item, type) => {
+                    if (type === "doc") {
+                      const doc = item as DocumentData;
+                      dispatch(setActiveDocument(doc));
+                      dispatch(updateUserLocalState({ lastActiveDocumentId: doc._id }));
+                      dispatch(updateProfile({ lastActiveDocumentId: doc._id }));
+                      navigate("/workspace");
                     } else {
-                      const folder = visibleFolders.find(f => f._id === id);
-                      if (folder) dispatch(toggleFolderSelection(folder));
+                      const folderId = (item as FolderData)._id;
+                      if (ui.filters.searchQuery) navPendingRef.current = folderId || "ROOT";
+                      ui.filters.setSearchQuery("");
+                      setActiveFolderId(folderId);
                     }
                   }}
-                  onToggleAll={() => dispatch(toggleAllVisibleSelection({
-                    docs: documentsList,
-                    folders: visibleFolders,
-                    isAllVisibleSelected: isAllSelected
-                  }))}
+                  onRowContextMenu={(e, item, type) => openMenu(e, { type, item } as any)}
+                  onRowDotsClick={(e, item, type) => openMenu(e, { type, item } as any)}
+                  onTableContextMenu={(e) => openMenu(e)}
+                  onEmptySpaceClick={() => dispatch(clearSelection())}
                 />
               )}
             </div>
@@ -214,19 +327,6 @@ export const LibraryFeature = () => {
           </div>
         </div>
       </div>
-
-      <BulkActionBar
-        selectedCount={selectedDocIds.length + selectedFolderIds.length}
-        onDelete={ui.bulkDeleteModal.open}
-        onClear={() => dispatch(clearSelection())}
-        onOrganizeAI={
-          selectedDocs.some(doc => doc.isOrganized) ||
-            selectedFolders.some(f => f.isAIGenerated)
-            ? undefined
-            : actions.executeAIOrganization
-        }
-        onSynthesizeAI={actions.executeAISynthesis}
-      />
 
       <SynthesisModal
         isOpen={isSynthesizing || !!synthesisResult}

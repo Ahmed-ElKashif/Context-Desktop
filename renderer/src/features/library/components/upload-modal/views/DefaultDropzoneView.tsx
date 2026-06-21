@@ -59,7 +59,7 @@ export const DefaultDropzoneView = ({
       <div className="flex px-6 pt-4 gap-6 border-b border-light-border dark:border-white/5">
         <button
           onClick={() => setActiveTab("file")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+          className={`pb-3 text-sm font-bold border-b-2 transition-colors focus-ring-standard rounded-md px-2 ${
             activeTab === "file"
               ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
               : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
@@ -69,7 +69,7 @@ export const DefaultDropzoneView = ({
         </button>
         <button
           onClick={() => setActiveTab("text")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+          className={`pb-3 text-sm font-bold border-b-2 transition-colors focus-ring-standard rounded-md px-2 ${
             activeTab === "text"
               ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
               : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"

@@ -1,63 +1,57 @@
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { DocumentData, FolderData } from "../../../../store/library/librarySlice";
 import { FolderRow } from "./components/FolderRow";
 import { DocumentRow } from "./components/DocumentRow";
+import { LibraryItem } from "../../hooks/useSelectionManager";
+import { CircleCheckbox } from "../../utils/tableUtils";
 
 interface LibraryTableProps {
   documents: DocumentData[];
   childFolders?: FolderData[];
+
   currentPage?: number;
   isAllSelected: boolean;
-  onFolderDoubleClick: (folderId: string) => void;
-  onFolderRenameClick?: (folderId: string) => void;
-  onFolderDeleteClick?: (folderId: string) => void;
-  onFolderDownloadClick?: (folderId: string) => void;
-  onRowClick: (doc: DocumentData) => void;
-  onRowDoubleClick: (doc: DocumentData) => void;
-  onShareClick: (doc: DocumentData) => void;
-  onRenameClick: (doc: DocumentData) => void;
-  onDeleteClick: (doc: DocumentData) => void;
+  selectedDocIds: string[];
+  selectedFolderIds: string[];
   sortBy: string;
   sortOrder: "asc" | "desc";
   onSort: (column: string) => void;
-  selectedDocIds: string[];
-  selectedFolderIds: string[];
-  onToggleSelection: (id: string, type: "document" | "folder") => void;
-  onToggleAll: (docIds: string[], folderIds: string[]) => void;
+  onToggleAll: () => void;
+  onRowClick: (e: React.MouseEvent, item: LibraryItem, index: number, allOrderedItems: LibraryItem[]) => void;
+  onRowDoubleClick: (item: DocumentData | FolderData, type: "doc" | "folder") => void;
+  onRowContextMenu: (e: React.MouseEvent, item: DocumentData | FolderData, type: "doc" | "folder") => void;
+  onRowDotsClick: (e: React.MouseEvent, item: DocumentData | FolderData, type: "doc" | "folder") => void;
+  onTableContextMenu: (e: React.MouseEvent) => void;
+  onEmptySpaceClick: () => void;
 }
 
 export const LibraryTable = React.memo(({
   documents,
   childFolders = [],
+
   currentPage = 1,
   isAllSelected,
-  onFolderDoubleClick,
-  onFolderRenameClick,
-  onFolderDeleteClick,
-  onFolderDownloadClick,
-  onRowClick,
-  onRowDoubleClick,
-  onShareClick,
-  onRenameClick,
-  onDeleteClick,
+  selectedDocIds,
+  selectedFolderIds,
   sortBy,
   sortOrder,
   onSort,
-  selectedDocIds,
-  selectedFolderIds,
-  onToggleSelection,
   onToggleAll,
+  onRowClick,
+  onRowDoubleClick,
+  onRowContextMenu,
+  onRowDotsClick,
+  onTableContextMenu,
+  onEmptySpaceClick,
 }: LibraryTableProps) => {
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const toggleMenu = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setOpenMenuId(openMenuId === id ? null : id);
-  };
+  const allOrderedItems = useMemo<LibraryItem[]>(() => [
+    ...childFolders.map(f => ({ type: "folder" as const, item: f })),
+    ...documents.map(d => ({ type: "doc" as const, item: d }))
+  ], [childFolders, documents]);
 
   const renderSortArrow = (column: string) => {
     const isActive = sortBy === column;
-    
     return (
       <span 
         className={`material-symbols-rounded text-[16px] transition-all duration-300 ${
@@ -78,21 +72,18 @@ export const LibraryTable = React.memo(({
       return (
         <div
           className="h-64 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50"
-          onClick={() => setOpenMenuId(null)}
+          onContextMenu={onTableContextMenu}
         >
-          <span className="material-symbols-rounded text-4xl mb-2">
-            find_in_page
-          </span>
+          <span className="material-symbols-rounded text-4xl mb-2">find_in_page</span>
           <p className="font-bold">No more files to display.</p>
           <p className="text-sm">Your folders are pinned to Page 1.</p>
         </div>
       );
     }
-
     return (
       <div
         className="h-64 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50 px-4 text-center"
-        onClick={() => setOpenMenuId(null)}
+        onContextMenu={onTableContextMenu}
       >
         <span className="material-symbols-rounded text-4xl mb-2">inbox</span>
         <p className="font-bold">This folder is empty.</p>
@@ -101,50 +92,67 @@ export const LibraryTable = React.memo(({
     );
   }
 
+  const selectedCount = selectedDocIds.length + selectedFolderIds.length;
+
   return (
-    <div className="w-full flex-1 overflow-auto hide-scrollbar">
+    <div 
+      className="w-full flex-1 overflow-auto hide-scrollbar"
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('tr[data-item-id]')) {
+          onEmptySpaceClick();
+        }
+      }}
+    >
       <table
-        className="w-full text-left border-collapse min-w-[650px]"
-        onClick={() => setOpenMenuId(null)}
+        className="w-full text-left border-collapse min-w-[700px] select-none"
+        onContextMenu={onTableContextMenu}
       >
-        <thead className="sticky top-0 bg-light-surface/95 dark:bg-[#121214]/95 backdrop-blur-md z-20 border-b border-light-border dark:border-white/5 shadow-sm">
-          <tr className="text-xs font-mono font-bold text-light-text/70 dark:text-dark-text/60 uppercase tracking-widest">
-            {/* Checkbox Column */}
-            <th className="py-1.5 pl-3 pr-1 w-8">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                onChange={() => onToggleAll(documents.map(d => d._id), childFolders.map(f => f._id))}
-                className="w-3.5 h-3.5 cursor-pointer rounded border-gray-400 dark:border-gray-500 bg-transparent text-black dark:text-white accent-black dark:accent-white focus:ring-0 focus:ring-offset-0 transition-colors"
-              />
-            </th>
+    <thead className="group sticky top-0 bg-light-surface/95 dark:bg-[#121214]/95 backdrop-blur-md z-20 border-b border-light-border dark:border-white/5 shadow-sm">
+      <tr className="text-xs font-mono font-bold text-light-text/70 dark:text-dark-text/60 uppercase tracking-widest">
+        <th className="py-1.5 pl-3 pr-1 w-8">
+          <CircleCheckbox
+            checked={isAllSelected}
+            onChange={onToggleAll}
+            visible={isAllSelected}
+          />
+        </th>
 
             <th
               className="py-1.5 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("title")}
             >
               <div className="flex items-center gap-1">
-                Name {renderSortArrow("title")}
+                {selectedCount > 0 ? `${selectedCount} selected` : <>Name {renderSortArrow("title")}</>}
               </div>
             </th>
 
-            <th className="py-1.5 w-32 sm:w-40">Tags</th>
+            <th className="py-1.5 w-32 sm:w-40">{selectedCount > 0 ? "" : "Tags"}</th>
 
             <th
               className="py-1.5 w-40 sm:w-48 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("cognitiveLoad")}
             >
               <div className="flex items-center gap-1">
-                Cognitive Load {renderSortArrow("cognitiveLoad")}
+                {selectedCount > 0 ? "" : <>Cognitive Load {renderSortArrow("cognitiveLoad")}</>}
+              </div>
+            </th>
+
+            <th 
+              className="py-1.5 w-24 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
+              onClick={() => onSort("fileSize")}
+            >
+              <div className="flex items-center gap-1">
+                {selectedCount > 0 ? "" : <>File Size {renderSortArrow("fileSize")}</>}
               </div>
             </th>
 
             <th
-              className="py-1.5 w-40 sm:w-48 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
+              className="py-1.5 w-32 group cursor-pointer hover:text-light-text dark:hover:text-white transition-colors"
               onClick={() => onSort("updatedAt")}
             >
               <div className="flex items-center gap-1">
-                Last Modified {renderSortArrow("updatedAt")}
+                {selectedCount > 0 ? "" : <>Last Modified {renderSortArrow("updatedAt")}</>}
               </div>
             </th>
 
@@ -153,56 +161,37 @@ export const LibraryTable = React.memo(({
         </thead>
 
         <tbody className="text-sm text-light-text dark:text-white font-medium relative z-0">
-          {childFolders.map((folder) => (
+          {childFolders.map((folder, idx) => (
             <FolderRow
               key={folder._id}
               folder={folder}
-              isMenuOpen={openMenuId === `folder-${folder._id}`}
+              index={idx}
               isSelected={selectedFolderIds.includes(folder._id)}
-              onToggleSelection={() => onToggleSelection(folder._id, "folder")}
-              onToggleMenu={(e) => toggleMenu(e, `folder-${folder._id}`)}
-              onCloseMenu={() => setOpenMenuId(null)}
-              onDoubleClick={() => onFolderDoubleClick(folder._id)}
-              onRename={() => {
-                onFolderRenameClick?.(folder._id);
-                setOpenMenuId(null);
-              }}
-              onDelete={() => {
-                onFolderDeleteClick?.(folder._id);
-                setOpenMenuId(null);
-              }}
-              onDownload={() => {
-                onFolderDownloadClick?.(folder._id);
-                setOpenMenuId(null);
-              }}
+              childCount={folder.itemCount}
+              onToggleSelection={() => onRowClick({ ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {} } as any, { type: "folder", item: folder }, idx, allOrderedItems)}
+              onClick={(e) => onRowClick(e, { type: "folder", item: folder }, idx, allOrderedItems)}
+              onDoubleClick={() => onRowDoubleClick(folder, "folder")}
+              onContextMenu={(e) => onRowContextMenu(e, folder, "folder")}
+              onDotsClick={(e) => onRowDotsClick(e, folder, "folder")}
             />
           ))}
 
-          {documents.map((doc) => (
-            <DocumentRow
-              key={doc._id}
-              doc={doc}
-              isSelected={selectedDocIds.includes(doc._id)}
-              isMenuOpen={openMenuId === `doc-${doc._id}`}
-              onToggleMenu={(e) => toggleMenu(e, `doc-${doc._id}`)}
-              onCloseMenu={() => setOpenMenuId(null)}
-              onToggleSelection={() => onToggleSelection(doc._id, "document")}
-              onClick={() => onRowClick(doc)}
-              onDoubleClick={() => onRowDoubleClick(doc)}
-              onShare={() => {
-                onShareClick(doc);
-                setOpenMenuId(null);
-              }}
-              onRename={() => {
-                onRenameClick(doc);
-                setOpenMenuId(null);
-              }}
-              onDelete={() => {
-                onDeleteClick(doc);
-                setOpenMenuId(null);
-              }}
-            />
-          ))}
+          {documents.map((doc, idx) => {
+            const indexOffset = childFolders.length + idx;
+            return (
+              <DocumentRow
+                key={doc._id}
+                doc={doc}
+                index={indexOffset}
+                isSelected={selectedDocIds.includes(doc._id)}
+                onToggleSelection={() => onRowClick({ ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {} } as any, { type: "doc", item: doc }, indexOffset, allOrderedItems)}
+                onClick={(e) => onRowClick(e, { type: "doc", item: doc }, indexOffset, allOrderedItems)}
+                onDoubleClick={() => onRowDoubleClick(doc, "doc")}
+                onContextMenu={(e) => onRowContextMenu(e, doc, "doc")}
+                onDotsClick={(e) => onRowDotsClick(e, doc, "doc")}
+              />
+            )
+          })}
         </tbody>
       </table>
     </div>

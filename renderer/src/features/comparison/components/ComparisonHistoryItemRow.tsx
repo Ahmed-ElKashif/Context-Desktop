@@ -64,7 +64,7 @@ export function ComparisonHistoryItemRow({ item, isActive, onSelect }: HistoryIt
           onClick={() => {
             onSelect();
           }}
-          className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors flex flex-col gap-1 group ${
+          className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors flex flex-col gap-1 group focus-ring-standard ${
             isActive
               ? "bg-light-primary/10 dark:bg-dark-primary/10 border-l-2 border-light-primary dark:border-dark-primary"
               : "hover:bg-light-bg dark:hover:bg-white/5 border-l-2 border-transparent"
@@ -116,7 +116,7 @@ export function ComparisonHistoryItemRow({ item, isActive, onSelect }: HistoryIt
                   setMenuRect(e.currentTarget.getBoundingClientRect());
                 }
               }}
-              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm ${
+              className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all shadow-sm backdrop-blur-sm focus-ring-standard ${
                 isMenuOpen 
                   ? "bg-black/10 dark:bg-black/40 text-light-text dark:text-white" 
                   : "bg-black/5 dark:bg-black/20 hover:bg-black/10 dark:hover:bg-black/40 text-light-text/70 dark:text-white/70"

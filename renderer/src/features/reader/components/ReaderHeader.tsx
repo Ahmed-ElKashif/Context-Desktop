@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Icon } from "../../../components/ui/core/Icons";
 import { DocumentData } from "../../../store/library/librarySlice";
 import { getTagColorClass } from "../../../lib/tagUtils";
-import { handleDownload, downloadTextAsFile } from "../shared/downloadUtils";
+import { handleDownload, downloadTextAsFile } from "../../../utils/downloadUtils";
 
 interface ReaderHeaderProps {
   document: DocumentData;

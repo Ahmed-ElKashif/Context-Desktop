@@ -1,5 +1,5 @@
 import { api } from "../../../lib/axios";
-import { ENV } from "../../../config/env";
+
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 
 export interface FolderContentsResponse {
@@ -50,10 +50,11 @@ export const folderService = {
     await api.put(`/folders/${id}/rename`, { newName });
   },
 
-  downloadFolderZip: async (id: string): Promise<void> => {
-    const baseURL = ENV.API_BASE_URL;
-    const token = localStorage.getItem("context_token");
-    const downloadUrl = `${baseURL}/folders/${id}/download${token ? `?token=${token}` : ''}`;
-    window.location.assign(downloadUrl);
+  downloadFolderZip: async (id: string): Promise<Blob> => {
+    const response = await api.get(`/folders/${id}/download`, {
+      responseType: 'blob',
+      timeout: 0, // Disable timeout for potentially large zip downloads
+    });
+    return response.data;
   },
 };

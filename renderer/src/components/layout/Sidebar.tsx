@@ -28,7 +28,7 @@ export const Sidebar = () => {
               window.location.reload();
             }
           }}
-          className="group focus:outline-none"
+          className="group focus-ring-standard rounded-xl"
           aria-label="Refresh Context"
           title="Home"
         >
@@ -49,7 +49,7 @@ export const Sidebar = () => {
             to={item.path}
             id={`tour-sidebar-${item.label.toLowerCase()}`}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center w-[72px] py-2 rounded-2xl transition-all group ${
+              `flex flex-col items-center justify-center w-[72px] py-2 rounded-2xl transition-all group focus-ring-standard ${
                 isActive
                   ? "bg-light-primary/10 dark:bg-dark-primary/15 text-light-primary dark:text-dark-primary shadow-sm"
                   : "text-light-text/70 dark:text-white/60 hover:bg-light-bg dark:hover:bg-white/10 hover:text-light-text dark:hover:text-white"

@@ -48,7 +48,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <div className="p-6">
         <button 
           onClick={() => setActiveTab("profile")}
-          className="w-full text-left flex items-center gap-3 p-4 bg-black/[0.03] dark:bg-white/[0.03] rounded-2xl border border-light-border dark:border-white/5 hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-colors"
+          className="w-full text-left flex items-center gap-3 p-4 bg-black/[0.03] dark:bg-white/[0.03] rounded-2xl border border-light-border dark:border-white/5 hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-colors focus-ring-standard"
         >
           <div className="w-10 h-10 rounded-full bg-light-primary/10 dark:bg-dark-primary/15 flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
             {user?.avatar ? (
@@ -83,7 +83,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-extrabold transition-all duration-200 text-left ${isActive
+              className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-extrabold transition-all duration-200 text-left focus-ring-standard ${isActive
                   ? "bg-light-primary/10 dark:bg-dark-primary/15 text-light-primary dark:text-dark-primary shadow-sm border-l-4 border-light-primary dark:border-dark-primary pl-3"
                   : "text-light-text/55 dark:text-white/45 hover:bg-black/[0.03] dark:hover:bg-white/5 hover:text-light-text dark:hover:text-white"
                 }`}

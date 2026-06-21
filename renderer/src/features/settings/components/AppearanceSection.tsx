@@ -20,7 +20,7 @@ export const AppearanceSection = () => {
           <div className="flex bg-light-bg dark:bg-[#121214] p-1 rounded-xl border border-light-border dark:border-white/5 shadow-inner self-start sm:self-auto">
             <button
               onClick={() => setTheme("light")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors focus-ring-standard ${
                 theme === "light"
                   ? "bg-light-bg text-light-primary border-light-border/50 shadow-sm"
                   : "text-light-text/70 dark:text-light-text/70 bg-transparent hover:text-light-text border border-transparent"
@@ -30,7 +30,7 @@ export const AppearanceSection = () => {
             </button>
             <button
               onClick={() => setTheme("dark")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors focus-ring-standard ${
                 theme === "dark"
                   ? "bg-[#252528] text-dark-primary border-white/10 shadow-sm"
                   : "text-light-text/70 dark:text-white/70 bg-transparent hover:text-white border border-transparent"

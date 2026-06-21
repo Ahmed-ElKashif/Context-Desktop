@@ -9,12 +9,13 @@ import {
   bulkDeleteDocumentsThunk,
   deleteFolderThunk,
   renameFolderThunk,
-  downloadFolderZipThunk,
   DocumentData,
   FolderData,
 } from "../../../store/library/librarySlice";
 import { clearSelection } from "../../../store/library/selectionSlice";
 import { notify } from "../../../components/ui/feedback/ToastEngine";
+import { folderService } from "../api/folderService";
+import { documentService } from "../api/documentService";
 
 interface UseLibraryActionsOptions {
   ui: any; // The useLibraryUI hook return value
@@ -117,25 +118,53 @@ export const useLibraryActions = ({
     }
   };
 
-  const executeDownloadFolder = async (folderId: string) => {
+  const executeDownloadFolder = async (folderId: string, folderName: string) => {
     notify("Preparing your download...", "info");
     try {
-      await dispatch(downloadFolderZipThunk(folderId)).unwrap();
+      const blob = await folderService.downloadFolderZip(folderId);
+      const url = window.URL.createObjectURL(blob);
+      const link = window.document.createElement("a");
+      link.href = url;
+      link.download = `${folderName}.zip`;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
       notify("Download started successfully.", "success");
     } catch {
       notify("Failed to download folder.", "error");
     }
   };
 
-  const executeAIOrganization = async () => {
-    if (selectedDocs.length === 0 && selectedFolders.length === 0) return;
+  const executeBulkDownload = async () => {
+    if (selectedDocIds.length === 0 && selectedFolderIds.length === 0) return;
+    notify("Preparing your download...", "info");
+    try {
+      const blob = await documentService.downloadBulkZip(selectedDocIds, selectedFolderIds);
+      const url = window.URL.createObjectURL(blob);
+      const link = window.document.createElement("a");
+      link.href = url;
+      link.download = `Library_Download.zip`;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      notify("Download started successfully.", "success");
+    } catch {
+      notify("Failed to download selected items.", "error");
+    }
+  };
+
+  const executeAIOrganization = async (targetFolderId?: string) => {
+    const isTargetingSingleFolder = !!targetFolderId;
+    if (!isTargetingSingleFolder && selectedDocs.length === 0 && selectedFolders.length === 0) return;
 
     try {
       notify("Analyzing semantic paths...", "info");
       await dispatch(
         generateSemanticStructure({
-          documents: selectedDocs,
-          folderIds: selectedFolderIds,
+          documents: isTargetingSingleFolder ? [] : selectedDocs,
+          folderIds: isTargetingSingleFolder ? [targetFolderId!] : selectedFolderIds,
         }),
       ).unwrap();
       dispatch(clearSelection());
@@ -157,14 +186,15 @@ export const useLibraryActions = ({
 
   const synthesisPromiseRef = useRef<any>(null);
 
-  const executeAISynthesis = async () => {
-    if (selectedDocIds.length === 0 && selectedFolderIds.length === 0) return;
+  const executeAISynthesis = async (targetFolderId?: string) => {
+    const isTargetingSingleFolder = !!targetFolderId;
+    if (!isTargetingSingleFolder && selectedDocIds.length === 0 && selectedFolderIds.length === 0) return;
 
     try {
       synthesisPromiseRef.current = dispatch(
         synthesizeDocumentsThunk({
-          documentIds: selectedDocIds,
-          folderIds: selectedFolderIds,
+          documentIds: isTargetingSingleFolder ? [] : selectedDocIds,
+          folderIds: isTargetingSingleFolder ? [targetFolderId!] : selectedFolderIds,
         }),
       );
       await synthesisPromiseRef.current.unwrap();
@@ -195,6 +225,7 @@ export const useLibraryActions = ({
     executeDeleteFolder,
     executeRenameFolder,
     executeDownloadFolder,
+    executeBulkDownload,
     executeAIOrganization,
     executeAISynthesis,
     cancelAISynthesis,

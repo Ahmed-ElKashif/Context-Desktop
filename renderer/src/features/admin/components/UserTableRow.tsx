@@ -112,7 +112,7 @@ const UserTableRow: React.FC<UserTableRowProps> = ({ user, onToggleSuspend, susp
           onClick={() => onToggleSuspend(user._id, !!user.isSuspended)}
           disabled={suspendLoading || user.role === "admin"}
           title={user.role === "admin" ? "Cannot suspend an admin" : user.isSuspended ? "Unsuspend user" : "Suspend user"}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all disabled:opacity-30 disabled:cursor-not-allowed focus-ring-standard ${
             user.isSuspended
               ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
               : "bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 border-red-100 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20"
