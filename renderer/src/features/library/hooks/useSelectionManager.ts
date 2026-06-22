@@ -1,5 +1,5 @@
-import { useCallback, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 import {
   selectSingle,
@@ -8,6 +8,7 @@ import {
   selectRange,
   toggleAllVisibleSelection,
 } from "../../../store/library/selectionSlice";
+import { RootState } from "../../../store/store";
 
 export type LibraryItem =
   | { type: "doc"; item: DocumentData }
@@ -18,7 +19,7 @@ export const useSelectionManager = (
   selectedFolders: FolderData[],
 ) => {
   const dispatch = useDispatch();
-  const lastClickedIndex = useRef<number>(0);
+  const anchorId = useSelector((state: RootState) => state.selection.anchorId);
 
   const handleItemClick = useCallback(
     (
@@ -33,13 +34,16 @@ export const useSelectionManager = (
 
       if (e.shiftKey) {
         // Range selection
-        // Prevent text selection during shift click
         e.preventDefault();
+        const anchorIndex = anchorId ? allOrderedItems.findIndex(w => w.item._id === anchorId) : 0;
+        const fromIndex = anchorIndex !== -1 ? anchorIndex : 0;
+        
         dispatch(
           selectRange({
             allItems: allOrderedItems,
-            fromIndex: lastClickedIndex.current,
+            fromIndex: fromIndex,
             toIndex: index,
+            clearOthers: !e.ctrlKey && !e.metaKey,
           })
         );
       } else if (e.ctrlKey || e.metaKey) {
@@ -49,14 +53,12 @@ export const useSelectionManager = (
         } else {
           dispatch(toggleFolderSelection(item as FolderData));
         }
-        lastClickedIndex.current = index;
       } else {
         // Single selection
         dispatch(selectSingle({ item, type }));
-        lastClickedIndex.current = index;
       }
     },
-    [dispatch]
+    [dispatch, anchorId]
   );
 
   const handleSelectAll = useCallback(
@@ -88,6 +90,5 @@ export const useSelectionManager = (
   return {
     handleItemClick,
     handleSelectAll,
-    lastClickedIndex,
   };
 };

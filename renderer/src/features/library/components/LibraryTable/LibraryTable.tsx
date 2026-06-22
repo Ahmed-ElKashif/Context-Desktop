@@ -13,6 +13,7 @@ interface LibraryTableProps {
   isAllSelected: boolean;
   selectedDocIds: string[];
   selectedFolderIds: string[];
+  focusId: string | null;
   sortBy: string;
   sortOrder: "asc" | "desc";
   onSort: (column: string) => void;
@@ -33,6 +34,7 @@ export const LibraryTable = React.memo(({
   isAllSelected,
   selectedDocIds,
   selectedFolderIds,
+  focusId,
   sortBy,
   sortOrder,
   onSort,
@@ -167,6 +169,7 @@ export const LibraryTable = React.memo(({
               folder={folder}
               index={idx}
               isSelected={selectedFolderIds.includes(folder._id)}
+              isFocused={focusId === folder._id}
               childCount={folder.itemCount}
               onToggleSelection={() => onRowClick({ ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {} } as any, { type: "folder", item: folder }, idx, allOrderedItems)}
               onClick={(e) => onRowClick(e, { type: "folder", item: folder }, idx, allOrderedItems)}
@@ -184,6 +187,7 @@ export const LibraryTable = React.memo(({
                 doc={doc}
                 index={indexOffset}
                 isSelected={selectedDocIds.includes(doc._id)}
+                isFocused={focusId === doc._id}
                 onToggleSelection={() => onRowClick({ ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {} } as any, { type: "doc", item: doc }, indexOffset, allOrderedItems)}
                 onClick={(e) => onRowClick(e, { type: "doc", item: doc }, indexOffset, allOrderedItems)}
                 onDoubleClick={() => onRowDoubleClick(doc, "doc")}

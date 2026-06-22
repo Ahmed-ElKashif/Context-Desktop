@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "../../../components/ui/core/Icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { searchService, SemanticSearchResult } from "../index";
 
 export const GlobalSearch = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SemanticSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -66,7 +67,7 @@ export const GlobalSearch = () => {
   const handleSelectResult = (docId: string) => {
     setIsDropdownOpen(false);
     setSearchQuery("");
-    navigate(`/read/${docId}`);
+      navigate(`/read/${docId}`, { state: { returnUrl: location.pathname + location.search } });
   };
 
   return (

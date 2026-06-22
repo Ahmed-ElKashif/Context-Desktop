@@ -1,26 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   fetchFolderContents,
   fetchFolderTree,
 } from "../../../store/library/librarySlice";
 
-/**
- * Debounces a value by `delay` ms.
- * Clears immediately when the value becomes falsy (e.g. empty string) so
- * that clearing the search bar takes effect right away on navigation.
- */
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  
-  useEffect(() => {
-    if (!value) return;
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-
-  return value ? debouncedValue : value;
-}
+import { useDebounce } from "../../../hooks/useDebounce";
 
 interface UseLibraryDataOptions {
   activeFolderId: string | undefined;
