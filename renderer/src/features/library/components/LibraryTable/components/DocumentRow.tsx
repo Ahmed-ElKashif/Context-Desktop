@@ -13,6 +13,7 @@ interface DocumentRowProps {
   doc: DocumentData;
   index: number;
   isSelected: boolean;
+  isFocused: boolean;
   onToggleSelection: () => void;
   onClick: (e: React.MouseEvent) => void;
   onDoubleClick: () => void;
@@ -23,6 +24,7 @@ interface DocumentRowProps {
 export const DocumentRow = ({
   doc,
   isSelected,
+  isFocused,
   onToggleSelection,
   onClick,
   onDoubleClick,
@@ -63,6 +65,8 @@ export const DocumentRow = ({
         isSelected
           ? "bg-light-primary/30 dark:bg-dark-primary/30"
           : "bg-white dark:bg-[#121214] hover:bg-light-primary/10 dark:hover:bg-dark-primary/10"
+      } ${
+        isFocused ? "outline outline-2 outline-light-primary dark:outline-dark-primary outline-offset-[-2px] z-10 relative" : ""
       }`}
     >
       <td className="py-2 pl-3 pr-1 w-8" onClick={(e) => e.stopPropagation()}>

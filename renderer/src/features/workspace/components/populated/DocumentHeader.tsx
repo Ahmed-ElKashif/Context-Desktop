@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // 1. Import navigation
+import { useNavigate, useLocation } from "react-router-dom"; // 1. Import navigation
 import { useAppDispatch } from "../../../../store/hooks";
 import {
   DocumentData,
@@ -8,8 +8,7 @@ import {
 import { clearActiveDocument } from "../../../../store/workspace/workspaceSlice";
 import { Icon } from "../../../../components/ui/core/Icons";
 import { notify } from "../../../../components/ui/feedback/ToastEngine"; // 2. Import your toast
-import { ConfirmDialog } from "@/components/ui/feedback/ConfirmDialog";
-import { handleShareClick } from "../../../library/utils/tableUtils";
+import { ConfirmDialog } from "../../../../components/ui/feedback/ConfirmDialog";
 
 import { getTagColorClass } from "../../../../lib/tagUtils";
 
@@ -21,6 +20,7 @@ export const DocumentHeader = ({
 }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate(); // Hook for routing
+  const location = useLocation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // Track delete loading state
 
@@ -51,13 +51,9 @@ export const DocumentHeader = ({
 
   // --- NEW ACTIONS --- //
 
-  const handleShare = () => {
-    handleShareClick(activeDocument.cloudinaryUrl);
-  };
-
   const handleOpenReader = () => {
     // Navigates to the Reader page using the document's Mongo ID
-    navigate(`/read/${activeDocument._id}`);
+    navigate(`/read/${activeDocument._id}`, { state: { returnUrl: location.pathname + location.search } });
   };
 
   const executeDelete = async () => {
@@ -159,12 +155,6 @@ export const DocumentHeader = ({
 
         {/* Action Buttons */}
         <div className="flex gap-3 mt-4 lg:mt-0">
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-lg text-sm font-bold text-light-text dark:text-white hover:bg-light-bg dark:hover:bg-white/5 transition-colors shadow-sm cursor-pointer"
-          >
-            <Icon name="share" className="text-[18px]" /> Share
-          </button>
           <button
             onClick={handleOpenReader}
             className="flex items-center gap-2 px-4 py-2 bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-sm dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] cursor-pointer"

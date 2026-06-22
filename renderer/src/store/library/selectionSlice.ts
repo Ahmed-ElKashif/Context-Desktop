@@ -4,11 +4,15 @@ import { DocumentData, FolderData } from "./librarySlice";
 interface SelectionState {
   selectedDocs: DocumentData[];
   selectedFolders: FolderData[];
+  anchorId: string | null;
+  focusId: string | null;
 }
 
 const initialState: SelectionState = {
   selectedDocs: [],
   selectedFolders: [],
+  anchorId: null,
+  focusId: null,
 };
 
 const selectionSlice = createSlice({
@@ -23,6 +27,8 @@ const selectionSlice = createSlice({
       } else {
         state.selectedDocs.push(doc);
       }
+      state.anchorId = doc._id;
+      state.focusId = doc._id;
     },
     toggleFolderSelection: (state, action: PayloadAction<FolderData>) => {
       const folder = action.payload;
@@ -34,6 +40,8 @@ const selectionSlice = createSlice({
       } else {
         state.selectedFolders.push(folder);
       }
+      state.anchorId = folder._id;
+      state.focusId = folder._id;
     },
     toggleAllVisibleSelection: (
       state,
@@ -67,10 +75,14 @@ const selectionSlice = createSlice({
           if (!existingFolderIds.has(f._id)) state.selectedFolders.push(f);
         });
       }
+      state.anchorId = null;
+      state.focusId = null;
     },
     clearSelection: (state) => {
       state.selectedDocs = [];
       state.selectedFolders = [];
+      state.anchorId = null;
+      state.focusId = null;
     },
     selectSingle: (state, action: PayloadAction<{ item: DocumentData | FolderData; type: "doc" | "folder" }>) => {
       state.selectedDocs = [];
@@ -80,29 +92,25 @@ const selectionSlice = createSlice({
       } else {
         state.selectedFolders.push(action.payload.item as FolderData);
       }
+      state.anchorId = action.payload.item._id;
+      state.focusId = action.payload.item._id;
     },
     selectRange: (state, action: PayloadAction<{
       allItems: { item: DocumentData | FolderData; type: "doc" | "folder" }[];
       fromIndex: number;
       toIndex: number;
+      clearOthers?: boolean;
     }>) => {
-      const { allItems, fromIndex, toIndex } = action.payload;
+      const { allItems, fromIndex, toIndex, clearOthers = true } = action.payload;
+      
+      if (clearOthers) {
+        state.selectedDocs = [];
+        state.selectedFolders = [];
+      }
+
       const start = Math.min(fromIndex, toIndex);
       const end = Math.max(fromIndex, toIndex);
       
-      const docsToAdd = new Set<string>();
-      const foldersToAdd = new Set<string>();
-
-      for (let i = start; i <= end; i++) {
-        const current = allItems[i];
-        if (current.type === "doc") {
-          docsToAdd.add(current.item._id);
-        } else {
-          foldersToAdd.add(current.item._id);
-        }
-      }
-
-      // Add them avoiding duplicates
       for (let i = start; i <= end; i++) {
         const current = allItems[i];
         if (current.type === "doc") {
@@ -115,10 +123,19 @@ const selectionSlice = createSlice({
           }
         }
       }
+      state.anchorId = allItems[fromIndex].item._id;
+      state.focusId = allItems[toIndex].item._id;
     },
     setSelection: (state, action: PayloadAction<{ docs: DocumentData[]; folders: FolderData[] }>) => {
       state.selectedDocs = action.payload.docs;
       state.selectedFolders = action.payload.folders;
+    },
+    setFocus: (state, action: PayloadAction<string | null>) => {
+      state.focusId = action.payload;
+    },
+    setAnchorAndFocus: (state, action: PayloadAction<string | null>) => {
+      state.anchorId = action.payload;
+      state.focusId = action.payload;
     },
   },
 });
@@ -131,6 +148,8 @@ export const {
   selectSingle,
   selectRange,
   setSelection,
+  setFocus,
+  setAnchorAndFocus,
 } = selectionSlice.actions;
 
 export default selectionSlice.reducer;

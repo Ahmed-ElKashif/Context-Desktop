@@ -1,8 +1,15 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
-import { setSelection } from "../../../store/library/selectionSlice";
+import { 
+  selectSingle, 
+  selectRange, 
+  setFocus, 
+  toggleDocSelection, 
+  toggleFolderSelection,
+} from "../../../store/library/selectionSlice";
 import { LibraryItem } from "./useSelectionManager";
+import { RootState } from "../../../store/store";
 
 export const useLibraryKeyboardShortcuts = (
   allOrderedItems: LibraryItem[],
@@ -13,10 +20,14 @@ export const useLibraryKeyboardShortcuts = (
   onRename: (item: DocumentData | FolderData, type: "doc" | "folder") => void,
 ) => {
   const dispatch = useDispatch();
+  const anchorId = useSelector((state: RootState) => state.selection.anchorId);
+  const focusId = useSelector((state: RootState) => state.selection.focusId);
+
+  const typeBufferRef = useRef<string>("");
+  const typeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if typing in input/textarea
       const activeEl = document.activeElement as HTMLElement;
       if (
         activeEl?.tagName === "INPUT" ||
@@ -26,7 +37,6 @@ export const useLibraryKeyboardShortcuts = (
         return;
       }
 
-      // Ignore if a modal is open (dialogs typically have role="dialog" or class="modal")
       if (document.querySelector('[role="dialog"]') || document.querySelector('.modal')) {
         return;
       }
@@ -34,58 +44,69 @@ export const useLibraryKeyboardShortcuts = (
       const totalItems = allOrderedItems.length;
       if (totalItems === 0) return;
 
-      const getSelectedIndexes = () => {
-        const indexes: number[] = [];
-        allOrderedItems.forEach((w, i) => {
-          if (w.type === "doc" && selectedDocIds.includes(w.item._id)) {
-            indexes.push(i);
-          } else if (w.type === "folder" && selectedFolderIds.includes(w.item._id)) {
-            indexes.push(i);
-          }
-        });
-        return indexes;
-      };
+      const anchorIndex = anchorId ? allOrderedItems.findIndex(w => w.item._id === anchorId) : -1;
+      const focusIndex = focusId ? allOrderedItems.findIndex(w => w.item._id === focusId) : -1;
+      
+      const currentFocus = focusIndex !== -1 ? focusIndex : 0;
+      const currentAnchor = anchorIndex !== -1 ? anchorIndex : currentFocus;
 
-      const selectedIndexes = getSelectedIndexes();
-      const lastSelected = selectedIndexes.length > 0 ? Math.max(...selectedIndexes) : -1;
-      const firstSelected = selectedIndexes.length > 0 ? Math.min(...selectedIndexes) : -1;
-
-      // Helper to scroll item into view
       const scrollToItem = (id: string) => {
-        // Small delay to ensure state update has rendered
         setTimeout(() => {
           const el = document.querySelector(`tr[data-item-id="${id}"]`);
-          if (el) {
-            el.scrollIntoView({ block: "nearest" });
-          }
+          if (el) el.scrollIntoView({ block: "nearest" });
         }, 10);
       };
+
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // Exclude Spacebar
+        if (e.key === " ") return;
+
+        if (typeTimeoutRef.current) clearTimeout(typeTimeoutRef.current);
+        
+        typeBufferRef.current += e.key.toLowerCase();
+        
+        let foundIndex = -1;
+        for (let i = 0; i < totalItems; i++) {
+          const searchIndex = (currentFocus + i) % totalItems;
+          const itemName = allOrderedItems[searchIndex].type === "folder" 
+            ? (allOrderedItems[searchIndex].item as FolderData).name 
+            : (allOrderedItems[searchIndex].item as DocumentData).title;
+            
+          if (itemName.toLowerCase().startsWith(typeBufferRef.current)) {
+            foundIndex = searchIndex;
+            break;
+          }
+        }
+
+        if (foundIndex !== -1) {
+          const foundItem = allOrderedItems[foundIndex];
+          dispatch(selectSingle({ item: foundItem.item, type: foundItem.type }));
+          scrollToItem(foundItem.item._id);
+        }
+
+        typeTimeoutRef.current = setTimeout(() => {
+          typeBufferRef.current = "";
+        }, 500);
+        return;
+      }
 
       switch (e.key) {
         case "ArrowDown": {
           e.preventDefault();
-          let nextIndex = 0;
-          if (selectedIndexes.length > 0) {
-            nextIndex = Math.min(lastSelected + 1, totalItems - 1);
-          }
+          const nextIndex = Math.min(currentFocus + 1, totalItems - 1);
           const nextItem = allOrderedItems[nextIndex];
           
-          if (e.shiftKey && selectedIndexes.length > 0) {
-            // Expand selection downwards
-            const currentSelectedDocs = allOrderedItems.filter((w, i) => selectedIndexes.includes(i) && w.type === "doc").map(w => w.item as DocumentData);
-            const currentSelectedFolders = allOrderedItems.filter((w, i) => selectedIndexes.includes(i) && w.type === "folder").map(w => w.item as FolderData);
-            
-            if (!selectedIndexes.includes(nextIndex)) {
-              if (nextItem.type === "doc") currentSelectedDocs.push(nextItem.item as DocumentData);
-              if (nextItem.type === "folder") currentSelectedFolders.push(nextItem.item as FolderData);
-            }
-            dispatch(setSelection({ docs: currentSelectedDocs, folders: currentSelectedFolders }));
-          } else {
-            // Single select
-            dispatch(setSelection({
-              docs: nextItem.type === "doc" ? [nextItem.item as DocumentData] : [],
-              folders: nextItem.type === "folder" ? [nextItem.item as FolderData] : [],
+          if (e.shiftKey) {
+            dispatch(selectRange({
+              allItems: allOrderedItems,
+              fromIndex: currentAnchor,
+              toIndex: nextIndex,
+              clearOthers: true
             }));
+          } else if (e.ctrlKey || e.metaKey) {
+            dispatch(setFocus(nextItem.item._id));
+          } else {
+            dispatch(selectSingle({ item: nextItem.item, type: nextItem.type }));
           }
           scrollToItem(nextItem.item._id);
           break;
@@ -93,45 +114,62 @@ export const useLibraryKeyboardShortcuts = (
         
         case "ArrowUp": {
           e.preventDefault();
-          let prevIndex = totalItems - 1;
-          if (selectedIndexes.length > 0) {
-            prevIndex = Math.max(firstSelected - 1, 0);
-          }
+          const prevIndex = Math.max(currentFocus - 1, 0);
           const prevItem = allOrderedItems[prevIndex];
           
-          if (e.shiftKey && selectedIndexes.length > 0) {
-            // Expand selection upwards
-            const currentSelectedDocs = allOrderedItems.filter((w, i) => selectedIndexes.includes(i) && w.type === "doc").map(w => w.item as DocumentData);
-            const currentSelectedFolders = allOrderedItems.filter((w, i) => selectedIndexes.includes(i) && w.type === "folder").map(w => w.item as FolderData);
-            
-            if (!selectedIndexes.includes(prevIndex)) {
-              if (prevItem.type === "doc") currentSelectedDocs.push(prevItem.item as DocumentData);
-              if (prevItem.type === "folder") currentSelectedFolders.push(prevItem.item as FolderData);
-            }
-            dispatch(setSelection({ docs: currentSelectedDocs, folders: currentSelectedFolders }));
-          } else {
-            // Single select
-            dispatch(setSelection({
-              docs: prevItem.type === "doc" ? [prevItem.item as DocumentData] : [],
-              folders: prevItem.type === "folder" ? [prevItem.item as FolderData] : [],
+          if (e.shiftKey) {
+            dispatch(selectRange({
+              allItems: allOrderedItems,
+              fromIndex: currentAnchor,
+              toIndex: prevIndex,
+              clearOthers: true
             }));
+          } else if (e.ctrlKey || e.metaKey) {
+            dispatch(setFocus(prevItem.item._id));
+          } else {
+            dispatch(selectSingle({ item: prevItem.item, type: prevItem.type }));
           }
           scrollToItem(prevItem.item._id);
           break;
         }
 
+        case " ": {
+          e.preventDefault();
+          if (e.ctrlKey || e.metaKey) {
+            if (focusIndex !== -1) {
+              const focusedItem = allOrderedItems[focusIndex];
+              if (focusedItem.type === "doc") {
+                dispatch(toggleDocSelection(focusedItem.item as DocumentData));
+              } else {
+                dispatch(toggleFolderSelection(focusedItem.item as FolderData));
+              }
+            }
+          }
+          break;
+        }
+
         case "Enter": {
-          if (selectedIndexes.length === 1) {
-            e.preventDefault();
-            const singleItem = allOrderedItems[selectedIndexes[0]];
-            onOpen(singleItem.item, singleItem.type);
+          if (focusIndex !== -1) {
+             e.preventDefault();
+             const selectedCount = selectedDocIds.length + selectedFolderIds.length;
+             if (selectedCount === 1) {
+                const singleSelected = allOrderedItems.find(w => 
+                  (w.type === "doc" && selectedDocIds.includes(w.item._id)) ||
+                  (w.type === "folder" && selectedFolderIds.includes(w.item._id))
+                );
+                if (singleSelected) onOpen(singleSelected.item, singleSelected.type);
+             } else {
+                const focusedItem = allOrderedItems[focusIndex];
+                onOpen(focusedItem.item, focusedItem.type);
+             }
           }
           break;
         }
 
         case "Delete":
         case "Backspace": {
-          if (selectedIndexes.length > 0) {
+          const selectedCount = selectedDocIds.length + selectedFolderIds.length;
+          if (selectedCount > 0) {
             e.preventDefault();
             onDelete();
           }
@@ -139,16 +177,22 @@ export const useLibraryKeyboardShortcuts = (
         }
 
         case "F2": {
-          if (selectedIndexes.length === 1) {
+          const selectedCount = selectedDocIds.length + selectedFolderIds.length;
+          if (selectedCount === 1) {
             e.preventDefault();
-            const singleItem = allOrderedItems[selectedIndexes[0]];
-            if (singleItem.type === "folder") {
-              const folder = singleItem.item as FolderData;
-              if (folder.isAIGenerated || folder.name.toLowerCase().startsWith("random files")) {
-                return;
+            const singleSelected = allOrderedItems.find(w => 
+              (w.type === "doc" && selectedDocIds.includes(w.item._id)) ||
+              (w.type === "folder" && selectedFolderIds.includes(w.item._id))
+            );
+            if (singleSelected) {
+              if (singleSelected.type === "folder") {
+                const folder = singleSelected.item as FolderData;
+                if (folder.isAIGenerated || folder.name.toLowerCase().startsWith("random files")) {
+                  return;
+                }
               }
+              onRename(singleSelected.item, singleSelected.type);
             }
-            onRename(singleItem.item, singleItem.type);
           }
           break;
         }
@@ -157,5 +201,5 @@ export const useLibraryKeyboardShortcuts = (
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [allOrderedItems, selectedDocIds, selectedFolderIds, dispatch, onOpen, onDelete, onRename]);
+  }, [allOrderedItems, selectedDocIds, selectedFolderIds, anchorId, focusId, dispatch, onOpen, onDelete, onRename]);
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { Icon } from "../../components/ui/core/Icons";
 import { readerService } from ".";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -13,6 +13,8 @@ import { useReaderSSE } from "./hooks/useReaderSSE";
 export function ReaderFeature() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const returnUrl = location.state?.returnUrl || "/workspace";
 
   // Pull the active document directly from Redux now!
   const activeDocument = useAppSelector(state => state.workspace.activeDocument);
@@ -66,7 +68,7 @@ export function ReaderFeature() {
         </div>
         <h2 className="text-2xl font-bold text-light-text dark:text-white mb-2">Access Denied</h2>
         <p className="text-sm font-medium text-light-text/70 dark:text-white/70 mb-6 max-w-md">{error}</p>
-        <Link to="/workspace" className="flex items-center gap-2 px-5 py-2.5 bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-sm">
+        <Link to={returnUrl} className="flex items-center gap-2 px-5 py-2.5 bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-lg text-sm font-bold hover:opacity-90 transition-opacity shadow-sm">
           <Icon name="arrow_back" className="text-[18px]" /> Return to Dashboard
         </Link>
       </div>
@@ -91,6 +93,7 @@ export function ReaderFeature() {
         document={activeDocument}
         fileUrl={fileUrl}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        returnUrl={returnUrl}
       />
 
       <div className="flex-1 flex overflow-hidden relative">

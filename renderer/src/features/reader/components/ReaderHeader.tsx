@@ -3,16 +3,19 @@ import { Icon } from "../../../components/ui/core/Icons";
 import { DocumentData } from "../../../store/library/librarySlice";
 import { getTagColorClass } from "../../../lib/tagUtils";
 import { handleDownload, downloadTextAsFile } from "../../../utils/downloadUtils";
+import { handleShareClick } from "../../library/utils/tableUtils";
 
 interface ReaderHeaderProps {
   document: DocumentData;
   fileUrl: string | null;
   toggleSidebar: () => void;
+  returnUrl?: string;
 }
 
 export const ReaderHeader = ({
   document,
   fileUrl,
+  returnUrl = "/workspace",
 }: ReaderHeaderProps) => {
 
   const getLoadColor = (load?: string) => {
@@ -37,9 +40,9 @@ export const ReaderHeader = ({
     <header className="h-16 border-b border-light-border dark:border-white/5 bg-light-surface dark:bg-dark-surface flex items-center justify-between px-6 shrink-0 z-50 shadow-sm relative">
       <div className="flex items-center gap-4 overflow-hidden">
         <Link
-          to="/workspace"
+          to={returnUrl}
           className="w-8 h-8 flex items-center justify-center shrink-0 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
-          title="Back to Dashboard"
+          title="Back"
         >
           <Icon name="arrow_back" className="text-[20px]" />
         </Link>
@@ -128,6 +131,17 @@ export const ReaderHeader = ({
         )}
 
         <div className="h-6 w-px bg-light-border dark:bg-white/10 mx-1 hidden md:block"></div>
+
+        {/* Share Button: requires a physical cloudinary URL */}
+        {fileUrl && (
+          <button
+            onClick={() => handleShareClick(fileUrl)}
+            className="hidden md:block p-2 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-light-bg dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            title="Share Document Link"
+          >
+            <Icon name="share" className="text-[20px]" />
+          </button>
+        )}
 
         {/* TextSnippet: download extractedText as .txt (no fileUrl needed) */}
         {document.fileType === "TextSnippet" && document.extractedText && (
