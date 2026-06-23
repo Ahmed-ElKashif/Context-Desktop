@@ -14,9 +14,7 @@ interface DefaultDropzoneViewProps {
   handleTextSubmit: () => void;
   handleClose: () => void;
   dropzone: DropzoneState;
-  hiddenFolderInputRef: React.RefObject<HTMLInputElement | null>;
-  handleManualFolderSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleNativeFolderSelect?: () => void;
+  handleNativeFolderSelect: () => void;
 }
 
 export const DefaultDropzoneView = ({
@@ -31,8 +29,6 @@ export const DefaultDropzoneView = ({
   handleTextSubmit,
   handleClose,
   dropzone,
-  hiddenFolderInputRef,
-  handleManualFolderSelect,
   handleNativeFolderSelect,
 }: DefaultDropzoneViewProps) => {
   const { getRootProps, getInputProps, isDragActive, open } = dropzone;
@@ -59,7 +55,7 @@ export const DefaultDropzoneView = ({
       <div className="flex px-6 pt-4 gap-6 border-b border-light-border dark:border-white/5">
         <button
           onClick={() => setActiveTab("file")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors focus-ring-standard rounded-md px-2 ${
+          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
             activeTab === "file"
               ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
               : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
@@ -69,7 +65,7 @@ export const DefaultDropzoneView = ({
         </button>
         <button
           onClick={() => setActiveTab("text")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors focus-ring-standard rounded-md px-2 ${
+          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
             activeTab === "text"
               ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
               : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
@@ -86,14 +82,6 @@ export const DefaultDropzoneView = ({
             className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-10 transition-colors group/drop relative ${isDragActive ? "border-light-primary bg-light-primary/10" : "border-light-border"}`}
           >
             <input {...getInputProps()} />
-            <input
-              type="file"
-              ref={hiddenFolderInputRef}
-              onChange={handleManualFolderSelect}
-              className="hidden"
-              multiple
-              {...({ webkitdirectory: "true", directory: "true" } as any)}
-            />
 
             <div className="w-16 h-16 shadow-sm rounded-full flex items-center justify-center mb-4 bg-white dark:bg-dark-surface text-light-primary dark:text-dark-primary">
               <Icon name="create_new_folder" className="text-3xl" />
@@ -121,11 +109,7 @@ export const DefaultDropzoneView = ({
                 className="bg-white dark:bg-[#1E1E22] text-xs font-bold"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (handleNativeFolderSelect) {
-                    handleNativeFolderSelect();
-                  } else {
-                    hiddenFolderInputRef.current?.click();
-                  }
+                  handleNativeFolderSelect();
                 }}
               >
                 Browse Folders

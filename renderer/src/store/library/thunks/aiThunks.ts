@@ -27,12 +27,12 @@ export const generateSemanticStructure = createAppAsyncThunk(
 
 export const applySemanticFolders = createAppAsyncThunk(
   "document/applySemanticFolders",
-  async (updates: SemanticUpdate[], { dispatch, getState }) => {
-    await aiService.applySemanticFolders(updates);
+  async ({ updates, force }: { updates: SemanticUpdate[]; force?: boolean }, { dispatch, getState }) => {
+    await aiService.applySemanticFolders(updates, force);
     dispatch(fetchFolderTree());
     const state = getState();
     const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 10 }));
+    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
     return;
   }
 );
@@ -54,7 +54,7 @@ export const synthesizeDocumentsThunk = createAppAsyncThunk(
     dispatch(fetchFolderTree());
     const state = getState();
     const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 10 }));
+    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
     return response.data;
   }
 );

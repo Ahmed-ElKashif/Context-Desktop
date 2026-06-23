@@ -17,13 +17,31 @@ export const fetchLibraryDocuments = createAppAsyncThunk(
 export const uploadBatchDocuments = createAppAsyncThunk(
   "document/uploadBatch",
   async (
-    payload: { files: File[]; clientPaths: string[] },
+    payload: { files: File[] | any[]; clientPaths: string[]; targetFolderId?: string | null },
     { dispatch, getState },
   ) => {
-    const response = await uploadService.uploadBatch(
-      payload.files,
-      payload.clientPaths,
-    );
+    let response;
+    
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      const state: any = getState();
+      const token = state.auth?.token;
+      // In electron, we need to pass the apiUrl explicitly, or maybe hardcode it/get it from env.
+      // But we can just use the standard Vite env var
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      response = await (window as any).electronAPI.localFiles.startBatchIngest({
+        token,
+        apiUrl,
+        files: payload.files,
+        clientPaths: payload.clientPaths,
+        folderId: payload.targetFolderId
+      });
+    } else {
+      response = await uploadService.uploadBatch(
+        payload.files as File[],
+        payload.clientPaths,
+        payload.targetFolderId,
+      );
+    }
 
     // Update the sidebar's tree
     dispatch(fetchFolderTree());
@@ -35,7 +53,7 @@ export const uploadBatchDocuments = createAppAsyncThunk(
       fetchFolderContents({
         folderId: p.folderId,
         page: 1,
-        limit: p.limit || 10,
+        limit: p.limit || 50,
         sortBy: p.sortBy,
         sortOrder: p.sortOrder,
         search: p.search,
@@ -50,12 +68,13 @@ export const uploadBatchDocuments = createAppAsyncThunk(
 export const uploadTextDocument = createAppAsyncThunk(
   "document/uploadText",
   async (
-    payload: string | { text: string; title?: string },
+    payload: string | { text: string; title?: string; targetFolderId?: string | null },
     { dispatch, getState },
   ) => {
     const text = typeof payload === "string" ? payload : payload.text;
     const title = typeof payload === "string" ? undefined : payload.title;
-    const response = await uploadService.processText(text, title);
+    const targetFolderId = typeof payload === "string" ? undefined : payload.targetFolderId;
+    const response = await uploadService.processText(text, title, targetFolderId);
 
     // Refresh the sidebar so "Random files" folder appears immediately
     dispatch(fetchFolderTree());
@@ -67,7 +86,7 @@ export const uploadTextDocument = createAppAsyncThunk(
       fetchFolderContents({
         folderId: p.folderId,
         page: 1,
-        limit: p.limit || 10,
+        limit: p.limit || 50,
         sortBy: p.sortBy,
         sortOrder: p.sortOrder,
         search: p.search,
@@ -103,7 +122,7 @@ export const deleteDocumentThunk = createAppAsyncThunk(
       fetchFolderContents({
     folderId: currentFolderId,
     page: 1,
-    limit: 10,
+    limit: 50,
       }),
     );
 
@@ -151,7 +170,7 @@ export const renameDocumentThunk = createAppAsyncThunk(
       fetchFolderContents({
     folderId: currentFolderId,
     page: 1,
-    limit: 10,
+    limit: 50,
       }),
     );
 
@@ -185,7 +204,7 @@ export const bulkDeleteDocumentsThunk = createAppAsyncThunk(
       fetchFolderContents({
     folderId: currentFolderId,
     page: 1,
-    limit: 10,
+    limit: 50,
       }),
     );
 

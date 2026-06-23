@@ -9,9 +9,14 @@ import {
   bulkDeleteDocumentsThunk,
   deleteFolderThunk,
   renameFolderThunk,
+  createFolderThunk,
+  setFolderColorThunk,
+  moveItemsThunk,
+  copyItemsThunk,
   DocumentData,
   FolderData,
 } from "../../../store/library/librarySlice";
+import { setClipboard, clearClipboard } from "../../../store/library/clipboardSlice";
 import { clearSelection } from "../../../store/library/selectionSlice";
 import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { folderService } from "../api/folderService";
@@ -23,6 +28,8 @@ interface UseLibraryActionsOptions {
   selectedFolders: FolderData[];
   selectedDocIds: string[];
   selectedFolderIds: string[];
+  currentFolder: FolderData | null;
+  clipboardState: { action: "copy" | null; documentIds: string[]; folderIds: string[] };
 }
 
 /**
@@ -34,6 +41,8 @@ export const useLibraryActions = ({
   selectedFolders,
   selectedDocIds,
   selectedFolderIds,
+  currentFolder,
+  clipboardState,
 }: UseLibraryActionsOptions) => {
   const dispatch = useAppDispatch();
 
@@ -118,6 +127,19 @@ export const useLibraryActions = ({
     }
   };
 
+  const executeCreateFolder = async (name: string, color: string) => {
+    const parentFolderId = ui.createFolderModal.targetFolderId !== undefined
+      ? ui.createFolderModal.targetFolderId
+      : currentFolder?._id ?? null;
+    try {
+      await dispatch(createFolderThunk({ name, parentFolderId, color })).unwrap();
+      notify(`Folder "${name}" created.`, "success");
+      ui.createFolderModal.close();
+    } catch (error: unknown) {
+      notify((error as string) || "Failed to create folder.", "error");
+    }
+  };
+
   const executeDownloadFolder = async (folderId: string, folderName: string) => {
     notify("Preparing your download...", "info");
     try {
@@ -155,7 +177,7 @@ export const useLibraryActions = ({
     }
   };
 
-  const executeAIOrganization = async (targetFolderId?: string) => {
+  const confirmAIOrganization = async (targetFolderId?: string) => {
     const isTargetingSingleFolder = !!targetFolderId;
     if (!isTargetingSingleFolder && selectedDocs.length === 0 && selectedFolders.length === 0) return;
 
@@ -184,6 +206,30 @@ export const useLibraryActions = ({
     }
   };
 
+  const executeAIOrganization = (targetFolderId?: string) => {
+    const isTargetingSingleFolder = !!targetFolderId;
+    if (!isTargetingSingleFolder && selectedDocs.length === 0 && selectedFolders.length === 0) return;
+
+    let hasOrganizedItems = false;
+
+    if (isTargetingSingleFolder) {
+      // We don't have the full FolderData of the target folder here easily unless we search for it.
+      // But typically targetFolderId is passed from context menu of a folder, which might be in selectedFolders or foldersList.
+      // Let's check selectedFolders first. If it's a single folder, we can check its isAIGenerated flag.
+      const target = selectedFolders.find(f => f._id === targetFolderId);
+      if (target?.isAIGenerated) {
+        hasOrganizedItems = true;
+      }
+    } else {
+      hasOrganizedItems = selectedDocs.some(d => d.isOrganized) || selectedFolders.some(f => f.isAIGenerated);
+    }
+
+    if (hasOrganizedItems) {
+      ui.reorganizeWarningModal.open(targetFolderId);
+    } else {
+      confirmAIOrganization(targetFolderId);
+    }
+  };
   const synthesisPromiseRef = useRef<any>(null);
 
   const executeAISynthesis = async (targetFolderId?: string) => {
@@ -218,16 +264,103 @@ export const useLibraryActions = ({
     dispatch(clearSynthesisResult());
   };
 
+  const executeMoveOrCopy = async (targetFolderId: string | null) => {
+    const documentIds = selectedDocIds;
+    const folderIds = selectedFolderIds;
+    const totalItems = documentIds.length + folderIds.length;
+    
+    if (totalItems === 0) return;
+
+    try {
+      if (ui.folderPickerModal.mode === 'move') {
+        await dispatch(moveItemsThunk({ documentIds, folderIds, targetFolderId })).unwrap();
+        notify(`Successfully moved ${totalItems} items.`, "success");
+      } else if (ui.folderPickerModal.mode === 'copy') {
+        await dispatch(copyItemsThunk({ documentIds, folderIds, targetFolderId })).unwrap();
+        notify(`Successfully copied ${totalItems} items.`, "success");
+      }
+      dispatch(clearSelection());
+      ui.folderPickerModal.close();
+    } catch (error : any) {
+      notify(`Failed to ${ui.folderPickerModal.mode} items.`, "error");
+    }
+  };
+
+  const executeFolderColor = async (folderId: string, color: string) => {
+    try {
+      await dispatch(setFolderColorThunk({ folderId, color })).unwrap();
+      // Optimistic update handles the immediate visual feedback
+    } catch (error : any ) {
+      notify("Failed to update folder color.", "error");
+    }
+  };
+
+  const executeDuplicate = async () => {
+    const documentIds = selectedDocIds;
+    const folderIds = selectedFolderIds;
+    const totalItems = documentIds.length + folderIds.length;
+    if (totalItems === 0) return;
+
+    try {
+      await dispatch(copyItemsThunk({ 
+        documentIds, 
+        folderIds, 
+        targetFolderId: currentFolder?._id || null 
+      })).unwrap();
+      notify(`Successfully duplicated ${totalItems} items.`, "success");
+      dispatch(clearSelection());
+    } catch (error: any) {
+      notify("Failed to duplicate items.", "error");
+    }
+  };
+
+  const executeCopy = () => {
+    const documentIds = selectedDocIds;
+    const folderIds = selectedFolderIds;
+    const totalItems = documentIds.length + folderIds.length;
+    if (totalItems === 0) return;
+
+    dispatch(setClipboard({ action: "copy", documentIds, folderIds }));
+    notify(`Copied ${totalItems} items to clipboard.`, "success");
+  };
+
+  const executePaste = async () => {
+    if (clipboardState.action !== "copy") return;
+    
+    const { documentIds, folderIds } = clipboardState;
+    const totalItems = documentIds.length + folderIds.length;
+    if (totalItems === 0) return;
+
+    try {
+      await dispatch(copyItemsThunk({ 
+        documentIds, 
+        folderIds, 
+        targetFolderId: currentFolder?._id || null 
+      })).unwrap();
+      notify(`Successfully pasted ${totalItems} items.`, "success");
+      dispatch(clearClipboard());
+    } catch (error: any) {
+      notify("Failed to paste items.", "error");
+    }
+  };
+
   return {
     executeDelete,
     executeRename,
     executeBulkDelete,
     executeDeleteFolder,
     executeRenameFolder,
+    executeCreateFolder,
     executeDownloadFolder,
     executeBulkDownload,
     executeAIOrganization,
     executeAISynthesis,
     cancelAISynthesis,
+    executeMoveOrCopy,
+    executeFolderColor,
+    executeDuplicate,
+    executeCopy,
+    executePaste,
+    confirmAIOrganization,
   };
 };

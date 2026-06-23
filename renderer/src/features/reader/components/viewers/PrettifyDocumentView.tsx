@@ -10,7 +10,7 @@ interface PrettifyDocumentViewProps {
   isSnippet: boolean;
   handlePrettify: (force: boolean) => void;
   handleCopyText: () => void;
-  handleDownloadText: () => void;
+  handleDownloadMarkdown: () => void;
   handleDownloadDocx: () => void;
   isDownloading: boolean;
   copied: boolean;
@@ -21,7 +21,7 @@ export const PrettifyDocumentView = ({
   isSnippet,
   handlePrettify,
   handleCopyText,
-  handleDownloadText,
+  handleDownloadMarkdown,
   handleDownloadDocx,
   isDownloading,
   copied,
@@ -83,11 +83,11 @@ export const PrettifyDocumentView = ({
                 {copied ? "Copied!" : "Copy Text"}
               </button>
               <button
-                onClick={handleDownloadText}
+                onClick={handleDownloadMarkdown}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
               >
                 <Icon name="download" className="text-[14px]" />
-                Download .txt
+                Download .md
               </button>
             </>
           ) : (
@@ -113,7 +113,7 @@ export const PrettifyDocumentView = ({
           dir={isRtl ? "rtl" : "ltr"}
         >
           <div className="max-w-none">
-            {result.sections.map((section: any, si: any) => {
+            {result.sections.map((section, si) => {
               const listData = getListItems(section);
 
               // Heading element based on level

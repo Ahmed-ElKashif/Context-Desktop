@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { Icon } from "../../../components/ui/core/Icons";
 import { DocumentData } from "../../../store/library/librarySlice";
 import { getTagColorClass } from "../../../lib/tagUtils";
-import { handleDownload, downloadTextAsFile } from "../../../utils/downloadUtils";
+import { handleDownload, downloadMarkdownAsFile, generateRawMarkdownString } from "../../../utils/downloadUtils";
 import { handleShareClick } from "../../library/utils/tableUtils";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 interface ReaderHeaderProps {
   document: DocumentData;
@@ -133,7 +134,7 @@ export const ReaderHeader = ({
         <div className="h-6 w-px bg-light-border dark:bg-white/10 mx-1 hidden md:block"></div>
 
         {/* Share Button: requires a physical cloudinary URL */}
-        {fileUrl && (
+        {fileUrl && document.fileType !== "TextSnippet" && (
           <button
             onClick={() => handleShareClick(fileUrl)}
             className="hidden md:block p-2 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-light-bg dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
@@ -143,12 +144,27 @@ export const ReaderHeader = ({
           </button>
         )}
 
-        {/* TextSnippet: download extractedText as .txt (no fileUrl needed) */}
+        {/* Share Button for TextSnippet (Copy Markdown to clipboard) */}
         {document.fileType === "TextSnippet" && document.extractedText && (
           <button
-            onClick={() => downloadTextAsFile(document.extractedText!, document.title)}
+            onClick={async () => {
+              const md = generateRawMarkdownString(document);
+              await navigator.clipboard.writeText(md);
+              notify("Markdown copied to clipboard.", "success");
+            }}
             className="hidden md:block p-2 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-light-bg dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
-            title="Download Original File"
+            title="Copy Markdown"
+          >
+            <Icon name="share" className="text-[20px]" />
+          </button>
+        )}
+
+        {/* TextSnippet: download extractedText as .md (no fileUrl needed) */}
+        {document.fileType === "TextSnippet" && document.extractedText && (
+          <button
+            onClick={() => downloadMarkdownAsFile(generateRawMarkdownString(document), document.title)}
+            className="hidden md:block p-2 text-light-text/60 dark:text-dark-text/50 hover:text-light-primary dark:hover:text-dark-primary hover:bg-light-bg dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            title="Download Markdown"
           >
             <Icon name="download" className="text-[20px]" />
           </button>

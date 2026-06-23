@@ -3,6 +3,7 @@ import { notify } from "../../../components/ui/feedback/ToastEngine";
 import { reloadDocumentThunk } from "./documentThunks";
 import { fetchSettings } from "../../settings/settingsSlice";
 import { DocumentData } from "../librarySlice";
+import { playNotificationSound } from "../../../utils/audioUtils";
 
 // Singleton for SSE
 let statusEventSource: EventSource | null = null;
@@ -67,14 +68,16 @@ export const pollDocumentStatusThunk = () => async (dispatch: any, getState: any
     if (parsed.aiStatus === "Analyzed") {
           if (!isHandledByReader) {
             const msg = `Orchestrator finished analyzing "${parsed.document?.title || "Document"}"!`;
-            notify(msg, "success", msg, true); // BIG TECH: Escalate to OS if app is minimized
+            notify(msg, "success", msg); // BIG TECH: Escalate to OS if app is minimized
+            playNotificationSound("success");
           }
       dispatch(reloadDocumentThunk(parsed.documentId));
       dispatch(fetchSettings());
     } else if (parsed.aiStatus === "Failed") {
           if (!isHandledByReader) {
             const msg = `Analysis failed for "${parsed.document?.title || "Document"}".`;
-            notify(msg, "error", msg, true); // BIG TECH: Escalate to OS if app is minimized
+            notify(msg, "error", msg); // BIG TECH: Escalate to OS if app is minimized
+            playNotificationSound("error");
           }
       dispatch(reloadDocumentThunk(parsed.documentId));
       dispatch(fetchSettings());

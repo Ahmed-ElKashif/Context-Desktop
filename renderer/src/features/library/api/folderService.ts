@@ -1,5 +1,4 @@
 import { api } from "../../../lib/axios";
-
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 
 export interface FolderContentsResponse {
@@ -29,6 +28,15 @@ export interface GetFolderContentsParams {
 }
 
 export const folderService = {
+  createFolder: async (name: string, parentFolderId: string | null, color?: string): Promise<{ data: FolderData }> => {
+    const response = await api.post("/folders", {
+      name,
+      parentFolder: parentFolderId ?? null,
+      color: color ?? "yellow",
+    });
+    return response.data;
+  },
+
   getFolderContents: async (params?: GetFolderContentsParams): Promise<FolderContentsResponse> => {
     const safeParams = params || {};
     const { folderId, ...queryParams } = safeParams; 
@@ -47,14 +55,27 @@ export const folderService = {
   },
 
   renameFolder: async (id: string, newName: string): Promise<void> => {
-    await api.put(`/folders/${id}/rename`, { newName });
+    await api.put(`/folders/${id}`, { name: newName });
+  },
+
+  setFolderColor: async (id: string, color: string): Promise<void> => {
+    await api.put(`/folders/${id}`, { color });
   },
 
   downloadFolderZip: async (id: string): Promise<Blob> => {
     const response = await api.get(`/folders/${id}/download`, {
       responseType: 'blob',
-      timeout: 0, // Disable timeout for potentially large zip downloads
+      timeout: 0,
     });
     return response.data;
+  },
+
+  moveFolder: async (id: string, targetParentFolderId: string | null): Promise<void> => {
+    await api.patch(`/folders/${id}/move`, { targetParentFolderId });
+  },
+
+  copyFolder: async (id: string, targetParentFolderId: string | null): Promise<FolderData> => {
+    const response = await api.post(`/folders/${id}/copy`, { targetParentFolderId });
+    return response.data.data;
   },
 };

@@ -1,12 +1,11 @@
-import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 import {
   selectSingle,
+  selectRange,
+  setSelection,
   toggleDocSelection,
   toggleFolderSelection,
-  selectRange,
-  toggleAllVisibleSelection,
 } from "../../../store/library/selectionSlice";
 import { RootState } from "../../../store/store";
 
@@ -15,80 +14,75 @@ export type LibraryItem =
   | { type: "folder"; item: FolderData };
 
 export const useSelectionManager = (
-  selectedDocs: DocumentData[],
-  selectedFolders: FolderData[],
+  selectedDocIds: string[],
+  selectedFolderIds: string[],
 ) => {
   const dispatch = useDispatch();
   const anchorId = useSelector((state: RootState) => state.selection.anchorId);
 
-  const handleItemClick = useCallback(
-    (
-      e: React.MouseEvent,
-      itemWrapper: LibraryItem,
-      index: number,
-      allOrderedItems: LibraryItem[]
-    ) => {
-      e.stopPropagation();
+  const handleItemClick = (
+    e: React.MouseEvent,
+    item: LibraryItem,
+    index: number,
+    allOrderedItems: LibraryItem[],
+  ) => {
+    e.stopPropagation();
 
-      const { item, type } = itemWrapper;
+    // Prevent default to avoid text selection on double-click
+    if (e.detail > 1) {
+      e.preventDefault();
+      return;
+    }
 
-      if (e.shiftKey) {
-        // Range selection
-        e.preventDefault();
-        const anchorIndex = anchorId ? allOrderedItems.findIndex(w => w.item._id === anchorId) : 0;
-        const fromIndex = anchorIndex !== -1 ? anchorIndex : 0;
-        
-        dispatch(
-          selectRange({
-            allItems: allOrderedItems,
-            fromIndex: fromIndex,
-            toIndex: index,
-            clearOthers: !e.ctrlKey && !e.metaKey,
-          })
-        );
-      } else if (e.ctrlKey || e.metaKey) {
-        // Toggle selection
-        if (type === "doc") {
-          dispatch(toggleDocSelection(item as DocumentData));
-        } else {
-          dispatch(toggleFolderSelection(item as FolderData));
-        }
-      } else {
-        // Single selection
-        dispatch(selectSingle({ item, type }));
-      }
-    },
-    [dispatch, anchorId]
-  );
-
-  const handleSelectAll = useCallback(
-    (docs: DocumentData[], folders: FolderData[]) => {
-      // Check if all visible items are selected
-      const isAllDocsSelected = docs.every((d) =>
-        selectedDocs.some((sd) => sd._id === d._id)
-      );
-      const isAllFoldersSelected = folders.every((f) =>
-        selectedFolders.some((sf) => sf._id === f._id)
-      );
-
-      const isAllVisibleSelected =
-        docs.length + folders.length > 0 &&
-        isAllDocsSelected &&
-        isAllFoldersSelected;
+    if (e.shiftKey) {
+      // Range selection
+      e.preventDefault();
+      const anchorIndex = anchorId ? allOrderedItems.findIndex(w => w.item._id === anchorId) : 0;
+      const fromIndex = anchorIndex !== -1 ? anchorIndex : 0;
 
       dispatch(
-        toggleAllVisibleSelection({
-          docs,
-          folders,
-          isAllVisibleSelected,
+        selectRange({
+          allItems: allOrderedItems,
+          fromIndex: fromIndex,
+          toIndex: index,
+          clearOthers: !e.ctrlKey && !e.metaKey,
         })
       );
-    },
-    [dispatch, selectedDocs, selectedFolders]
-  );
+    } else if (e.ctrlKey || e.metaKey) {
+      // Multi-select toggle
+      if (item.type === "doc") {
+        dispatch(toggleDocSelection(item.item as DocumentData));
+      } else {
+        dispatch(toggleFolderSelection(item.item as FolderData));
+      }
+    } else {
+      // Single selection
+      dispatch(selectSingle({ item: item.item, type: item.type }));
+    }
+  };
+
+  const handleSelectAll = (visibleDocs: DocumentData[], visibleFolders: FolderData[]) => {
+    const totalVisible = visibleDocs.length + visibleFolders.length;
+    const totalSelected = selectedDocIds.length + selectedFolderIds.length;
+
+    if (totalSelected === totalVisible && totalVisible > 0) {
+      // If all are selected, clear selection
+      dispatch(setSelection({ docs: [], folders: [] }));
+    } else {
+      // Select all visible
+      dispatch(setSelection({ docs: visibleDocs, folders: visibleFolders }));
+    }
+  };
+
+  const isAllSelected = (visibleDocs: DocumentData[], visibleFolders: FolderData[]) => {
+    const totalVisible = visibleDocs.length + visibleFolders.length;
+    if (totalVisible === 0) return false;
+    return selectedDocIds.length + selectedFolderIds.length === totalVisible;
+  };
 
   return {
     handleItemClick,
     handleSelectAll,
+    isAllSelected,
   };
 };

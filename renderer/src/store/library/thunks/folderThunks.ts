@@ -1,5 +1,6 @@
 import { createAppAsyncThunk } from "../../hooks";
 import { folderService } from "../../../features/library/api/folderService";
+import { documentService } from "../../../features/library/api/documentService";
 
 export const fetchFolderTree = createAppAsyncThunk(
   "document/fetchFolderTree",
@@ -17,6 +18,25 @@ export const fetchFolderContents = createAppAsyncThunk(
   }
 );
 
+export const createFolderThunk = createAppAsyncThunk(
+  "folder/createFolder",
+  async (
+    payload: { name: string; parentFolderId: string | null; color?: string },
+    { dispatch, getState }
+  ) => {
+    const response = await folderService.createFolder(
+      payload.name,
+      payload.parentFolderId,
+      payload.color
+    );
+    dispatch(fetchFolderTree());
+    const state: any = getState();
+    const currentFolderId = state.library?.currentFolder?._id;
+    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    return response.data;
+  }
+);
+
 export const renameFolderThunk = createAppAsyncThunk(
   "document/renameFolder",
   async (payload: { path: string; newName: string }, { dispatch, getState }) => {
@@ -24,7 +44,7 @@ export const renameFolderThunk = createAppAsyncThunk(
     dispatch(fetchFolderTree());
     const state = getState();
     const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 10 }));
+    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
     return response;
   }
 );
@@ -36,7 +56,7 @@ export const deleteFolderThunk = createAppAsyncThunk(
     dispatch(fetchFolderTree());
     const state = getState();
     const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 10 }));
+    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
     return path;
   }
 );
@@ -44,7 +64,97 @@ export const deleteFolderThunk = createAppAsyncThunk(
 export const downloadFolderZipThunk = createAppAsyncThunk(
   "document/downloadFolderZip",
   async (folderId: string) => {
-    const blob = await folderService.downloadFolderZip(folderId);
-    return blob;
+    await folderService.downloadFolderZip(folderId);
+    return folderId;
+  }
+);
+
+export const moveItemsThunk = createAppAsyncThunk(
+  "library/moveItems",
+  async (
+    payload: { documentIds: string[]; folderIds: string[]; targetFolderId: string | null },
+    { dispatch, getState }
+  ) => {
+    const { documentIds, folderIds, targetFolderId } = payload;
+
+    // Move documents by updating their folder ID
+    if (documentIds.length > 0) {
+      await Promise.all(
+        documentIds.map((id) => documentService.updateDocument(id, { folder: targetFolderId }))
+      );
+    }
+
+    // Move folders
+    if (folderIds.length > 0) {
+      await Promise.all(
+        folderIds.map((id) => folderService.moveFolder(id, targetFolderId))
+      );
+    }
+
+    // Refresh sidebar folder tree
+    dispatch(fetchFolderTree());
+
+    // Refresh folder contents
+    const state: any = getState();
+    const currentFolderId = state.library?.currentFolder?._id;
+    dispatch(
+      fetchFolderContents({
+        folderId: currentFolderId,
+        page: 1,
+        limit: 50,
+      })
+    );
+
+    return payload;
+  }
+);
+
+export const copyItemsThunk = createAppAsyncThunk(
+  "library/copyItems",
+  async (
+    payload: { documentIds: string[]; folderIds: string[]; targetFolderId: string | null },
+    { dispatch, getState }
+  ) => {
+    const { documentIds, folderIds, targetFolderId } = payload;
+
+    // Copy documents
+    if (documentIds.length > 0) {
+      await Promise.all(
+        documentIds.map((id) => documentService.copyDocument(id, targetFolderId))
+      );
+    }
+
+    // Copy folders
+    if (folderIds.length > 0) {
+      await Promise.all(
+        folderIds.map((id) => folderService.copyFolder(id, targetFolderId))
+      );
+    }
+
+    // Refresh sidebar folder tree
+    dispatch(fetchFolderTree());
+
+    // Refresh folder contents
+    const state: any = getState();
+    const currentFolderId = state.library?.currentFolder?._id;
+    dispatch(
+      fetchFolderContents({
+        folderId: currentFolderId,
+        page: 1,
+        limit: 50,
+      })
+    );
+
+    return payload;
+  }
+);
+
+export const setFolderColorThunk = createAppAsyncThunk(
+  "library/setFolderColor",
+  async (payload: { folderId: string; color: string }, { dispatch }) => {
+    const { folderId, color } = payload;
+    await folderService.setFolderColor(folderId, color);
+    dispatch(fetchFolderTree());
+    return payload;
   }
 );
