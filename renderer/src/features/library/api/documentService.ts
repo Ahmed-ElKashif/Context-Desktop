@@ -66,4 +66,9 @@ export const documentService = {
     });
     return response.data;
   },
+
+  copyDocument: async (id: string, targetFolderId: string | null): Promise<DocumentData> => {
+    const response = await api.post(`/documents/${id}/copy`, { targetFolderId });
+    return response.data.data;
+  },
 };

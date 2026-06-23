@@ -3,6 +3,8 @@ import { ConfirmDialog } from "../../../components/ui/feedback/ConfirmDialog";
 import { RenameDialog } from "../../../components/ui/feedback/RenameDialog";
 import { UploadModal } from "./UploadModal";
 import { SynthesisModal } from "./SynthesisModal";
+import { CreateFolderDialog } from "../../../components/ui/feedback/CreateFolderDialog";
+import { FolderPickerModal } from "../../../components/ui/feedback/FolderPickerModal";
 
 interface LibraryModalsProps {
   ui: any;
@@ -14,35 +16,29 @@ interface LibraryModalsProps {
 export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state, dropzone }) => {
   return (
     <>
-      <SynthesisModal
-        isOpen={state.isSynthesizing || !!state.synthesisResult}
-        isLoading={state.isSynthesizing}
-        synthesisResult={state.synthesisResult}
-        onClose={actions.cancelAISynthesis}
-      />
-
-      <UploadModal
-        isOpen={ui.uploadModal.isOpen}
-        onClose={ui.uploadModal.close}
-        externalFiles={dropzone.globalDroppedFiles}
-        externalPaths={dropzone.globalDroppedPaths}
-        onClearExternal={() => {
-          dropzone.setGlobalDroppedFiles([]);
-          dropzone.setGlobalDroppedPaths([]);
-        }}
+      {/* Modals */}
+      <ConfirmDialog
+        isOpen={ui.bulkDeleteModal.isOpen}
+        title="Delete Items"
+        message={`Are you sure you want to delete ${state.selectedDocIds.length + state.selectedFolderIds.length} items?`}
+        onConfirm={actions.executeBulkDelete}
+        onClose={ui.bulkDeleteModal.close}
+        isLoading={ui.loading.isDeleting}
       />
 
       <ConfirmDialog
-        isOpen={ui.bulkDeleteModal.isOpen}
-        onClose={ui.bulkDeleteModal.close}
-        onConfirm={actions.executeBulkDelete}
-        title="Delete Multiple Records"
-        message={`Are you sure you want to permanently delete ${state.selectedDocIds.length + state.selectedFolderIds.length} selected items?`}
-        confirmText="Delete All"
-        isDestructive
-        isLoading={ui.loading.isDeleting}
+        isOpen={ui.reorganizeWarningModal.isOpen}
+        title="Reorganize Already Organized Items?"
+        message="Some of the selected items have already been organized by AI. Reorganizing them will move them from their current folders and consume your token budget. Are you sure you want to proceed?"
+        onConfirm={() => {
+          ui.reorganizeWarningModal.close();
+          actions.confirmAIOrganization(ui.reorganizeWarningModal.targetFolderId);
+        }}
+        onClose={ui.reorganizeWarningModal.close}
+        confirmText="Yes, Reorganize"
+        isDestructive={false}
       />
-      
+
       <ConfirmDialog
         isOpen={!!ui.deleteModal.doc}
         onClose={ui.deleteModal.close}
@@ -53,7 +49,7 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         isDestructive
         isLoading={ui.loading.isDeleting}
       />
-      
+
       <RenameDialog
         isOpen={!!ui.renameModal.doc}
         onClose={ui.renameModal.close}
@@ -61,7 +57,50 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         currentName={ui.renameModal.doc?.title || ""}
         isLoading={ui.loading.isRenaming}
       />
-      
+
+      <RenameDialog
+        isOpen={!!ui.folderRenameModal.path}
+        currentName={ui.folderRenameModal.path || ""}
+        onConfirm={(newName) => actions.executeRenameFolder(newName)}
+        onClose={ui.folderRenameModal.close}
+        isLoading={ui.loading.isRenaming}
+      />
+
+      <CreateFolderDialog
+        isOpen={ui.createFolderModal.isOpen}
+        onClose={ui.createFolderModal.close}
+        onConfirm={actions.executeCreateFolder}
+        isLoading={ui.loading.isCreatingFolder}
+      />
+
+      <FolderPickerModal
+        isOpen={ui.folderPickerModal.isOpen}
+        onClose={ui.folderPickerModal.close}
+        onConfirm={actions.executeMoveOrCopy}
+        title={
+          ui.folderPickerModal.mode === 'move'
+            ? `Move ${state.selectedDocIds.length + state.selectedFolderIds.length} item${state.selectedDocIds.length + state.selectedFolderIds.length !== 1 ? 's' : ''}`
+            : `Copy ${state.selectedDocIds.length + state.selectedFolderIds.length} item${state.selectedDocIds.length + state.selectedFolderIds.length !== 1 ? 's' : ''}`
+        }
+        actionLabel={ui.folderPickerModal.mode === 'move' ? 'Move' : 'Copy'}
+        globalFolderTree={state.globalFolderTree}
+        onCreateNewFolder={(parentId) => ui.createFolderModal.open(parentId)}
+        disabledFolderIds={state.selectedFolderIds}
+      />
+
+      <UploadModal
+        isOpen={ui.uploadModal.isOpen}
+        onClose={ui.uploadModal.close}
+        externalFiles={dropzone.globalDroppedFiles}
+        externalPaths={dropzone.globalDroppedPaths}
+        targetFolderId={ui.uploadModal.targetFolderId}
+        forceReorganize={ui.reorganizeWarningModal.isForceReorganize}
+        onClearExternal={() => {
+          dropzone.setGlobalDroppedFiles([]);
+          dropzone.setGlobalDroppedPaths([]);
+        }}
+      />
+
       <ConfirmDialog
         isOpen={!!ui.folderDeleteModal.path}
         onClose={ui.folderDeleteModal.close}
@@ -72,14 +111,15 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         isDestructive
         isLoading={ui.loading.isDeleting}
       />
-      
-      <RenameDialog
-        isOpen={!!ui.folderRenameModal.path}
-        onClose={ui.folderRenameModal.close}
-        onConfirm={actions.executeRenameFolder}
-        currentName={state.folderToRename?.name || "Rename Folder"}
-        isLoading={ui.loading.isRenaming}
-      />
+
+      {state.synthesisResult && (
+        <SynthesisModal
+          isOpen={true}
+          isLoading={state.isFetchingLibrary}
+          onClose={() => actions.clearSelection()}
+          synthesisResult={state.synthesisResult}
+        />
+      )}
     </>
   );
 };

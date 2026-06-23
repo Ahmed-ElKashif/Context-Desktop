@@ -2,10 +2,9 @@ import React from "react";
 import { Icon } from "../../components/ui/core/Icons";
 
 // Components
-import { LibrarySidebar } from "./components/LibrarySidebar";
 import { LibraryHeader } from "./components/LibraryHeader";
+import { LibrarySidebar } from "./components/LibrarySidebar";
 import { LibraryTable } from "./components/LibraryTable/LibraryTable";
-import { LibraryPagination } from "./components/LibraryPagination";
 import { LibraryDragOverlay } from "./components/LibraryDragOverlay";
 import { LibraryModals } from "./components/LibraryModals";
 
@@ -20,8 +19,6 @@ export const LibraryFeature = () => {
       {...dropzone.getRootProps()}
       className="flex-1 flex flex-row overflow-hidden relative overscroll-contain outline-none bg-light-surface dark:bg-[#0A0A0C]"
       onMouseDown={(e) => {
-        // Clear selection when clicking on empty area outside the table
-        // But only if it's the main container (not the sidebar or inner elements)
         if (e.target === e.currentTarget) {
           actions.clearSelection();
         }
@@ -33,7 +30,7 @@ export const LibraryFeature = () => {
       <div id="tour-library-sidebar" className="h-full">
         <LibrarySidebar
           currentFolder={state.currentFolder}
-          onNavigate={actions.handleNavigate}
+          onNavigate={actions.handleFolderSelect}
           activeTag={ui.filters.activeTag}
           onTagSelect={ui.filters.handleTagSelect}
           isMobileOpen={state.isMobileMenuOpen}
@@ -45,13 +42,13 @@ export const LibraryFeature = () => {
       <div className="flex-1 flex flex-col overflow-hidden relative dark:shadow-none">
         <div id="tour-library-header">
           <LibraryHeader
-            currentFolder={state.currentFolder}
             onOpenUpload={ui.uploadModal.open}
             activeTag={ui.filters.activeTag}
             searchQuery={ui.filters.searchQuery}
             onSearchChange={ui.filters.setSearchQuery}
             onToggleMobileMenu={() => actions.setIsMobileMenuOpen(!state.isMobileMenuOpen)}
-            onNavigate={actions.handleNavigate}
+            currentFolder={state.currentFolder}
+            onNavigate={actions.handleFolderSelect}
           />
         </div>
 
@@ -61,7 +58,6 @@ export const LibraryFeature = () => {
             ref={tableContainerRef}
             className="w-full h-full bg-white dark:bg-dark-surface rounded-xl border border-light-border dark:border-white/5 shadow-sm relative flex flex-col overflow-hidden"
             onContextMenu={(e) => {
-              // Only open generic context menu if right clicking in empty space of the container
               if (e.target === e.currentTarget) {
                 contextMenu.openMenu(e);
               }
@@ -72,7 +68,7 @@ export const LibraryFeature = () => {
                 <div className="h-full bg-primary animate-progress-indeterminate"></div>
               </div>
             )}
-            
+
             {rubberBand.rubberBandOverlay}
 
             <div className="w-full flex-1 overflow-hidden flex flex-col relative">
@@ -83,31 +79,31 @@ export const LibraryFeature = () => {
               ) : (
                 <LibraryTable
                   documents={state.documentsList}
-                  childFolders={state.visibleFolders}
-                  currentPage={state.pagination?.currentPage}
+                  childFolders={state.foldersList}
+                  currentPage={state.pagination?.currentPage || 1}
                   isAllSelected={state.isAllSelected}
                   selectedDocIds={state.selectedDocIds}
                   selectedFolderIds={state.selectedFolderIds}
                   focusId={state.focusId}
-                  sortBy={ui.sorting.sortBy}
-                  sortOrder={ui.sorting.sortOrder}
+                  sortBy={state.sortBy}
+                  sortOrder={state.sortOrder}
                   onSort={ui.sorting.handleSort}
-                  onToggleAll={() => actions.handleSelectAll(state.documentsList, state.visibleFolders)}
-                  onRowClick={actions.handleItemClick}
+                  onToggleAll={() => actions.handleSelectAll(state.documentsList, state.foldersList)}
+                  onRowClick={(e, item, index, allItems) => actions.handleItemClick(e, item, index, allItems)}
                   onRowDoubleClick={actions.handleRowDoubleClick}
                   onRowContextMenu={actions.handleRowContextMenu}
                   onRowDotsClick={actions.handleRowDotsClick}
                   onTableContextMenu={(e) => contextMenu.openMenu(e)}
                   onEmptySpaceClick={() => actions.clearSelection()}
+                  hasMore={!!(state.pagination && state.pagination.currentPage < state.pagination.totalPages)}
+                  onLoadMore={() => {
+                    if (!state.isFetchingLibrary && state.pagination) {
+                      actions.handlePageChange(state.pagination.currentPage + 1);
+                    }
+                  }}
                 />
               )}
             </div>
-            {state.pagination && !state.isFetchingLibrary && (
-              <LibraryPagination
-                {...state.pagination}
-                onPageChange={actions.handlePageChange}
-              />
-            )}
           </div>
         </div>
       </div>

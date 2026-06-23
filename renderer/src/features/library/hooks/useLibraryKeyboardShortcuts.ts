@@ -18,6 +18,9 @@ export const useLibraryKeyboardShortcuts = (
   onOpen: (item: DocumentData | FolderData, type: "doc" | "folder") => void,
   onDelete: () => void,
   onRename: (item: DocumentData | FolderData, type: "doc" | "folder") => void,
+  onCreateFolder: () => void,
+  onCopyClipboard: () => void,
+  onPasteClipboard: () => void,
 ) => {
   const dispatch = useDispatch();
   const anchorId = useSelector((state: RootState) => state.selection.anchorId);
@@ -42,6 +45,14 @@ export const useLibraryKeyboardShortcuts = (
       }
 
       const totalItems = allOrderedItems.length;
+
+      // Handle Paste specifically before returning on empty folder
+      if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
+        e.preventDefault();
+        onPasteClipboard();
+        return;
+      }
+
       if (totalItems === 0) return;
 
       const anchorIndex = anchorId ? allOrderedItems.findIndex(w => w.item._id === anchorId) : -1;
@@ -87,6 +98,12 @@ export const useLibraryKeyboardShortcuts = (
         typeTimeoutRef.current = setTimeout(() => {
           typeBufferRef.current = "";
         }, 500);
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        onCreateFolder();
         return;
       }
 
@@ -176,6 +193,20 @@ export const useLibraryKeyboardShortcuts = (
           break;
         }
 
+        case "c":
+        case "C": {
+          if (e.ctrlKey || e.metaKey) {
+            const selectedCount = selectedDocIds.length + selectedFolderIds.length;
+            if (selectedCount > 0) {
+              e.preventDefault();
+              onCopyClipboard();
+            }
+          }
+          break;
+        }
+
+        // Ctrl+V is handled earlier to support pasting into empty folders
+
         case "F2": {
           const selectedCount = selectedDocIds.length + selectedFolderIds.length;
           if (selectedCount === 1) {
@@ -201,5 +232,5 @@ export const useLibraryKeyboardShortcuts = (
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [allOrderedItems, selectedDocIds, selectedFolderIds, anchorId, focusId, dispatch, onOpen, onDelete, onRename]);
+  }, [allOrderedItems, selectedDocIds, selectedFolderIds, anchorId, focusId, dispatch, onOpen, onDelete, onRename, onCreateFolder, onCopyClipboard, onPasteClipboard]);
 };

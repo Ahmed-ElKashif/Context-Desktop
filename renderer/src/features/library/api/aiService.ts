@@ -19,8 +19,8 @@ export const aiService = {
     return response.data;
   },
 
-  applySemanticFolders: async (updates: SemanticUpdate[]): Promise<void> => {
-    const response = await api.put("/ai/apply-folders", { updates });
+  applySemanticFolders: async (updates: SemanticUpdate[], force?: boolean): Promise<void> => {
+    const response = await api.put("/ai/apply-folders", { updates, force });
     return response.data;
   },
 

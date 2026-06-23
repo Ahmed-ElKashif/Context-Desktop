@@ -17,6 +17,8 @@ export interface UseUploadModalProps {
   externalPaths?: string[];
   onClearExternal?: () => void;
   onSuccess?: () => void;
+  targetFolderId?: string | null;
+  forceReorganize?: boolean;
 }
 
 export const useUploadModal = ({
@@ -25,6 +27,8 @@ export const useUploadModal = ({
   externalPaths = [],
   onClearExternal,
   onSuccess,
+  targetFolderId,
+  forceReorganize = false,
 }: UseUploadModalProps) => {
   const dispatch = useAppDispatch();
   const {
@@ -114,7 +118,7 @@ export const useUploadModal = ({
   const handleUploadToYourFolders = async () => {
     try {
       const res = await dispatch(
-        uploadBatchDocuments({ files: activeFiles, clientPaths: activePaths }),
+        uploadBatchDocuments({ files: activeFiles, clientPaths: activePaths, targetFolderId }),
       ).unwrap();
       
       let successMsg = "Saved to Your Folders!";
@@ -163,6 +167,7 @@ export const useUploadModal = ({
         uploadTextDocument({
           text: pastedText,
           title: snippetTitle.trim() || undefined,
+          targetFolderId,
         }),
       ).unwrap();
       const remaining = Math.max(0, 3000 - (Date.now() - startedAt));
@@ -192,7 +197,7 @@ export const useUploadModal = ({
     notify("Applying new structure...", "info", toastId);
 
     try {
-      await dispatch(applySemanticFolders(proposedFolderUpdates)).unwrap();
+      await dispatch(applySemanticFolders({ updates: proposedFolderUpdates, force: forceReorganize })).unwrap();
       notify("Inbox Organized!", "success", toastId);
       onSuccess?.();
       handleClose();

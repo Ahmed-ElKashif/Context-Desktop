@@ -12,7 +12,7 @@ const generateCacheKey = (p: any): string => {
     p?.sortBy || "updatedAt",
     p?.sortOrder || "desc",
     p?.page || 1,
-    p?.limit || 10,
+    p?.limit || 50,
   ].join("|");
 };
 
@@ -44,7 +44,7 @@ export const buildFetchReducers = (builder: ActionReducerMapBuilder<LibraryState
         tags: p.tags,
         sortBy: p.sortBy,
         sortOrder: p.sortOrder,
-        limit: p.limit || state.lastFetchParams?.limit || 10,
+        limit: p.limit || state.lastFetchParams?.limit || 50,
       };
 
       // Smart SWR Cache Logic
@@ -60,11 +60,14 @@ export const buildFetchReducers = (builder: ActionReducerMapBuilder<LibraryState
         (p.tags || "") !== (state.lastFetchParams?.tags || "");
 
       if (isCacheValid) {
-        // Restore from cache instantly — background fetch will update silently
-        state.documentsList = cached.documentsList;
-        state.foldersList = cached.foldersList;
-        state.breadcrumbs = cached.breadcrumbs;
-        state.pagination = cached.pagination;
+        const isAppending = p.page && p.page > 1;
+        if (!isAppending) {
+          // Restore from cache instantly — background fetch will update silently
+          state.documentsList = cached.documentsList;
+          state.foldersList = cached.foldersList;
+          state.breadcrumbs = cached.breadcrumbs;
+          state.pagination = cached.pagination;
+        }
         state.isFetchingLibrary = false; // Don't show spinner
         state.isRevalidating = true; // Show subtle progress bar
       } else if (isContextChange) {
@@ -79,8 +82,19 @@ export const buildFetchReducers = (builder: ActionReducerMapBuilder<LibraryState
       state.isRevalidating = false;
       state.currentFolder = action.payload.data.currentFolder;
       state.breadcrumbs = action.payload.data.breadcrumbs || [];
-      state.foldersList = action.payload.data.folders;
-      state.documentsList = action.payload.data.documents;
+      const isAppending = action.meta.arg?.page && action.meta.arg.page > 1;
+
+      if (isAppending) {
+        // Deduplicate to prevent double-appending if cache and fetch run close together
+        const newFolders = action.payload.data.folders.filter((f: any) => !state.foldersList.some(existing => existing._id === f._id));
+        const newDocs = action.payload.data.documents.filter((d: any) => !state.documentsList.some(existing => existing._id === d._id));
+        
+        state.foldersList = [...state.foldersList, ...newFolders];
+        state.documentsList = [...state.documentsList, ...newDocs];
+      } else {
+        state.foldersList = action.payload.data.folders;
+        state.documentsList = action.payload.data.documents;
+      }
 
       if (action.payload.pagination) {
         state.pagination = action.payload.pagination ? action.payload.pagination : null;

@@ -1,6 +1,7 @@
 import React from "react";
 import { FolderData } from "../../../../../store/library/librarySlice";
 import { formatDate, formatItemCount, CircleCheckbox } from "../../../utils/tableUtils";
+import { getFolderColorHex } from "../../../utils/folderColors";
 
 interface FolderRowProps {
   folder: FolderData;
@@ -59,7 +60,10 @@ export const FolderRow = ({
       </td>
       <td className="py-1 pr-2">
         <div className="flex items-center gap-1.5">
-          <span className="material-symbols-rounded text-lg text-yellow-500">
+          <span 
+            className="material-symbols-rounded text-lg"
+            style={{ color: getFolderColorHex(folder.color || 'yellow') }}
+          >
             folder
           </span>
           <div className="truncate max-w-[200px] md:max-w-[250px] lg:max-w-[400px]">

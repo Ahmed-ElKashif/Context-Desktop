@@ -57,7 +57,7 @@ export const PrettifyExcelView = ({
           {/* Sheet tabs */}
           {result.sheets.length > 1 && (
             <div className="flex items-center ml-2 border-l border-light-border dark:border-white/10 pl-3 gap-1">
-              {result.sheets.map((s: any, i: any) => (
+              {result.sheets.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveSheet(i)}
@@ -106,7 +106,7 @@ export const PrettifyExcelView = ({
                   <th className={`w-12 px-3 py-3 text-center text-[10px] font-bold font-mono uppercase tracking-widest text-white/50 border-r border-white/10 select-none sticky ${isRtl ? 'right-0 border-l' : 'left-0 border-r'} bg-[#111827] dark:bg-[#18181B] z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]`}>
                     #
                   </th>
-              {sheet.headers.map((h: any, ci: any) => (
+              {sheet.headers.map((h, ci) => (
                 <th
                   key={ci}
                   className="px-5 py-3 font-semibold tracking-wide text-white/90 whitespace-nowrap border-r border-white/10 last:border-r-0 text-left"
@@ -127,7 +127,7 @@ export const PrettifyExcelView = ({
                 </td>
               </tr>
             ) : (
-              sheet.rows.map((row: any, ri: any) => {
+              sheet.rows.map((row, ri) => {
                 const isEvenRow = ri % 2 === 0;
                 
                 return (
@@ -142,7 +142,7 @@ export const PrettifyExcelView = ({
                     } z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>
                       {ri + 1}
                     </td>
-                    {sheet.headers.map((_: any, ci: any) => {
+                    {sheet.headers.map((_, ci) => {
                       const cell = row[ci] ?? "";
                       const isNumeric = cell !== "" && (!isNaN(Number(cell)) || /^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}/.test(cell));
                       const isEmpty = !cell;

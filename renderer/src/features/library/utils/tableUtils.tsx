@@ -73,19 +73,6 @@ export const formatDate = (dateString?: string) => {
   if (isToday) return `Today, ${time}`;
   return `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
 }; 
-
-export const formatFileSize = (bytes?: number): string => {
-  if (!bytes || bytes === 0) return '—';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10240 ? 2 : 1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
-export const formatItemCount = (count?: number): string => {
-  if (count === undefined) return '--';
-  return count === 1 ? "1 item" : `${count} items`;
-};
-
 // ─── Upload deduplication helpers (Windows-style rename) ─────────────────────
 
 /**
@@ -165,6 +152,18 @@ export const renderCognitiveLoadBars = (load?: string) => {
       </span>
     </div>
   );
+};
+
+export const formatFileSize = (bytes?: number): string => {
+  if (!bytes || bytes === 0) return '—';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10240 ? 2 : 1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+export const formatItemCount = (count?: number): string => {
+  if (count === undefined) return '--';
+  return count === 1 ? '1 item' : `${count} items`;
 };
 
 export const CircleCheckbox = ({ checked, onChange, visible }: {

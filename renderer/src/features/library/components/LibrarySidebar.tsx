@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Icon } from "../../../components/ui/core/Icons";
 import { FolderData } from "../../../store/library/librarySlice";
 import { useAppSelector } from "../../../store/hooks"; 
+import { getFolderColorHex } from "../../../features/library/utils/folderColors"; 
 
 interface LibrarySidebarProps {
   currentFolder: FolderData | null;
@@ -52,8 +53,9 @@ const FolderTreeItem = ({
             name={isOpen && children.length > 0 ? "folder_open" : "folder"}
             className={`text-[16px] shrink-0 ${isActive
                 ? "text-light-primary dark:text-dark-primary"
-                : "text-yellow-500"
+                : ""
               }`}
+            style={{ color: !isActive ? getFolderColorHex(folder.color || 'yellow') : undefined }}
           />
           <span
             className={`truncate text-sm font-semibold ${isActive

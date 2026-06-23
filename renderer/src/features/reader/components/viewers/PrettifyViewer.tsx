@@ -114,8 +114,8 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
     handleDownloadExcel,
     handleDownloadDocx,
     handleCopyText,
-    handleDownloadText,
-  } = usePrettifyDownloads(result, doc.title);
+    handleDownloadMarkdown,
+  } = usePrettifyDownloads(result, doc);
 
   const restorePrevious = useCallback(() => {
     setResult(previousResult);
@@ -284,7 +284,7 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
       isSnippet={isSnippet}
       handlePrettify={handlePrettify}
       handleCopyText={handleCopyText}
-      handleDownloadText={handleDownloadText}
+      handleDownloadMarkdown={handleDownloadMarkdown}
       handleDownloadDocx={handleDownloadDocx}
       isDownloading={isDownloading}
       copied={copied}

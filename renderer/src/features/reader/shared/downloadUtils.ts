@@ -8,8 +8,6 @@
  *  • TextSnippets → in-memory Blob, no network request needed
  */
 
-import { DocumentData } from "../store/library/librarySlice";
-
 /**
  * Downloads a plain-text string as a .txt file.
  * The snippet title is used as the filename, with OS-invalid characters replaced by underscores.
@@ -30,39 +28,6 @@ export const downloadTextAsFile = (text: string, title: string): void => {
   window.document.body.removeChild(link);
 
   // Revoke the object URL after a short delay to allow the download to start
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-};
-
-export const generateRawMarkdownString = (document: DocumentData): string => {
-  const dateStr = new Date(document.createdAt).toLocaleDateString("en-US", {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  
-  const tagsStr = (document.tags || []).map(t => `#${t.replace(/^#/, '')}`).join(" ");
-  const loadStr = document.cognitiveLoad || "Unknown";
-  
-  const header = `# ${document.title}\n\n**Extracted Date:** ${dateStr}\n**Cognitive Load:** ${loadStr}\n${tagsStr ? `**Tags:** ${tagsStr}\n` : ''}\n---\n\n`;
-  
-  return header + (document.extractedText || "");
-};
-
-export const downloadMarkdownAsFile = (text: string, title: string): void => {
-  const safeTitle = title.replace(/[/\\:*?"<>|]/g, "_").trim() || "snippet";
-  const filename = `${safeTitle}.md`;
-
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-
-  const link = window.document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  window.document.body.appendChild(link);
-  link.click();
-  window.document.body.removeChild(link);
-
   setTimeout(() => URL.revokeObjectURL(url), 100);
 };
 

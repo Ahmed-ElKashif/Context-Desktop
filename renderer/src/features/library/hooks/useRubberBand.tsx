@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 import { setSelection } from "../../../store/library/selectionSlice";
@@ -10,162 +10,171 @@ interface Point {
 }
 
 interface Rect {
-  left: number;
   top: number;
+  left: number;
   right: number;
   bottom: number;
 }
 
 export const useRubberBand = (
-  containerRef: React.RefObject<HTMLElement | null>,
+  containerRef: React.RefObject<HTMLDivElement>,
   allOrderedItems: LibraryItem[],
-  selectedDocs: DocumentData[],
-  selectedFolders: FolderData[],
+  selectedDocIds: string[],
+  selectedFolderIds: string[],
 ) => {
   const dispatch = useDispatch();
-  const [isLassoing, setIsLassoing] = useState(false);
-  const [startPoint, setStartPoint] = useState<Point>({ x: 0, y: 0 });
-  const [currentPoint, setCurrentPoint] = useState<Point>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPoint, setStartPoint] = useState<Point | null>(null);
+  const [currentPoint, setCurrentPoint] = useState<Point | null>(null);
+  const [initialSelectedDocs, setInitialSelectedDocs] = useState<DocumentData[]>([]);
+  const [initialSelectedFolders, setInitialSelectedFolders] = useState<FolderData[]>([]);
 
-  // Store the initial selection state before shift-lasso
-  const initialSelection = useRef<{ docs: DocumentData[]; folders: FolderData[] }>({
-    docs: [],
-    folders: [],
-  });
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    // Ignore right clicks or middle clicks
+    if (e.button !== 0) return;
 
-  const handleMouseDown = useCallback(
-    (e: MouseEvent | React.MouseEvent) => {
-      // Only trigger on left click
-      if (e.button !== 0) return;
+    // Ignore if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('.modal') || // don't start drag from a modal
+      target.closest('[role="menu"]') // don't start drag from context menu
+    ) {
+      return;
+    }
 
-      // Ensure we are clicking on the container or its immediate children, 
-      // but NOT on interactive elements like buttons, inputs, checkboxes, or existing selected rows (maybe? actually we want lasso over rows).
-      // A robust way: check if target is an interactive element
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName.toLowerCase() === 'button' ||
-        target.tagName.toLowerCase() === 'input' ||
-        target.tagName.toLowerCase() === 'a' ||
-        target.closest('button') ||
-        target.closest('input') ||
-        target.closest('a')
-      ) {
-        return;
-      }
-
-      // Record initial selection for additive lasso (Shift)
-      initialSelection.current = {
-        docs: e.shiftKey ? [...selectedDocs] : [],
-        folders: e.shiftKey ? [...selectedFolders] : [],
-      };
-
+    // Only start dragging if clicking inside the container
+    if (containerRef.current && containerRef.current.contains(target)) {
       setStartPoint({ x: e.clientX, y: e.clientY });
       setCurrentPoint({ x: e.clientX, y: e.clientY });
+      
+      // Save current selection state if shift is held (additive selection)
+      if (e.shiftKey) {
+        const currentDocs = allOrderedItems
+          .filter(w => w.type === "doc" && selectedDocIds.includes(w.item._id))
+          .map(w => w.item as DocumentData);
+        const currentFolders = allOrderedItems
+          .filter(w => w.type === "folder" && selectedFolderIds.includes(w.item._id))
+          .map(w => w.item as FolderData);
+        
+        setInitialSelectedDocs(currentDocs);
+        setInitialSelectedFolders(currentFolders);
+      } else {
+        setInitialSelectedDocs([]);
+        setInitialSelectedFolders([]);
+      }
+    }
+  }, [containerRef, allOrderedItems, selectedDocIds, selectedFolderIds]);
 
-      // Don't set isLassoing immediately, wait for a small drag threshold
-      const handleMouseMove = (moveEvent: MouseEvent) => {
-        const dx = moveEvent.clientX - startPoint.x;
-        const dy = moveEvent.clientY - startPoint.y;
-        if (!isLassoing && Math.sqrt(dx * dx + dy * dy) > 5) {
-          setIsLassoing(true);
-        }
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!startPoint) return;
 
-        setCurrentPoint({ x: moveEvent.clientX, y: moveEvent.clientY });
+    // Only set dragging if we've moved past a small threshold
+    // This prevents accidental drags when trying to click
+    const threshold = 5;
+    const dx = Math.abs(e.clientX - startPoint.x);
+    const dy = Math.abs(e.clientY - startPoint.y);
 
-        // Calculate intersection
-        if (containerRef.current) {
-          const lassoRect: Rect = {
-            left: Math.min(startPoint.x, moveEvent.clientX),
-            top: Math.min(startPoint.y, moveEvent.clientY),
-            right: Math.max(startPoint.x, moveEvent.clientX),
-            bottom: Math.max(startPoint.y, moveEvent.clientY),
-          };
+    if (!isDragging && (dx > threshold || dy > threshold)) {
+      setIsDragging(true);
+      // Clear text selection
+      window.getSelection()?.removeAllRanges();
+    }
 
-          const rowElements = containerRef.current.querySelectorAll("tr[data-item-id]");
+    if (isDragging) {
+      setCurrentPoint({ x: e.clientX, y: e.clientY });
+
+      // Calculate intersection frame
+      const rubberBandRect: Rect = {
+        top: Math.min(startPoint.y, e.clientY),
+        bottom: Math.max(startPoint.y, e.clientY),
+        left: Math.min(startPoint.x, e.clientX),
+        right: Math.max(startPoint.x, e.clientX),
+      };
+
+      // Find intersecting elements
+      const newlySelectedDocs = new Set<string>();
+      const newlySelectedFolders = new Set<string>();
+      const docsData: DocumentData[] = [...initialSelectedDocs];
+      const foldersData: FolderData[] = [...initialSelectedFolders];
+
+      // Add initially selected items to the sets to prevent duplicates
+      initialSelectedDocs.forEach(d => newlySelectedDocs.add(d._id));
+      initialSelectedFolders.forEach(f => newlySelectedFolders.add(f._id));
+
+      const rowElements = containerRef.current?.querySelectorAll('tr[data-item-id]');
+      if (rowElements) {
+        rowElements.forEach((el) => {
+          const rect = el.getBoundingClientRect();
           
-          const newSelectedDocs = new Map<string, DocumentData>(
-            initialSelection.current.docs.map(d => [d._id, d])
-          );
-          const newSelectedFolders = new Map<string, FolderData>(
-            initialSelection.current.folders.map(f => [f._id, f])
+          // Check collision
+          const isIntersecting = !(
+            rect.right < rubberBandRect.left ||
+            rect.left > rubberBandRect.right ||
+            rect.bottom < rubberBandRect.top ||
+            rect.top > rubberBandRect.bottom
           );
 
-          rowElements.forEach((row) => {
-            const rect = row.getBoundingClientRect();
-            // AABB collision detection
-            const intersects = !(
-              lassoRect.right < rect.left ||
-              lassoRect.left > rect.right ||
-              lassoRect.bottom < rect.top ||
-              lassoRect.top > rect.bottom
-            );
-
-            if (intersects) {
-              const id = row.getAttribute("data-item-id");
-              const type = row.getAttribute("data-item-type");
-              if (id && type) {
-                const itemWrapper = allOrderedItems.find(w => w.item._id === id);
-                if (itemWrapper) {
-                  if (type === "doc") {
-                    newSelectedDocs.set(id, itemWrapper.item as DocumentData);
-                  } else {
-                    newSelectedFolders.set(id, itemWrapper.item as FolderData);
-                  }
+          if (isIntersecting) {
+            const id = el.getAttribute('data-item-id');
+            const type = el.getAttribute('data-item-type');
+            
+            if (id && type) {
+              const item = allOrderedItems.find(i => i.type === type && i.item._id === id);
+              if (item) {
+                if (type === 'doc' && !newlySelectedDocs.has(id)) {
+                  newlySelectedDocs.add(id);
+                  docsData.push(item.item as DocumentData);
+                } else if (type === 'folder' && !newlySelectedFolders.has(id)) {
+                  newlySelectedFolders.add(id);
+                  foldersData.push(item.item as FolderData);
                 }
               }
             }
-          });
+          }
+        });
+      }
 
-          dispatch(setSelection({
-            docs: Array.from(newSelectedDocs.values()),
-            folders: Array.from(newSelectedFolders.values()),
-          }));
-        }
-      };
+      dispatch(setSelection({ docs: docsData, folders: foldersData }));
+    }
+  }, [isDragging, startPoint, containerRef, allOrderedItems, initialSelectedDocs, initialSelectedFolders, dispatch]);
 
-      const handleMouseUp = () => {
-        setIsLassoing(false);
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    },
-    [dispatch, startPoint, isLassoing, containerRef, allOrderedItems, selectedDocs, selectedFolders]
-  );
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setStartPoint(null);
+    setCurrentPoint(null);
+  }, []);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("mousedown", handleMouseDown);
-    }
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
     return () => {
-      if (container) {
-        container.removeEventListener("mousedown", handleMouseDown);
-      }
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [containerRef, handleMouseDown]);
+  }, [handleMouseDown, handleMouseMove, handleMouseUp]);
 
-  const rubberBandStyle: React.CSSProperties = {
-    position: "fixed",
-    left: Math.min(startPoint.x, currentPoint.x),
-    top: Math.min(startPoint.y, currentPoint.y),
-    width: Math.abs(currentPoint.x - startPoint.x),
-    height: Math.abs(currentPoint.y - startPoint.y),
-    pointerEvents: "none",
-    zIndex: 50,
+  const getRubberBandStyle = () => {
+    if (!isDragging || !startPoint || !currentPoint) return { display: 'none' };
+
+    return {
+      left: Math.min(startPoint.x, currentPoint.x),
+      top: Math.min(startPoint.y, currentPoint.y),
+      width: Math.abs(currentPoint.x - startPoint.x),
+      height: Math.abs(currentPoint.y - startPoint.y),
+    };
   };
 
-  const rubberBandOverlay = isLassoing ? (
+  const rubberBandOverlay = isDragging && (
     <div
-      style={rubberBandStyle}
-      className="bg-light-primary/10 dark:bg-dark-primary/10 border border-light-primary/40 dark:border-dark-primary/40"
+      className="fixed z-50 pointer-events-none border border-light-primary/50 bg-light-primary/10 dark:border-dark-primary/50 dark:bg-dark-primary/20 backdrop-blur-[1px]"
+      style={getRubberBandStyle()}
     />
-  ) : null;
+  );
 
-  return {
-    isLassoing,
-    rubberBandOverlay,
-  };
+  return { isDragging, rubberBandOverlay };
 };

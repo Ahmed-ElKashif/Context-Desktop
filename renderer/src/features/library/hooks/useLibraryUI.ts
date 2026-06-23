@@ -23,9 +23,17 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
 
   // 3. Global UI States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadTargetFolderId, setUploadTargetFolderId] = useState<string | null>(null);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [createFolderTargetId, setCreateFolderTargetId] = useState<string | null | undefined>(undefined);
+  const [isFolderPickerOpen, setIsFolderPickerOpen] = useState(false);
+  const [folderPickerMode, setFolderPickerMode] = useState<'move' | 'copy' | null>(null);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [isReorganizeWarningOpen, setIsReorganizeWarningOpen] = useState(false);
+  const [reorganizeTargetFolderId, setReorganizeTargetFolderId] = useState<string | undefined>(undefined);
+  const [isForceReorganize, setIsForceReorganize] = useState(false);
 
   // 4. Global UI State (Sorting & Filters from Redux)
   const {
@@ -87,21 +95,67 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
       open: setFolderToRename,
       close: () => setFolderToRename(null),
     },
+    createFolderModal: {
+      isOpen: isCreateFolderModalOpen,
+      open: (targetFolderId?: string | null) => {
+        setCreateFolderTargetId(targetFolderId);
+        setIsCreateFolderModalOpen(true);
+      },
+      close: () => {
+        setIsCreateFolderModalOpen(false);
+        setCreateFolderTargetId(undefined);
+      },
+      targetFolderId: createFolderTargetId,
+    },
     uploadModal: {
       isOpen: isUploadModalOpen,
-      open: () => setIsUploadModalOpen(true),
+      open: (targetFolderId?: string | null) => {
+        setUploadTargetFolderId(targetFolderId ?? null);
+        setIsUploadModalOpen(true);
+      },
       close: () => setIsUploadModalOpen(false),
+      targetFolderId: uploadTargetFolderId,
+    },
+    folderPickerModal: {
+      isOpen: isFolderPickerOpen,
+      mode: folderPickerMode,
+      open: (mode: 'move' | 'copy') => {
+        setFolderPickerMode(mode);
+        setIsFolderPickerOpen(true);
+      },
+      close: () => {
+        setIsFolderPickerOpen(false);
+        setFolderPickerMode(null);
+      }
     },
     bulkDeleteModal: {
       isOpen: isBulkDeleteModalOpen,
       open: () => setIsBulkDeleteModalOpen(true),
-      close: () => setIsBulkDeleteModalOpen(false),
+      close: () => {
+        setIsBulkDeleteModalOpen(false);
+      },
+    },
+    reorganizeWarningModal: {
+      isOpen: isReorganizeWarningOpen,
+      targetFolderId: reorganizeTargetFolderId,
+      isForceReorganize,
+      open: (targetFolderId?: string) => {
+        setReorganizeTargetFolderId(targetFolderId);
+        setIsForceReorganize(true);
+        setIsReorganizeWarningOpen(true);
+      },
+      close: () => {
+        setIsReorganizeWarningOpen(false);
+        setReorganizeTargetFolderId(undefined);
+        setIsForceReorganize(false);
+      },
     },
     loading: {
       isDeleting,
       setIsDeleting,
       isRenaming,
       setIsRenaming,
+      isCreatingFolder: false, // Could be state, but keeping it simple for now, we'll let useLibraryActions manage local state if needed or thunk loading
     },
     sorting: { sortBy, sortOrder, handleSort },
 

@@ -11,6 +11,7 @@ import appReducerSlice from "./ui/appSlice";
 import libraryReducer from "./library/librarySlice";
 import workspaceReducer from "./workspace/workspaceSlice";
 import prettifyReducer from "./workspace/prettifySlice";
+import clipboardReducer from "./library/clipboardSlice";
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -25,10 +26,11 @@ const appReducer = combineReducers({
   library: libraryReducer,
   workspace: workspaceReducer,
   prettify: prettifyReducer,
+  clipboard: clipboardReducer,
 });
 
 const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: Action) => {
-  if (action.type === 'auth/logout/fulfilled' || action.type === 'auth/logout') {
+  if (action.type === 'auth/logout') {
     state = undefined;
   }
   return appReducer(state, action);

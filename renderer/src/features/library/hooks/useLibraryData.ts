@@ -1,11 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   fetchFolderContents,
   fetchFolderTree,
 } from "../../../store/library/librarySlice";
 
-import { useDebounce } from "../../../hooks/useDebounce";
+/**
+ * Debounces a value by `delay` ms.
+ * Clears immediately when the value becomes falsy (e.g. empty string) so
+ * that clearing the search bar takes effect right away on navigation.
+ */
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  
+  useEffect(() => {
+    if (!value) return;
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return value ? debouncedValue : value;
+}
 
 interface UseLibraryDataOptions {
   activeFolderId: string | undefined;
@@ -33,7 +48,7 @@ export const useLibraryData = ({
 }: UseLibraryDataOptions) => {
   const dispatch = useAppDispatch();
   const { pagination } = useAppSelector((state) => state.library);
-  const limit = pagination?.limit || 10;
+  const limit = pagination?.limit || 50;
 
   const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
@@ -84,7 +99,7 @@ export const useLibraryData = ({
         search: debouncedSearchQuery,
         tags: activeTag || undefined,
         page: newPage,
-        limit: pagination?.limit || 10,
+        limit: pagination?.limit || 50,
         sortBy,
         sortOrder,
       }),

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import mammoth from "mammoth";
 import DOMPurify from "dompurify";
 import { Icon } from "../../../../components/ui/core/Icons";
-import { handleDownload } from "../../../../utils/downloadUtils";
+import { handleDownload } from "../../shared/downloadUtils";
 
 interface WordViewerProps {
   fileUrl: string | null;

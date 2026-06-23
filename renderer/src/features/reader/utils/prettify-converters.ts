@@ -118,7 +118,7 @@ export const convertToExcel = async (
 
 
     // ── Set column widths based on content ──
-    ws.columns = sheet.headers.map((header: any, ci: any) => {
+    ws.columns = sheet.headers.map((header, ci) => {
       let maxLen = header.length;
       for (const row of sheet.rows) {
         const cellLen = (row[ci] || "").length;
@@ -152,7 +152,7 @@ export const convertToExcel = async (
     });
 
     // ── Data rows ──
-    sheet.rows.forEach((rowData: any, ri: any) => {
+    sheet.rows.forEach((rowData, ri) => {
       const row = ws.addRow(rowData);
       const isEvenRow = ri % 2 === 0;
 
@@ -208,7 +208,7 @@ export const convertToExcel = async (
 
 export const convertToMarkdown = (json: DocumentPrettifyResult): string => {
   const body = json.sections
-    .map((section: any) => {
+    .map((section) => {
       const prefix = "#".repeat(section.level);
       let md = `${prefix} ${htmlToMarkdown(section.heading)}\n\n`;
 
@@ -240,7 +240,7 @@ export const convertToMarkdown = (json: DocumentPrettifyResult): string => {
 
 export const convertToPlainText = (json: DocumentPrettifyResult): string => {
   return json.sections
-    .map((section: any) => {
+    .map((section) => {
       const headingPrefix = section.level <= 2 ? "\n" : "";
       let out = `${headingPrefix}${stripMarkdown(section.heading)}\n`;
 

@@ -20,8 +20,9 @@ export interface FolderData {
   user: string;
   parentFolder: string | null;
   path: string;
-  isAIGenerated?: boolean;
   itemCount?: number;
+  isAIGenerated?: boolean;
+  color?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,7 +37,6 @@ export interface DocumentData {
   summary?: string;
   tags: string[];
   extractedText?: string;
-  fileSize?: number;
 
   // ☁️ Cloudinary (replaces the old local originalFilePath)
   cloudinaryUrl?: string;
@@ -48,6 +48,7 @@ export interface DocumentData {
   isOrganized?: boolean;
   prettifiedJson?: any | null;
 
+  fileSize?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -113,7 +114,7 @@ const initialState: LibraryState = {
   documentsList: [],
   globalDocumentsList: [],
   pagination: null,
-  lastFetchParams: { limit: 10 },
+  lastFetchParams: { limit: 50 },
   isFetchingLibrary: false,
   isRevalidating: false,
 

@@ -12,6 +12,7 @@ import {
 import {
   renameFolderThunk,
   deleteFolderThunk,
+  setFolderColorThunk,
 } from "../thunks/folderThunks";
 
 const invalidateFolderCache = (state: LibraryState, folderId?: string | null) => {
@@ -21,7 +22,8 @@ const invalidateFolderCache = (state: LibraryState, folderId?: string | null) =>
 
 export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibraryState>) => {
   builder
-    // --- Batch Folder Upload ---
+
+    // --- Batch Folder Upload ---
     .addCase(uploadBatchDocuments.pending, (state) => {
       state.isUploading = true;
       state.error = null;
@@ -48,7 +50,8 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
       state.error = (action.error.message || "An unexpected error occurred") as string;
     })
 
-    // --- Text Document Upload ---
+
+    // --- Text Document Upload ---
     .addCase(uploadTextDocument.pending, (state) => {
       state.isUploading = true;
       state.error = null;
@@ -137,6 +140,17 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
       state.foldersList = state.foldersList.filter(f => f.path !== path);
     })
     .addCase(deleteFolderThunk.fulfilled, (state) => {
+      invalidateFolderCache(state, state.currentFolder?._id);
+    })
+    .addCase(setFolderColorThunk.pending, (state, action) => {
+      const { folderId, color } = action.meta.arg;
+      const folder = state.foldersList.find(f => f._id === folderId);
+      if (folder) folder.color = color;
+      
+      const globalFolder = state.globalFolderTree.find(f => f._id === folderId);
+      if (globalFolder) globalFolder.color = color;
+    })
+    .addCase(setFolderColorThunk.fulfilled, (state) => {
       invalidateFolderCache(state, state.currentFolder?._id);
     });
 };
