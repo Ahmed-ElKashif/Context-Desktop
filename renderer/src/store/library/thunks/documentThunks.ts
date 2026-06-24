@@ -117,12 +117,16 @@ export const deleteDocumentThunk = createAppAsyncThunk(
 
     // Refresh folder contents
     const currentState = getState();
-    const currentFolderId = currentState.library?.currentFolder?._id;
+    const p = currentState.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
-    folderId: currentFolderId,
-    page: 1,
-    limit: 50,
+        folderId: p.folderId,
+        page: 1,
+        limit: p.limit || 50,
+        sortBy: p.sortBy,
+        sortOrder: p.sortOrder,
+        search: p.search,
+        tags: p.tags,
       }),
     );
 
@@ -165,12 +169,16 @@ export const renameDocumentThunk = createAppAsyncThunk(
     // Auto-refresh in the background without blocking the optimistic UI
     dispatch(fetchFolderTree());
     const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
+    const p = state.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
-    folderId: currentFolderId,
-    page: 1,
-    limit: 50,
+        folderId: p.folderId,
+        page: 1,
+        limit: p.limit || 50,
+        sortBy: p.sortBy,
+        sortOrder: p.sortOrder,
+        search: p.search,
+        tags: p.tags,
       }),
     );
 
@@ -199,12 +207,16 @@ export const bulkDeleteDocumentsThunk = createAppAsyncThunk(
     // Refresh sidebar and background data
     dispatch(fetchFolderTree());
     const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
+    const p = state.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
-    folderId: currentFolderId,
-    page: 1,
-    limit: 50,
+        folderId: p.folderId,
+        page: 1,
+        limit: p.limit || 50,
+        sortBy: p.sortBy,
+        sortOrder: p.sortOrder,
+        search: p.search,
+        tags: p.tags,
       }),
     );
 

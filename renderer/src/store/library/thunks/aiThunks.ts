@@ -30,9 +30,17 @@ export const applySemanticFolders = createAppAsyncThunk(
   async ({ updates, force }: { updates: SemanticUpdate[]; force?: boolean }, { dispatch, getState }) => {
     await aiService.applySemanticFolders(updates, force);
     dispatch(fetchFolderTree());
-    const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    const state: any = getState();
+    const p = state.library.lastFetchParams;
+    dispatch(fetchFolderContents({
+      folderId: p.folderId,
+      page: 1,
+      limit: p.limit || 50,
+      sortBy: p.sortBy,
+      sortOrder: p.sortOrder,
+      search: p.search,
+      tags: p.tags,
+    }));
     return;
   }
 );
@@ -52,9 +60,17 @@ export const synthesizeDocumentsThunk = createAppAsyncThunk(
     const response = await aiService.synthesizeDocuments(payload);
     dispatch(fetchSettings());
     dispatch(fetchFolderTree());
-    const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    const state: any = getState();
+    const p = state.library.lastFetchParams;
+    dispatch(fetchFolderContents({
+      folderId: p.folderId,
+      page: 1,
+      limit: p.limit || 50,
+      sortBy: p.sortBy,
+      sortOrder: p.sortOrder,
+      search: p.search,
+      tags: p.tags,
+    }));
     return response.data;
   }
 );

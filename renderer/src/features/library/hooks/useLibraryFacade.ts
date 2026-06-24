@@ -30,6 +30,7 @@ export const useLibraryFacade = () => {
     pagination,
     synthesisResult,
     currentFolder,
+    globalFolderTree,
   } = useSelector((state: RootState) => state.library);
 
   const { sortBy, sortOrder } = useSelector((state: RootState) => state.libraryUI);
@@ -192,12 +193,12 @@ export const useLibraryFacade = () => {
     dispatch(
       fetchFolderContents({ 
         folderId: selectedFolderId || undefined, 
-        page: pagination?.currentPage || 1,
+        page: 1,
         sortBy,
         sortOrder
       }),
     );
-  }, [dispatch, selectedFolderId, sortBy, sortOrder, pagination?.currentPage]);
+  }, [dispatch, selectedFolderId, sortBy, sortOrder]);
 
   const handlePageChange = (newPage: number) => {
     dispatch(
@@ -280,6 +281,7 @@ export const useLibraryFacade = () => {
       isMobileMenuOpen,
       sortBy,
       sortOrder,
+      globalFolderTree,
     },
     actions: {
       handleSelectAll,

@@ -135,8 +135,8 @@ export async function createWindow() {
       : "'self'";
 
     const connectSrc = isDev
-      ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com"
-      : "'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://res.cloudinary.com";
+      ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com"
+      : "'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com";
       
     callback({
       responseHeaders: {

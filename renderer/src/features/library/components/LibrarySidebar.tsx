@@ -31,7 +31,7 @@ const FolderTreeItem = ({
 }) => {
   const children = allFolders.filter((f) => f.parentFolder === folder._id);
   const isActive = currentFolder?._id === folder._id;
-  const isDescendantActive = currentFolder?.path.startsWith(`${folder.path}/`);
+  const isDescendantActive = currentFolder?.path?.startsWith(`${folder.path}/`);
 
   const [isOpen, setIsOpen] = useState(isDescendantActive || false);
 
