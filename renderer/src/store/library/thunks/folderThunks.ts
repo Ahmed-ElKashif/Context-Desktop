@@ -31,8 +31,16 @@ export const createFolderThunk = createAppAsyncThunk(
     );
     dispatch(fetchFolderTree());
     const state: any = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    const p = state.library.lastFetchParams;
+    dispatch(fetchFolderContents({
+      folderId: p.folderId,
+      page: 1,
+      limit: p.limit || 50,
+      sortBy: p.sortBy,
+      sortOrder: p.sortOrder,
+      search: p.search,
+      tags: p.tags,
+    }));
     return response.data;
   }
 );
@@ -42,9 +50,17 @@ export const renameFolderThunk = createAppAsyncThunk(
   async (payload: { path: string; newName: string }, { dispatch, getState }) => {
     const response = await folderService.renameFolder(payload.path, payload.newName);
     dispatch(fetchFolderTree());
-    const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    const state: any = getState();
+    const p = state.library.lastFetchParams;
+    dispatch(fetchFolderContents({
+      folderId: p.folderId,
+      page: 1,
+      limit: p.limit || 50,
+      sortBy: p.sortBy,
+      sortOrder: p.sortOrder,
+      search: p.search,
+      tags: p.tags,
+    }));
     return response;
   }
 );
@@ -54,9 +70,17 @@ export const deleteFolderThunk = createAppAsyncThunk(
   async (path: string, { dispatch, getState }) => {
     await folderService.deleteFolder(path);
     dispatch(fetchFolderTree());
-    const state = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
-    dispatch(fetchFolderContents({ folderId: currentFolderId, page: 1, limit: 50 }));
+    const state: any = getState();
+    const p = state.library.lastFetchParams;
+    dispatch(fetchFolderContents({
+      folderId: p.folderId,
+      page: 1,
+      limit: p.limit || 50,
+      sortBy: p.sortBy,
+      sortOrder: p.sortOrder,
+      search: p.search,
+      tags: p.tags,
+    }));
     return path;
   }
 );
@@ -96,12 +120,16 @@ export const moveItemsThunk = createAppAsyncThunk(
 
     // Refresh folder contents
     const state: any = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
+    const p = state.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
-        folderId: currentFolderId,
+        folderId: p.folderId,
         page: 1,
-        limit: 50,
+        limit: p.limit || 50,
+        sortBy: p.sortBy,
+        sortOrder: p.sortOrder,
+        search: p.search,
+        tags: p.tags,
       })
     );
 
@@ -136,12 +164,16 @@ export const copyItemsThunk = createAppAsyncThunk(
 
     // Refresh folder contents
     const state: any = getState();
-    const currentFolderId = state.library?.currentFolder?._id;
+    const p = state.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
-        folderId: currentFolderId,
+        folderId: p.folderId,
         page: 1,
-        limit: 50,
+        limit: p.limit || 50,
+        sortBy: p.sortBy,
+        sortOrder: p.sortOrder,
+        search: p.search,
+        tags: p.tags,
       })
     );
 
