@@ -22,6 +22,7 @@ export interface UseContextMenuOptions {
   onMove: () => void;
   onCopy: () => void;
   onChangeFolderColor: (folderId: string, color: string) => void;
+  onShare: (doc: DocumentData) => void;
   clipboardState: { action: "copy" | null; documentIds: string[]; folderIds: string[] };
   onDuplicate: () => void;
   onCopyClipboard: () => void;

@@ -100,8 +100,8 @@ const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
   return (
     <div className="flex-1 min-h-full w-full overflow-auto bg-white dark:bg-[#18181B] rounded-xl shadow-sm border border-light-border dark:border-white/10">
       <div
-        style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top center" }}
-        className="w-full min-h-full p-4 md:p-10 text-light-text dark:text-white/90 text-base md:text-lg leading-relaxed text-justify break-words transition-transform duration-200
+        style={{ fontSize: `${Math.round(zoomLevel * 100)}%` }}
+        className="w-full min-h-full p-4 md:p-10 text-light-text dark:text-white/90 leading-relaxed text-justify break-words transition-all duration-200
                    [&>*]:[content-visibility:auto] [&>*]:[contain-intrinsic-size:auto_100px]
                    [&>p]:mb-4 [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mb-6 [&>h1]:text-light-primary dark:[&>h1]:text-white
                    [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mb-4 [&>h2]:text-light-primary dark:[&>h2]:text-white/90

@@ -52,7 +52,7 @@ const electronAPI = {
     processDroppedPaths: (paths: string[]) => ipcRenderer.invoke(IPC_CHANNELS.FILE.PROCESS_DROPPED_PATHS, paths),
     getFileIcon: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.FILE.GET_FILE_ICON, filePath),
     saveComparisonReport: (content: string, defaultFilename: string) => ipcRenderer.invoke(IPC_CHANNELS.FILE.SAVE_COMPARISON_REPORT, content, defaultFilename),
-    startBatchIngest: (payload: { token: string; apiUrl: string; files: any[] }) => 
+    startBatchIngest: (payload: { token: string; apiUrl: string; files: any[]; clientPaths?: string[]; folderId?: string | null }) => 
       ipcRenderer.invoke(IPC_CHANNELS.FILE.INGEST_BATCH_START, payload),
     onBatchProgress: (callback: (event: any, data: any) => void) =>
       ipcRenderer.on(IPC_CHANNELS.FILE.INGEST_BATCH_PROGRESS, callback),

@@ -193,7 +193,7 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
           }`}
         >
           <Icon name="auto_awesome" className="text-[18px]" />
-          Prettify ✨
+          Prettify
         </button>
 
         {cap && capColor && (

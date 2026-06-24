@@ -15,6 +15,9 @@ import { useSelectionManager, LibraryItem } from "./useSelectionManager";
 import { useRubberBand } from "./useRubberBand";
 import { useContextMenu } from "./useContextMenu";
 import { handleWebNativeFolderSelect } from "../utils/uploadHelpers";
+import { useDebounce } from "../../../hooks/useDebounce";
+import { addNotification } from "../../../store/ui/notificationSlice";
+import { generateRawMarkdownString } from "../../../utils/downloadUtils";
 
 export const useLibraryFacade = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -175,6 +178,19 @@ export const useLibraryFacade = () => {
     onMove: () => ui.folderPickerModal.open('move'),
     onCopy: () => ui.folderPickerModal.open('copy'),
     onChangeFolderColor: (folderId, color) => actions.executeFolderColor(folderId, color),
+    onShare: (doc: any) => {
+      if (doc.fileType === "TextSnippet") {
+        navigator.clipboard.writeText(generateRawMarkdownString(doc));
+        dispatch(addNotification({ message: "Markdown copied to clipboard!", type: "success" }));
+      } else {
+        if (doc.cloudinaryUrl) {
+          navigator.clipboard.writeText(doc.cloudinaryUrl);
+          dispatch(addNotification({ message: "Share link copied to clipboard!", type: "success" }));
+        } else {
+          dispatch(addNotification({ message: "No share link available", type: "error" }));
+        }
+      }
+    },
     clipboardState: clipboardState,
     onDuplicate: () => actions.executeDuplicate(),
     onCopyClipboard: () => actions.executeCopy(),
@@ -189,16 +205,20 @@ export const useLibraryFacade = () => {
     dispatch(fetchFolderTree());
   }, [dispatch]);
 
+  const debouncedSearch = useDebounce(ui.filters.searchQuery, 400);
+
   useEffect(() => {
     dispatch(
       fetchFolderContents({ 
         folderId: selectedFolderId || undefined, 
+        search: debouncedSearch || undefined,
+        tags: ui.filters.activeTag || undefined,
         page: 1,
         sortBy,
         sortOrder
       }),
     );
-  }, [dispatch, selectedFolderId, sortBy, sortOrder]);
+  }, [dispatch, selectedFolderId, sortBy, sortOrder, debouncedSearch, ui.filters.activeTag]);
 
   const handlePageChange = (newPage: number) => {
     dispatch(
