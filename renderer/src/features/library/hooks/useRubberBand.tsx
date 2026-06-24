@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 import { setSelection } from "../../../store/library/selectionSlice";
@@ -140,7 +140,24 @@ export const useRubberBand = (
     }
   }, [isDragging, startPoint, containerRef, allOrderedItems, initialSelectedDocs, initialSelectedFolders, dispatch]);
 
+  const isDraggingRef = React.useRef(isDragging);
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
   const handleMouseUp = useCallback(() => {
+    if (isDraggingRef.current) {
+      // Prevent the immediate click event from firing and clearing the selection
+      const preventClick = (e: MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        window.removeEventListener('click', preventClick, true);
+      };
+      window.addEventListener('click', preventClick, true);
+      setTimeout(() => {
+        window.removeEventListener('click', preventClick, true);
+      }, 50);
+    }
     setIsDragging(false);
     setStartPoint(null);
     setCurrentPoint(null);

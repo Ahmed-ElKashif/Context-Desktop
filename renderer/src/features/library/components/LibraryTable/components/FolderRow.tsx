@@ -66,7 +66,7 @@ export const FolderRow = ({
           >
             folder
           </span>
-          <div className="truncate max-w-[200px] md:max-w-[250px] lg:max-w-[400px]">
+          <div className="truncate max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[350px]">
             <p 
               className="text-xs font-semibold text-light-text dark:text-white group-hover:text-black dark:group-hover:text-white hover:underline transition-colors truncate"
               onClick={(e) => {

@@ -13,12 +13,15 @@ export const ImageViewer = ({
   zoomLevel,
 }: ImageViewerProps) => {
   return (
-    <div className="flex-1 min-h-0 w-full h-full overflow-auto flex items-center justify-center">
+    <div className="flex-1 min-h-0 w-full h-full overflow-auto bg-black/5 dark:bg-white/5 rounded-xl text-center flex items-start justify-center">
       <img
-        style={{ transform: `scale(${zoomLevel})` }}
+        style={{ 
+          height: `${Math.round(zoomLevel * 100)}%`,
+          width: "auto",
+        }}
         src={fileUrl}
         alt={documentTitle}
-        className="max-w-full max-h-full object-contain p-4 transition-transform duration-200"
+        className="max-w-none object-contain p-4 transition-all duration-200 shadow-sm rounded-lg origin-top"
       />
     </div>
   );

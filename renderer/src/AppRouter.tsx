@@ -149,10 +149,10 @@ export function AppRouter({ showBootSequence, isBootComplete }: { showBootSequen
           <Route path="/verify-email" element={<VerifyEmail />} />
 
           <Route element={<AuthGuard />}>
+            <Route path="/read/:id" element={<Reader />} />
             <Route element={<MainLayout />}>
               <Route path="/workspace" element={<Workspace />} />
               <Route path="/library" element={<Library />} />
-              <Route path="/read/:id" element={<Reader />} />
               <Route path="/compare" element={<Compare />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />

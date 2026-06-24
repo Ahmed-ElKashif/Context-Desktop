@@ -46,6 +46,14 @@ export const useLibraryKeyboardShortcuts = (
 
       const totalItems = allOrderedItems.length;
 
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        onCreateFolder();
+        return;
+      }
+
+      if (totalItems === 0) return;
+
       // Handle Paste specifically before returning on empty folder
       if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
         e.preventDefault();
@@ -99,12 +107,7 @@ export const useLibraryKeyboardShortcuts = (
           typeBufferRef.current = "";
         }, 500);
         return;
-      }
 
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "n") {
-        e.preventDefault();
-        onCreateFolder();
-        return;
       }
 
       switch (e.key) {

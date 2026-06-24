@@ -148,7 +148,7 @@ export const LibraryHeader = ({
                 <input
                   autoFocus
                   type="text"
-                  placeholder="Search..."
+                  placeholder={currentFolder ? `Search ${currentFolder.name}` : "Search All Documents"}
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onBlur={() => {
@@ -174,7 +174,7 @@ export const LibraryHeader = ({
             />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={currentFolder ? `Search ${currentFolder.name}` : "Search All Documents"}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-8 pr-3 w-40 md:w-80 h-9 bg-light-bg dark:bg-[#1E1E22] border border-light-border dark:border-white/10 rounded-l-lg rounded-r-none text-sm text-light-text dark:text-white font-medium focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary outline-none transition-all placeholder:text-light-text/60 dark:placeholder:text-white/60 border-r-0"

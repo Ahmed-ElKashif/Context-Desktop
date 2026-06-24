@@ -45,7 +45,14 @@ export const buildContextMenu = (ctx: ActionContext): ContextMenuItem[] => {
             ? (ctx.clickedItem.item as any).color 
             : undefined,
           onColorSelect: action.isColorPicker
-            ? (colorHex: string) => ctx.handlers.onChangeFolderColor(ctx.selectedFolderIds[0], colorHex)
+            ? (colorHex: string) => {
+                const targetId = ctx.clickedItem?.type === "folder"
+                  ? ctx.clickedItem.item._id
+                  : ctx.selectedFolderIds[0];
+                if (targetId) {
+                  ctx.handlers.onChangeFolderColor(targetId, colorHex);
+                }
+              }
             : undefined,
           onClick: () => action.execute(ctx),
         });

@@ -24,8 +24,7 @@ export const ACTION_FOLDER_COLOR: MenuAction = {
   icon: "palette",
   group: "modify",
   isColorPicker: true,
-  isVisible: (ctx) =>
-    ctx.selectedFolderIds.length === 1 && ctx.selectedDocIds.length === 0,
+  isVisible: (ctx) => isSingleFolder(ctx),
   execute: () => {}, // Handled directly by the custom component in ContextMenu
 };
 
@@ -41,6 +40,14 @@ export const ALL_ACTIONS: MenuAction[] = [
     group: 'primary',
     isVisible: isSingleDoc,
     execute: (ctx) => ctx.handlers.onOpenDocReader(ctx.clickedItem!.item as DocumentData),
+  },
+  {
+    id: 'share_doc',
+    label: () => "Share",
+    icon: "share",
+    group: 'primary',
+    isVisible: isSingleDoc,
+    execute: (ctx) => ctx.handlers.onShare(ctx.clickedItem!.item as DocumentData),
   },
   {
     id: 'open_workspace',
@@ -173,23 +180,6 @@ export const ALL_ACTIONS: MenuAction[] = [
     execute: (ctx) => ctx.handlers.onCopy(),
   },
   {
-    id: 'copy_clipboard',
-    label: () => "Copy",
-    icon: "file_copy",
-    shortcut: "Ctrl+C",
-    group: 'modify',
-    isVisible: (ctx) => !!ctx.clickedItem || isMultiSelect(ctx),
-    execute: (ctx) => ctx.handlers.onCopyClipboard(),
-  },
-  {
-    id: 'duplicate',
-    label: () => "Make a copy",
-    icon: "control_point_duplicate",
-    group: 'modify',
-    isVisible: (ctx) => !!ctx.clickedItem || isMultiSelect(ctx),
-    execute: (ctx) => ctx.handlers.onDuplicate(),
-  },
-  {
     id: 'rename',
     label: () => "Rename",
     icon: "edit",
@@ -253,7 +243,7 @@ export const ALL_ACTIONS: MenuAction[] = [
     id: 'new_folder',
     label: () => "New Folder",
     icon: "create_new_folder",
-    shortcut: "Ctrl+Shift+N",
+    shortcut: "Alt+N",
     group: 'empty_area',
     isVisible: (ctx) => !ctx.clickedItem && !isMultiSelect(ctx),
     execute: (ctx) => ctx.handlers.onCreateFolder(),
@@ -266,15 +256,6 @@ export const ALL_ACTIONS: MenuAction[] = [
     group: 'empty_area',
     isVisible: (ctx) => !ctx.clickedItem && !isMultiSelect(ctx),
     execute: (ctx) => ctx.handlers.onSelectAll(),
-  },
-  {
-    id: 'paste_clipboard',
-    label: () => "Paste",
-    icon: "content_paste",
-    shortcut: "Ctrl+V",
-    group: 'empty_area',
-    isVisible: (ctx) => !ctx.clickedItem && !isMultiSelect(ctx) && (ctx.handlers.clipboardState.documentIds.length > 0 || ctx.handlers.clipboardState.folderIds.length > 0),
-    execute: (ctx) => ctx.handlers.onPasteClipboard(),
   },
   {
     id: 'upload_files',

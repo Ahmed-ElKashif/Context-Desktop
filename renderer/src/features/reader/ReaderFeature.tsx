@@ -4,6 +4,8 @@ import { Icon } from "../../components/ui/core/Icons";
 import { readerService } from ".";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setActiveDocument, clearActiveDocument } from "../../store/workspace/workspaceSlice";
+import { reanalyzeDocumentThunk } from "../../store/library/librarySlice";
+import { notify } from "../../components/ui/feedback/ToastEngine";
 
 // Imported Components
 import { ReaderHeader } from "./components/ReaderHeader";
@@ -22,7 +24,6 @@ export function ReaderFeature() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Toggle for mobile
 
   useEffect(() => {
     const fetchDocumentAndFile = async () => {
@@ -60,6 +61,21 @@ export function ReaderFeature() {
 
   // SSE: Real-time status updates instead of polling
   useReaderSSE(id, activeDocument?.aiStatus);
+
+  // ── Re-analyze ────────────────────────────────────────────────────────────
+  const handleRegenerate = async () => {
+    if (!activeDocument) return;
+    try {
+      notify("Re-analyzing document...", "info");
+      await dispatch(reanalyzeDocumentThunk(activeDocument._id)).unwrap();
+      notify("Document analysis triggered successfully.", "success");
+    } catch (error: unknown) {
+      notify(
+        error instanceof Error ? error.message : "Failed to trigger analysis.",
+        "error",
+      );
+    }
+  };
   if (error || (!id && !isLoading)) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-light-bg dark:bg-[#0A0A0C]">
@@ -86,14 +102,14 @@ export function ReaderFeature() {
   }
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col bg-light-bg dark:bg-[#0A0A0C] overflow-hidden">
+    <div className="h-screen flex flex-col bg-light-bg dark:bg-[#0A0A0C] overflow-hidden">
 
-      {/* 1. Header Component */}
       <ReaderHeader
         document={activeDocument}
         fileUrl={fileUrl}
-        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         returnUrl={returnUrl}
+        aiStatus={activeDocument.aiStatus}
+        onReanalyze={handleRegenerate}
       />
 
       <div className="flex-1 flex overflow-hidden relative">

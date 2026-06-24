@@ -119,8 +119,9 @@ export const LibraryTable = React.memo(
       if (currentPage > 1) {
         return (
           <div
-            className="h-64 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50"
+            className="w-full flex-1 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50"
             onContextMenu={onTableContextMenu}
+            onClick={onEmptySpaceClick}
           >
             <span className="material-symbols-rounded text-4xl mb-2">
               find_in_page
@@ -132,8 +133,9 @@ export const LibraryTable = React.memo(
       }
       return (
         <div
-          className="h-64 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50 px-4 text-center"
+          className="w-full flex-1 flex flex-col items-center justify-center text-light-text/60 dark:text-white/50 px-4 text-center"
           onContextMenu={onTableContextMenu}
+          onClick={onEmptySpaceClick}
         >
           <span className="material-symbols-rounded text-4xl mb-2">inbox</span>
           <p className="font-bold">This folder is empty.</p>
@@ -151,6 +153,12 @@ export const LibraryTable = React.memo(
           const target = e.target as HTMLElement;
           if (!target.closest("tr[data-item-id]")) {
             onEmptySpaceClick();
+          }
+        }}
+        onContextMenu={(e) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest("tr[data-item-id]")) {
+            onTableContextMenu(e);
           }
         }}
       >
