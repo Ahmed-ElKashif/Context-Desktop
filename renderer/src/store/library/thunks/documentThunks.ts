@@ -27,7 +27,7 @@ export const uploadBatchDocuments = createAppAsyncThunk(
       const token = state.auth?.token;
       // In electron, we need to pass the apiUrl explicitly, or maybe hardcode it/get it from env.
       // But we can just use the standard Vite env var
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       response = await (window as any).electronAPI.localFiles.startBatchIngest({
         token,
         apiUrl,
