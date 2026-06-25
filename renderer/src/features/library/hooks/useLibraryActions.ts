@@ -112,11 +112,11 @@ export const useLibraryActions = ({
   };
 
   const executeRenameFolder = async (newName: string) => {
-    if (!ui.folderRenameModal.path) return;
+    if (!ui.folderRenameModal.folder) return;
     ui.loading.setIsRenaming(true);
     try {
       await dispatch(
-        renameFolderThunk({ path: ui.folderRenameModal.path, newName }),
+        renameFolderThunk({ path: ui.folderRenameModal.folder.path, newName }),
       ).unwrap();
       notify("Folder renamed successfully.", "success");
       ui.folderRenameModal.close();

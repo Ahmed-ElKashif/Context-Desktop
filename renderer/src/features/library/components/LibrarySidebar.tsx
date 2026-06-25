@@ -166,7 +166,7 @@ export const LibrarySidebar = ({
                   name="folder"
                   className="text-[12px] text-light-text/60 dark:text-white/50"
                 />
-                Your Folders
+                My files
               </p>
 
               <div className="px-2 space-y-0.5 relative">
