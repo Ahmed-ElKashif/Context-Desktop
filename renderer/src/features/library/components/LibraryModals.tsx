@@ -59,8 +59,8 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
       />
 
       <RenameDialog
-        isOpen={!!ui.folderRenameModal.path}
-        currentName={ui.folderRenameModal.path || ""}
+        isOpen={!!ui.folderRenameModal.folder}
+        currentName={ui.folderRenameModal.folder?.name || ""}
         onConfirm={(newName) => actions.executeRenameFolder(newName)}
         onClose={ui.folderRenameModal.close}
         isLoading={ui.loading.isRenaming}

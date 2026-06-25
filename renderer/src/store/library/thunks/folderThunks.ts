@@ -185,8 +185,11 @@ export const setFolderColorThunk = createAppAsyncThunk(
   "library/setFolderColor",
   async (payload: { folderId: string; color: string }, { dispatch }) => {
     const { folderId, color } = payload;
-    await folderService.setFolderColor(folderId, color);
-    dispatch(fetchFolderTree());
+    try {
+      await folderService.setFolderColor(folderId, color);
+    } finally {
+      dispatch(fetchFolderTree());
+    }
     return payload;
   }
 );

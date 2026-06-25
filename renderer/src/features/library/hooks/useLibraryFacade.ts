@@ -111,7 +111,7 @@ export const useLibraryFacade = () => {
       dispatch(clearSelection());
     },
     onRenameDoc: (doc: any) => ui.renameModal.open(doc),
-    onRenameFolder: (folderPath) => ui.folderRenameModal.open(folderPath),
+    onRenameFolder: (folder) => ui.folderRenameModal.open(folder),
     onDeleteDoc: () => ui.bulkDeleteModal.open(),
     onDeleteFolder: (folderPath) => ui.folderDeleteModal.open(folderPath),
     onBulkDelete: () => ui.bulkDeleteModal.open(),
@@ -274,7 +274,7 @@ export const useLibraryFacade = () => {
       if (type === "doc") {
         ui.renameModal.open(item as any);
       } else {
-        ui.folderRenameModal.open((item as any).path);
+        ui.folderRenameModal.open(item as any);
       }
     },
     () => ui.createFolderModal.open(),

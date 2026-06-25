@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { DocumentData } from "../../../store/library/librarySlice";
+import { DocumentData, FolderData } from "../../../store/library/librarySlice";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../../store/hooks";
 import { clearSelection } from "../../../store/library/selectionSlice";
@@ -19,7 +19,7 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
 
   // 2. Folder Modal States
   const [folderToDelete, setFolderToDelete] = useState<string | null>(null);
-  const [folderToRename, setFolderToRename] = useState<string | null>(null);
+  const [folderToRename, setFolderToRename] = useState<FolderData | null>(null);
 
   // 3. Global UI States
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -91,8 +91,8 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
       close: () => setFolderToDelete(null),
     },
     folderRenameModal: {
-      path: folderToRename,
-      open: setFolderToRename,
+      folder: folderToRename,
+      open: (folder: FolderData) => setFolderToRename(folder),
       close: () => setFolderToRename(null),
     },
     createFolderModal: {

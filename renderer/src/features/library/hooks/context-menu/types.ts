@@ -5,7 +5,7 @@ export interface UseContextMenuOptions {
   onOpenDocWorkspace: (doc: DocumentData) => void;
   onOpenFolder: (folder: FolderData) => void;
   onRenameDoc: (doc: DocumentData) => void;
-  onRenameFolder: (folderPath: string) => void;
+  onRenameFolder: (folder: FolderData) => void;
   onDeleteDoc: (doc: DocumentData) => void;
   onDeleteFolder: (folderPath: string) => void;
   onBulkDelete: () => void;

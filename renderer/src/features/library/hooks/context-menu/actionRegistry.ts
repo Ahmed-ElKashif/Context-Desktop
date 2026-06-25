@@ -197,7 +197,7 @@ export const ALL_ACTIONS: MenuAction[] = [
       if (ctx.clickedItem?.type === 'doc') {
         ctx.handlers.onRenameDoc(ctx.clickedItem.item as DocumentData);
       } else if (ctx.clickedItem?.type === 'folder') {
-        ctx.handlers.onRenameFolder((ctx.clickedItem.item as FolderData).path);
+        ctx.handlers.onRenameFolder(ctx.clickedItem.item as FolderData);
       }
     },
   },
