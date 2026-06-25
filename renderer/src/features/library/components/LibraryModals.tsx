@@ -116,7 +116,7 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         <SynthesisModal
           isOpen={true}
           isLoading={state.isFetchingLibrary}
-          onClose={() => actions.clearSelection()}
+          onClose={() => actions.cancelAISynthesis()}
           synthesisResult={state.synthesisResult}
         />
       )}

@@ -12,7 +12,9 @@ export function useWorkspaceBoot() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        await dispatch(fetchLibraryDocuments()).unwrap();
+        // Use a high limit to ensure the global document list contains the entire library
+        // so tools like the Comparison document picker have access to all documents.
+        await dispatch(fetchLibraryDocuments({ limit: 1000 })).unwrap();
       } catch (error) {
         console.error("Failed to load documents", error);
         setIsError(true);
