@@ -16,7 +16,7 @@ import {
 export function useComparisonEngine() {
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector((state) => state.auth.user);
-  const { isFetchingLibrary, globalDocumentsList } = useAppSelector((state) => state.library);
+  const { globalDocumentsList } = useAppSelector((state) => state.library);
   
   const comparisonState = useAppSelector((state) => state.comparison);
   const { baseDoc, compareDoc, comparisonData, isComparing } = comparisonState;
@@ -52,13 +52,13 @@ export function useComparisonEngine() {
     }
   }, [currentUser?.lastActiveComparisonId, dispatch, baseDoc, compareDoc]);
 
-  // ─── Effect 2: Fetch library documents if cache is empty ────────────────────
+  // ─── Effect 2: Fetch library documents if cache is empty or incomplete ───
   useEffect(() => {
-    if (globalDocumentsList.length === 0 && !isFetchingLibrary && !hasRequestedLibrary.current) {
+    if (!hasRequestedLibrary.current) {
       hasRequestedLibrary.current = true;
-      dispatch(fetchLibraryDocuments());
+      dispatch(fetchLibraryDocuments({ limit: 1000 }));
     }
-  }, [dispatch, globalDocumentsList.length, isFetchingLibrary]);
+  }, [dispatch]);
 
   // ─── Effect 3: Comparison engine — fires when doc pair changes ──────────────
   useEffect(() => {
