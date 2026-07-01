@@ -54,7 +54,8 @@ export const LoginForm = () => {
         navigate("/workspace");
       }
     } catch (error: unknown) {
-      notify((error as string) || "Authentication failed.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Authentication failed.";
+      notify(errorMsg, "error");
     }
   };
 

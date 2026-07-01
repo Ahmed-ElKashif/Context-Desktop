@@ -54,7 +54,8 @@ export const useLibraryActions = ({
       notify("Document permanently deleted.", "success");
       ui.deleteModal.close();
     } catch (error: unknown) {
-      notify((error as string) || "Failed to delete document.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to delete document.";
+      notify(errorMsg, "error");
     } finally {
       ui.loading.setIsDeleting(false);
     }
@@ -98,14 +99,15 @@ export const useLibraryActions = ({
   };
 
   const executeDeleteFolder = async () => {
-    if (!ui.folderDeleteModal.path) return;
+    if (!ui.folderDeleteModal.id) return;
     ui.loading.setIsDeleting(true);
     try {
-      await dispatch(deleteFolderThunk(ui.folderDeleteModal.path)).unwrap();
+      await dispatch(deleteFolderThunk(ui.folderDeleteModal.id)).unwrap();
       notify("Folder permanently deleted.", "success");
       ui.folderDeleteModal.close();
     } catch (error: unknown) {
-      notify((error as string) || "Failed to delete folder.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to delete folder.";
+      notify(errorMsg, "error");
     } finally {
       ui.loading.setIsDeleting(false);
     }
@@ -121,7 +123,8 @@ export const useLibraryActions = ({
       notify("Folder renamed successfully.", "success");
       ui.folderRenameModal.close();
     } catch (error: unknown) {
-      notify((error as string) || "Failed to rename folder.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to rename folder.";
+      notify(errorMsg, "error");
     } finally {
       ui.loading.setIsRenaming(false);
     }
@@ -136,7 +139,8 @@ export const useLibraryActions = ({
       notify(`Folder "${name}" created.`, "success");
       ui.createFolderModal.close();
     } catch (error: unknown) {
-      notify((error as string) || "Failed to create folder.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to create folder.";
+      notify(errorMsg, "error");
     }
   };
 

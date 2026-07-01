@@ -11,6 +11,7 @@ interface AISplitScreenViewProps {
   isApplyingFolders: boolean;
   handleClose: () => void;
   handleAcceptAI: () => void;
+  handleAcceptLocal?: () => void;
 }
 
 export const AISplitScreenView = ({
@@ -20,6 +21,7 @@ export const AISplitScreenView = ({
   isApplyingFolders,
   handleClose,
   handleAcceptAI,
+  handleAcceptLocal,
 }: AISplitScreenViewProps) => {
   const originalTreePaths = proposedFolderUpdates.map((update) => {
     // Use the enriched originalPath from the backend first!
@@ -113,6 +115,17 @@ export const AISplitScreenView = ({
           >
             {isApplyingFolders ? "Applying..." : "Accept Organization"}
           </Button>
+          {handleAcceptLocal && (
+            <Button
+              onClick={handleAcceptLocal}
+              disabled={isApplyingFolders}
+              variant="outline"
+              className="border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary font-bold flex items-center gap-2"
+            >
+              <Icon name="save_alt" className="text-[18px]" />
+              Export Local
+            </Button>
+          )}
         </div>
       </div>
     </div>,

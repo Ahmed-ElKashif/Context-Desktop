@@ -32,6 +32,7 @@ export const UploadModal = ({
         isApplyingFolders={uploadState.isApplyingFolders}
         handleClose={uploadState.handleClose}
         handleAcceptAI={uploadState.handleAcceptAI}
+        handleAcceptLocal={uploadState.handleAcceptLocal}
       />
     );
   }

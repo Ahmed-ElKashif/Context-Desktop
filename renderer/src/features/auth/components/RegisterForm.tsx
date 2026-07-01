@@ -60,7 +60,8 @@ export const RegisterForm = () => {
       notify("Account created successfully. Please check your email.", "success");
       // Don't navigate away; the UI will now show the verification screen
     } catch (error: unknown) {
-      notify((error as string) || "Failed to create account.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to create account.";
+      notify(errorMsg, "error");
     }
   };
 

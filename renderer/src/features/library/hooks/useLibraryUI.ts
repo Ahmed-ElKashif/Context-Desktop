@@ -86,7 +86,7 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
       close: () => setDocToRename(null),
     },
     folderDeleteModal: {
-      path: folderToDelete,
+      id: folderToDelete,
       open: setFolderToDelete,
       close: () => setFolderToDelete(null),
     },

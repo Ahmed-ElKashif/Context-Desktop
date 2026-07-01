@@ -67,8 +67,8 @@ export const renameFolderThunk = createAppAsyncThunk(
 
 export const deleteFolderThunk = createAppAsyncThunk(
   "document/deleteFolder",
-  async (path: string, { dispatch, getState }) => {
-    await folderService.deleteFolder(path);
+  async (folderId: string, { dispatch, getState }) => {
+    await folderService.deleteFolder(folderId);
     dispatch(fetchFolderTree());
     const state: any = getState();
     const p = state.library.lastFetchParams;
@@ -81,7 +81,7 @@ export const deleteFolderThunk = createAppAsyncThunk(
       search: p.search,
       tags: p.tags,
     }));
-    return path;
+    return folderId;
   }
 );
 
