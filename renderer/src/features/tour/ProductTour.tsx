@@ -41,7 +41,7 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: "#tour-sidebar-compare",
+    element: "#tour-sidebar-comparison",
     popover: {
       title: "⚡ Document Compare",
       description:

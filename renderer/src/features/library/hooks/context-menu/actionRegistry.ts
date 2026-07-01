@@ -218,7 +218,7 @@ export const ALL_ACTIONS: MenuAction[] = [
       if (ctx.clickedItem?.type === 'doc') {
         ctx.handlers.onDeleteDoc(ctx.clickedItem.item as DocumentData);
       } else if (ctx.clickedItem?.type === 'folder') {
-        ctx.handlers.onDeleteFolder((ctx.clickedItem.item as FolderData).path);
+        ctx.handlers.onDeleteFolder((ctx.clickedItem.item as FolderData)._id);
       }
     },
   },

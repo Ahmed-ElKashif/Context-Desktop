@@ -18,6 +18,8 @@ import { handleWebNativeFolderSelect } from "../utils/uploadHelpers";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { addNotification } from "../../../store/ui/notificationSlice";
 import { generateRawMarkdownString } from "../../../utils/downloadUtils";
+import { applyPrototypeBridge } from "@/lib/desktop-dropzone";
+import { notify } from "../../../components/ui/feedback/ToastEngine";
 
 export const useLibraryFacade = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -113,7 +115,7 @@ export const useLibraryFacade = () => {
     onRenameDoc: (doc: any) => ui.renameModal.open(doc),
     onRenameFolder: (folder) => ui.folderRenameModal.open(folder),
     onDeleteDoc: () => ui.bulkDeleteModal.open(),
-    onDeleteFolder: (folderPath) => ui.folderDeleteModal.open(folderPath),
+    onDeleteFolder: (folderId) => ui.folderDeleteModal.open(folderId),
     onBulkDelete: () => ui.bulkDeleteModal.open(),
     onDownloadFolder: (folderId, folderName) => actions.executeDownloadFolder(folderId, folderName),
     onBulkDownload: () => actions.executeBulkDownload(),
@@ -121,43 +123,53 @@ export const useLibraryFacade = () => {
     onSynthesizeAI: (folderId?: string) => actions.executeAISynthesis(folderId),
     onCreateFolder: () => ui.createFolderModal.open(),
     onUploadFilesInCurrentDir: async () => {
-      if (typeof window !== 'undefined' && (window as any).electronAPI) {
-        // Desktop uses selectBatchFolder? Actually, desktop might not have a generic 'select files' exposed
-        // unless there is electronAPI.localFiles.selectFiles? I didn't see one.
-        // Let's fallback to the HTML input for file selection which works in Electron.
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.onchange = (e) => {
-          const files = Array.from((e.target as HTMLInputElement).files || []);
-          if (files.length > 0) {
-            dropzone.setGlobalDroppedFiles(files);
-            dropzone.setGlobalDroppedPaths(files.map(f => f.name));
-            ui.uploadModal.open(currentFolder?._id ?? null);
-          }
-        };
-        input.click();
-      } else {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.onchange = (e) => {
-          const files = Array.from((e.target as HTMLInputElement).files || []);
-          if (files.length > 0) {
-            dropzone.setGlobalDroppedFiles(files);
-            dropzone.setGlobalDroppedPaths(files.map(f => f.name));
-            ui.uploadModal.open(currentFolder?._id ?? null);
-          }
-        };
-        input.click();
-      }
+      // Shared accept string — mirrors file-handlers.ts SUPPORTED_TYPES
+      const SUPPORTED_ACCEPT = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.xlsx,.xls,.csv';
+      const SUPPORTED_MIME_TYPES = new Set([
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/png', 'image/jpeg', 'image/webp',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+      ]);
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = SUPPORTED_ACCEPT;
+      input.onchange = (e) => {
+        const rawFiles = Array.from((e.target as HTMLInputElement).files || []);
+
+        // Client-side rejection of unsupported types (user may override via "All Files")
+        const accepted = rawFiles.filter(f => SUPPORTED_MIME_TYPES.has(f.type));
+        const rejected = rawFiles.filter(f => !SUPPORTED_MIME_TYPES.has(f.type));
+
+        if (rejected.length > 0) {
+          const names = rejected.map(f => f.name).join(', ');
+          notify(`Unsupported file type(s) skipped: ${names}`, 'error');
+        }
+        if (accepted.length === 0) return;
+
+        // Extract real OS paths: use webUtils bridge in Electron, fallback to filename on web
+        const paths = accepted.map((f: File) =>
+          (window as any).electronAPI?.localFiles?.getPathForFile?.(f) || f.name
+        );
+        
+        dropzone.setGlobalDroppedFiles(accepted);
+        dropzone.setGlobalDroppedPaths(paths);
+        ui.uploadModal.open(currentFolder?._id ?? null);
+      };
+      input.click();
     },
     onUploadFolderInCurrentDir: async () => {
       try {
         if (typeof window !== 'undefined' && (window as any).electronAPI) {
           const result = await (window as any).electronAPI.localFiles.selectBatchFolder();
           if (result && result.files && result.files.length > 0) {
-            dropzone.setGlobalDroppedFiles(result.files);
+            const wrappedFiles = applyPrototypeBridge(result.files);
+            dropzone.setGlobalDroppedFiles(wrappedFiles);
             const paths = result.files.map((f: any) => f.clientPath || f.name);
             dropzone.setGlobalDroppedPaths(paths);
             ui.uploadModal.open(currentFolder?._id ?? null);

@@ -136,8 +136,8 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
       invalidateFolderCache(state, state.currentFolder?._id);
     })
     .addCase(deleteFolderThunk.pending, (state, action) => {
-      const path = action.meta.arg;
-      state.foldersList = state.foldersList.filter(f => f.path !== path);
+      const folderId = action.meta.arg;
+      state.foldersList = state.foldersList.filter(f => f._id !== folderId);
     })
     .addCase(deleteFolderThunk.fulfilled, (state) => {
       invalidateFolderCache(state, state.currentFolder?._id);

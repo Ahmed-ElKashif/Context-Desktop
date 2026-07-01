@@ -48,7 +48,8 @@ export const PasteArea = ({
 
       onUploadSuccess(newDocument);
     } catch (error: unknown) {
-      notify((error as string) || "Failed to process text.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to process text.";
+      notify(errorMsg, "error");
     }
   };
 

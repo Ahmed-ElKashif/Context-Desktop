@@ -156,7 +156,7 @@ export function registerFileHandlers() {
     // SECURITY CHECK: Lock down the API URL using strict hostname parsing to prevent subdomain bypasses
     try {
       const parsedUrl = new URL(apiUrl);
-      const allowedHostnames = ['context-sfs.up.railway.app', 'localhost'];
+      const allowedHostnames = ['context-sfs.up.railway.app', 'context-ai.up.railway.app', 'localhost'];
       if (!allowedHostnames.includes(parsedUrl.hostname)) {
         throw new Error("Hostname not in allowed list");
       }
@@ -197,7 +197,19 @@ export function registerFileHandlers() {
       return response.data;
     } catch (err: any) {
       console.error("[Main Process] Batch upload error:", err.message);
-      throw err;
+      if (axios.isAxiosError(err) && err.response) {
+        // Serialize the essential parts of the Axios error to JSON
+        // because the full Axios error object cannot be cloned by contextBridge
+        const serializedError = {
+          response: {
+            data: err.response.data,
+            status: err.response.status
+          }
+        };
+        throw new Error(`[AxiosError]${JSON.stringify(serializedError)}`);
+      }
+      // If it's a string, throw it directly, otherwise stringify the generic error
+      throw new Error(typeof err === "string" ? err : err.message || 'Unknown batch upload error');
     }
   });
 

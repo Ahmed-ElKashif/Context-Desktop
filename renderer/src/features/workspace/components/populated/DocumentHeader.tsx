@@ -65,7 +65,8 @@ export const DocumentHeader = ({
       notify("Document permanently deleted.", "success");
       //eslint-disable-next-line
     } catch (error: unknown) {
-      notify((error as string) || "Failed to delete document.", "error");
+      const errorMsg = typeof error === 'string' ? error : (error as any)?.message || "Failed to delete document.";
+      notify(errorMsg, "error");
       setIsDeleting(false);
       setIsDeleteDialogOpen(false); // Close modal on fail so they can try again
     }

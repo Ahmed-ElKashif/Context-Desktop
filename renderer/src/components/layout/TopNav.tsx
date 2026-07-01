@@ -269,12 +269,8 @@ export const TopNav = () => {
               <span className="text-sm font-bold text-light-text dark:text-white truncate max-w-[120px] group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
                 {user ? `@${user.username}` : "System Admin"}
               </span>
-              <span className="text-[10px] font-mono text-light-text/50 dark:text-white/40 capitalize flex items-center gap-1.5 mt-0.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                </span>
-                {user ? `Ready • ${user.persona}` : "Ready • v1.0-beta"}
+              <span className="text-[10px] font-mono font-medium text-light-text/80 dark:text-white/70 capitalize mt-0.5">
+                {user ? user.persona : "v1.0-beta"}
               </span>
             </div>
           </button>

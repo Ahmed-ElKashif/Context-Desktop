@@ -33,7 +33,13 @@ export const loadNotifications = createAsyncThunk(
     const electronAPI = (window as any).electronAPI;
     if (electronAPI?.store) {
       const stored = await electronAPI.store.get("app_notifications");
-      return (stored || []) as AppNotification[];
+      let safeStored = (stored || []) as any[];
+      // Sanitize corrupted objects to heal existing databases
+      safeStored = safeStored.map(n => ({
+        ...n,
+        message: typeof n.message === 'string' ? n.message : String(n.message?.message || n.message?.name || "System Error")
+      }));
+      return safeStored as AppNotification[];
     }
     return [];
   }
@@ -47,7 +53,13 @@ export const addNotification = createAsyncThunk(
   ) => {
     const state = getState() as RootState;
     const isObj = typeof payload === "object" && payload !== null;
-    const message = isObj ? (payload as any).message : payload;
+    let message = isObj ? (payload as any).message : payload;
+    
+    // Safety guard against object injections crashing React
+    if (typeof message !== "string") {
+      message = String((message as any)?.message || message?.name || "System Error");
+    }
+
     const type = isObj ? (payload as any).type || "info" : "info";
     const silent = isObj ? (payload as any).silent : false;
 

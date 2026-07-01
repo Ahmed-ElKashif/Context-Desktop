@@ -7,7 +7,7 @@ export interface UseContextMenuOptions {
   onRenameDoc: (doc: DocumentData) => void;
   onRenameFolder: (folder: FolderData) => void;
   onDeleteDoc: (doc: DocumentData) => void;
-  onDeleteFolder: (folderPath: string) => void;
+  onDeleteFolder: (folderId: string) => void;
   onBulkDelete: () => void;
   onDownloadFolder: (folderId: string, folderName: string) => void;
   onBulkDownload: () => void;

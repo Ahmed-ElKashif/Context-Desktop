@@ -18,23 +18,60 @@ export const uploadBatchDocuments = createAppAsyncThunk(
   "document/uploadBatch",
   async (
     payload: { files: File[] | any[]; clientPaths: string[]; targetFolderId?: string | null },
-    { dispatch, getState },
+    { dispatch, getState, rejectWithValue },
   ) => {
     let response;
     
     if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      const electronAPI = (window as any).electronAPI;
       const state: any = getState();
       const token = state.auth?.token;
       // In electron, we need to pass the apiUrl explicitly, or maybe hardcode it/get it from env.
       // But we can just use the standard Vite env var
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      response = await (window as any).electronAPI.localFiles.startBatchIngest({
-        token,
-        apiUrl,
-        files: payload.files,
-        clientPaths: payload.clientPaths,
-        folderId: payload.targetFolderId
+
+      // CRITICAL FIX: Serialize to plain objects before crossing contextBridge.
+      // File/Blob DOM objects lose non-enumerable properties (e.g. .path injected by
+      // Object.defineProperty) when the Structured Clone Algorithm serializes them.
+      const serializableFiles = payload.files.map((file: any, i: number) => {
+        // 1. Read non-enumerable .path (set by applyPrototypeBridge via Object.defineProperty)
+        const bridgePath = Object.getOwnPropertyDescriptor(file, 'path')?.value;
+        // 2. Direct .path on plain objects (from selectBatchFolder raw result)
+        const directPath = typeof file.path === 'string' ? file.path : undefined;
+        // 3. webUtils fallback for native <input> File objects (strict contextIsolation)
+        const webUtilsPath = (!bridgePath && !directPath && electronAPI.localFiles?.getPathForFile)
+          ? electronAPI.localFiles.getPathForFile(file)
+          : undefined;
+
+        return {
+          name: file.name || '',
+          path: bridgePath || directPath || webUtilsPath || '',
+          clientPath: payload.clientPaths?.[i] || (file as any).webkitRelativePath || (file as any).clientPath || file.name || '',
+          type: file.type || '',
+          size: file.size || 0,
+        };
       });
+
+      try {
+        response = await electronAPI.localFiles.startBatchIngest({
+          token,
+          apiUrl,
+          files: serializableFiles,
+          clientPaths: payload.clientPaths,
+          folderId: payload.targetFolderId
+        });
+      } catch (err: any) {
+        if (err.message && err.message.includes('[AxiosError]')) {
+          try {
+            const jsonStr = err.message.split('[AxiosError]')[1];
+            const parsed = JSON.parse(jsonStr);
+            return rejectWithValue(parsed); // Restored as a plain object resembling AxiosError
+          } catch {
+            return rejectWithValue(err.message);
+          }
+        }
+        return rejectWithValue(err.message);
+      }
     } else {
       response = await uploadService.uploadBatch(
         payload.files as File[],

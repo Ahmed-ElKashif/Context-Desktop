@@ -102,7 +102,7 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
       />
 
       <ConfirmDialog
-        isOpen={!!ui.folderDeleteModal.path}
+        isOpen={!!ui.folderDeleteModal.id}
         onClose={ui.folderDeleteModal.close}
         onConfirm={actions.executeDeleteFolder}
         title="Delete Folder"
