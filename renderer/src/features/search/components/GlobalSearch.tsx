@@ -64,10 +64,16 @@ export const GlobalSearch = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleSelectResult = (docId: string) => {
+  const handleSelectResult = (docId: string, chunkText: string) => {
     setIsDropdownOpen(false);
+    navigate(`/read/${docId}`, { 
+      state: { 
+        returnUrl: location.pathname + location.search,
+        highlightQuery: searchQuery,
+        highlightText: chunkText 
+      } 
+    });
     setSearchQuery("");
-      navigate(`/read/${docId}`, { state: { returnUrl: location.pathname + location.search } });
   };
 
   return (
@@ -122,7 +128,7 @@ export const GlobalSearch = () => {
               </li>
               {searchResults.map((chunk, index) => (
                 <li key={`${chunk.documentId}-${chunk.chunkIndex}-${index}`}>
-                  <button onClick={() => handleSelectResult(chunk.documentId)} className="w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg hover:bg-light-bg dark:hover:bg-white/5 transition-colors group">
+                  <button onClick={() => handleSelectResult(chunk.documentId, chunk.text)} className="w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg hover:bg-light-bg dark:hover:bg-white/5 transition-colors group">
                     <div className="flex items-center gap-3 overflow-hidden flex-1">
                       <div className="w-8 h-8 rounded-lg bg-light-primary/10 dark:bg-white/5 text-light-primary dark:text-white/70 flex items-center justify-center shrink-0">
                         <Icon name={chunk.documentType === 'Image' ? 'image' : 'description'} className="text-[16px]" />

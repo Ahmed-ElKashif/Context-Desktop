@@ -96,7 +96,9 @@ export function RegisterFeature() {
         </Link>
         <div className="flex items-center gap-4">
           <a
-            href="#"
+            href="https://context-front-production.up.railway.app/documentation"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-bold text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity hidden sm:block"
           >
             Help & Docs
