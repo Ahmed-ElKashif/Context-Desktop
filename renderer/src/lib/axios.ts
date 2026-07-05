@@ -1,4 +1,5 @@
 import axios from "axios";
+import { translateApiError } from "./errorTranslator";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
@@ -42,22 +43,26 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // 1. Extract backend message
-    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    const rawMessage = error.response?.data?.message || error.response?.data?.error || error.message;
+    const status = error.response?.status;
+    const translatedMessage = translateApiError(status, rawMessage);
 
-    if (error.response && error.response.status === 401) {
+    if (status === 401) {
       // Token expired or invalid
       window.dispatchEvent(new CustomEvent("auth-expired"));
     } else if (
       error.message === "Network Error" || 
-      (error.response && error.response.status >= 502 && error.response.status <= 504)
+      (status >= 502 && status <= 504)
     ) {
       window.dispatchEvent(new CustomEvent("server-down"));
-    } else if (message) {
-      // Dispatch globally so App.tsx can log it to the Notification Center if needed
-      window.dispatchEvent(new CustomEvent("api-error", { detail: { message } }));
+    } else if (
+      status === 403 || status === 413 || status === 429 || status >= 500
+    ) {
+      // Dispatch globally so AppRouter.tsx can log it to the Notification Center if needed
+      window.dispatchEvent(new CustomEvent("api-error", { detail: { message: translatedMessage } }));
     }
     
     // 2. Reject with the string so individual components don't toast "[object Object]"
-    return Promise.reject(message);
+    return Promise.reject(translatedMessage);
   }
 );

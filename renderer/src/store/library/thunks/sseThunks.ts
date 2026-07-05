@@ -61,28 +61,38 @@ export const pollDocumentStatusThunk = () => async (dispatch: any, getState: any
       );
 
       if (match && match.aiStatus !== parsed.aiStatus) {
+        // Optimistically update the store immediately so UI feels instant
+        dispatch({
+          type: "library/updateDocumentStatusLocally",
+          payload: {
+            documentId: parsed.documentId,
+            aiStatus: parsed.aiStatus,
+            document: parsed.document
+          }
+        });
+
         // If the completed doc is the activeDocument, useReaderSSE handles
         // the notification — skip here to avoid duplicate toasts.
         const isHandledByReader = freshState.workspace.activeDocument?._id === parsed.documentId;
 
-    if (parsed.aiStatus === "Analyzed") {
+        if (parsed.aiStatus === "Analyzed") {
           if (!isHandledByReader) {
             const msg = `Orchestrator finished analyzing "${parsed.document?.title || "Document"}"!`;
             notify(msg, "success", msg); // BIG TECH: Escalate to OS if app is minimized
             playNotificationSound("success");
           }
-      dispatch(reloadDocumentThunk(parsed.documentId));
-      dispatch(fetchSettings());
-    } else if (parsed.aiStatus === "Failed") {
+          dispatch(reloadDocumentThunk(parsed.documentId));
+          dispatch(fetchSettings());
+        } else if (parsed.aiStatus === "Failed") {
           if (!isHandledByReader) {
             const msg = `Analysis failed for "${parsed.document?.title || "Document"}".`;
             notify(msg, "error", msg); // BIG TECH: Escalate to OS if app is minimized
             playNotificationSound("error");
           }
-      dispatch(reloadDocumentThunk(parsed.documentId));
-      dispatch(fetchSettings());
-    }
-      }
+          dispatch(reloadDocumentThunk(parsed.documentId));
+          dispatch(fetchSettings());
+        }
+      }
     };
 
     statusEventSource.onerror = (error) => {

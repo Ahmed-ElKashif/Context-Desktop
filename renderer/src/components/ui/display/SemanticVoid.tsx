@@ -141,11 +141,12 @@ export const SemanticVoid = ({
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mt-2">
           <a
             href={actionLink}
-            onClick={() => {
+            onClick={(e) => {
               if (
                 actionLink === window.location.pathname ||
                 actionLink === "#"
               ) {
+                e.preventDefault();
                 window.location.reload();
               }
             }}

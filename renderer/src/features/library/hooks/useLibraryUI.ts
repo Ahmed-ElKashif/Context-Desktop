@@ -31,9 +31,6 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [isReorganizeWarningOpen, setIsReorganizeWarningOpen] = useState(false);
-  const [reorganizeTargetFolderId, setReorganizeTargetFolderId] = useState<string | undefined>(undefined);
-  const [isForceReorganize, setIsForceReorganize] = useState(false);
 
   // 4. Global UI State (Sorting & Filters from Redux)
   const {
@@ -135,21 +132,7 @@ export const useLibraryUI = (documentsList: DocumentData[] = []) => {
         setIsBulkDeleteModalOpen(false);
       },
     },
-    reorganizeWarningModal: {
-      isOpen: isReorganizeWarningOpen,
-      targetFolderId: reorganizeTargetFolderId,
-      isForceReorganize,
-      open: (targetFolderId?: string) => {
-        setReorganizeTargetFolderId(targetFolderId);
-        setIsForceReorganize(true);
-        setIsReorganizeWarningOpen(true);
-      },
-      close: () => {
-        setIsReorganizeWarningOpen(false);
-        setReorganizeTargetFolderId(undefined);
-        setIsForceReorganize(false);
-      },
-    },
+
     loading: {
       isDeleting,
       setIsDeleting,

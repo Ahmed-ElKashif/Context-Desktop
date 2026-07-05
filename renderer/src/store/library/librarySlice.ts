@@ -172,6 +172,16 @@ const librarySlice = createSlice({
         state.documentsList[docIndex].prettifiedJson = prettifiedJson;
       }
     },
+    updateDocumentStatusLocally: (state, action: PayloadAction<{ documentId: string; aiStatus: AIStatus; document?: Partial<DocumentData> }>) => {
+      const { documentId, aiStatus, document } = action.payload;
+      const docIndex = state.documentsList.findIndex((d) => d._id === documentId);
+      if (docIndex !== -1) {
+        state.documentsList[docIndex].aiStatus = aiStatus;
+        if (document) {
+          state.documentsList[docIndex] = { ...state.documentsList[docIndex], ...document };
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     buildFetchReducers(builder);
@@ -187,6 +197,7 @@ export const {
   clearProposedStructure,
   clearSynthesisResult,
   updateDocumentPrettifyResult,
+  updateDocumentStatusLocally,
 } = librarySlice.actions;
 
 export default librarySlice.reducer;

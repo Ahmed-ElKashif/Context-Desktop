@@ -117,9 +117,7 @@ export const ALL_ACTIONS: MenuAction[] = [
     isVisible: (ctx) => {
       if (isSingleDoc(ctx)) return true;
       if (isMultiSelect(ctx) && ctx.selectedDocIds.length > 0) return true; // Docs only or Mixed
-      if (isSingleFolder(ctx)) {
-        return !(ctx.clickedItem!.item as FolderData).isAIGenerated;
-      }
+      if (isSingleFolder(ctx)) return true;
       return false;
     },
     execute: (ctx) => {
@@ -189,7 +187,7 @@ export const ALL_ACTIONS: MenuAction[] = [
       if (isSingleDoc(ctx)) return true;
       if (isSingleFolder(ctx)) {
         const folder = ctx.clickedItem!.item as FolderData;
-        return !folder.isAIGenerated && folder.name.toLowerCase() !== "random files";
+        return folder.name.toLowerCase() !== "random files";
       }
       return false;
     },

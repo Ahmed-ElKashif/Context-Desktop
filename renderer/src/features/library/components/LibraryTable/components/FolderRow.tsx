@@ -60,12 +60,22 @@ export const FolderRow = ({
       </td>
       <td className="py-1 pr-2">
         <div className="flex items-center gap-1.5">
-          <span 
-            className="material-symbols-rounded text-lg"
-            style={{ color: getFolderColorHex(folder.color || 'yellow') }}
-          >
-            folder
-          </span>
+          <div className="relative inline-block leading-none">
+            <span 
+              className="material-symbols-rounded text-lg"
+              style={{ color: getFolderColorHex(folder.color || 'yellow') }}
+            >
+              folder
+            </span>
+            {folder.isAIGenerated && (
+              <div 
+                className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+                title="AI Generated"
+              >
+                <span className="material-symbols-rounded text-[10px] text-white font-bold">account_tree</span>
+              </div>
+            )}
+          </div>
           <div className="truncate max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[350px]">
             <p 
               className="text-xs font-semibold text-light-text dark:text-white group-hover:text-black dark:group-hover:text-white hover:underline transition-colors truncate"

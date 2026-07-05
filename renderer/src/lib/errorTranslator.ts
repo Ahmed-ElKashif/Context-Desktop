@@ -7,12 +7,7 @@ export const translateApiError = (status: number | undefined, rawMessage: string
 
   const lowerMessage = rawMessage ? rawMessage.toLowerCase() : "";
 
-  // 1. Check if the rawMessage is a generic Axios/Network error or generic Backend error
-  const isGenericAxios = lowerMessage.includes("request failed with status code") || lowerMessage === "network error";
-  const genericBackendMessages = ["unauthorized", "internal server error", "not found"];
-  const isGenericBackend = genericBackendMessages.includes(lowerMessage);
-
-  // 1b. Safety net: intercept raw AI provider errors that leaked through the backend
+  // 1. Safety net: intercept raw AI provider errors that leaked through the backend
   const isLeakedProviderError = lowerMessage.includes("platform.openai.com") ||
     lowerMessage.includes("docs.langchain") ||
     lowerMessage.includes("exceeded your current quota") ||
@@ -22,32 +17,39 @@ export const translateApiError = (status: number | undefined, rawMessage: string
     return "The AI service is temporarily at capacity. Please try again in a moment.";
   }
 
-  // 2. If the backend sent a specific, non-generic message, prioritize it!
-  if (rawMessage && !isGenericAxios && !isGenericBackend) {
-    return rawMessage;
-  }
-
-  // 3. Specific Business Logic Errors (fallback if generic)
+  // Intercept specific provider API key issues
   if (status === 409 && lowerMessage.includes("apikey")) {
     return "The AI provider rejected the request due to an invalid or missing API key. Please contact your system administrator.";
   }
-  
-  if (status === 409) {
-    return "This action conflicts with an existing resource (e.g., name already taken).";
+
+  // 2. Check if the rawMessage is a generic Axios/Network error or generic Backend error
+  const isGenericAxios = lowerMessage.includes("request failed with status code") || lowerMessage === "network error";
+  const genericBackendMessages = ["unauthorized", "internal server error", "not found", "bad request", "forbidden", "too many requests", "too many requests, please try again later."];
+  const isGenericBackend = genericBackendMessages.includes(lowerMessage);
+
+  // 3. If the backend sent a specific, non-generic message, prioritize it!
+  if (rawMessage && !isGenericAxios && !isGenericBackend && rawMessage !== String(status)) {
+    return rawMessage;
   }
 
-  // 4. Standard HTTP Status Code Translations
+  // 4. Standard HTTP Status Code Translations (fallback when message is generic or missing)
   switch (status) {
+    case 400:
+      return "The request was invalid. Please check your input and try again.";
     case 401:
       return "Your session has expired or is invalid. Please log in again.";
     case 403:
       return "You do not have the required permissions to perform this action.";
     case 404:
       return "The requested resource could not be found. It may have been deleted.";
+    case 409:
+      return "This action conflicts with an existing resource (e.g., name already taken).";
     case 413:
       return "The uploaded file is too large. Please select a smaller file.";
+    case 422:
+      return "The provided data is invalid or cannot be processed.";
     case 429:
-      return "The AI service is temporarily unavailable. Please try again later.";
+      return "You have reached your usage limit. Please try again later.";
     case 500:
       return "The server encountered an unexpected condition. Our team has been notified.";
     case 502:
@@ -56,7 +58,6 @@ export const translateApiError = (status: number | undefined, rawMessage: string
       return "The service is temporarily unavailable. Please check your connection or try again later.";
   }
 
-  // Fallback: return the original backend message if it's already user-friendly, 
-  // or a generic error if it's completely missing.
-  return rawMessage || "An unexpected system error occurred.";
+  // Fallback: return a generic error if everything else failed.
+  return "An unexpected system error occurred.";
 };
