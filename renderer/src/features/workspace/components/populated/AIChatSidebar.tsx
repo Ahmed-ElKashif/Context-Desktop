@@ -123,14 +123,14 @@ export const AIChatSidebar = ({
     <aside id="tour-ai-chat" className="w-full h-full flex flex-col">
       <div className="w-full h-full flex flex-col bg-white dark:bg-dark-surface rounded-2xl border border-light-border dark:border-white/5 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-light-border dark:border-white/5 bg-light-bg/50 dark:bg-[#121214]/50 flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-light-primary dark:bg-dark-primary text-white dark:text-black flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-light-primary dark:bg-dark-primary text-white dark:text-black flex items-center justify-center shadow-sm shrink-0">
             <Icon name="smart_toy" className="text-[18px]" />
           </div>
-          <div>
-            <h4 className="font-bold text-light-text dark:text-white text-sm">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-bold text-light-text dark:text-white text-sm truncate">
               Ask Context AI
             </h4>
-            <p className="text-[10px] font-medium text-light-text/70 dark:text-white/70">
+            <p className="text-[10px] font-medium text-light-text/70 dark:text-white/70 truncate">
               Your personal assistant for {activeDocument.title}
             </p>
           </div>
@@ -146,7 +146,7 @@ export const AIChatSidebar = ({
             </div>
           ) : messages.length === 0 ? (
             <>
-              <div className="bg-light-bg dark:bg-[#121214] p-3.5 rounded-xl rounded-tl-sm border border-light-border dark:border-white/5 text-sm font-medium text-light-text dark:text-white/90 shadow-sm w-[90%]">
+              <div className="bg-light-bg dark:bg-[#121214] p-3.5 rounded-xl rounded-tl-sm border border-light-border dark:border-white/5 text-sm font-medium text-light-text dark:text-white/90 shadow-sm w-[90%] break-words">
                 Hello! I've fully analyzed this {activeDocument.title}. What
                 would you like to know?
               </div>
@@ -170,7 +170,7 @@ export const AIChatSidebar = ({
             messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`max-w-[90%] p-3.5 rounded-xl text-sm font-medium leading-relaxed shadow-sm ${
+                className={`max-w-[90%] p-3.5 rounded-xl text-sm font-medium leading-relaxed shadow-sm break-words ${
                   msg.role === "user"
                     ? "self-end bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-tr-sm"
                     : msg.role === "error"
@@ -223,9 +223,13 @@ export const AIChatSidebar = ({
             <button
               onClick={() => handleSendMessage()}
               disabled={!chatInput.trim() || isTyping}
-              className="p-1 m-1 bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shrink-0 shadow-sm"
+              className={`w-8 h-8 m-1 flex items-center justify-center rounded-lg transition-all shrink-0 ${
+                !chatInput.trim() || isTyping
+                  ? "bg-black/5 dark:bg-white/5 text-light-text/30 dark:text-white/30 cursor-not-allowed"
+                  : "bg-light-primary dark:bg-dark-primary text-white dark:text-black hover:opacity-90 shadow-sm hover:scale-105 active:scale-95"
+              }`}
             >
-              <Icon name="arrow_upward" className="text-[16px]" />
+              <Icon name="arrow_upward" className="text-[18px]" />
             </button>
           </div>
         </div>

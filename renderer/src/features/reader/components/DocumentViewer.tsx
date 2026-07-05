@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { DocumentData } from "../../../store/library/librarySlice";
 import { useZoom } from "../hooks/useZoom";
 import { ZoomPill } from "./ZoomPill";
@@ -19,6 +20,10 @@ interface DocumentViewerProps {
 }
 
 export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
+  const location = useLocation();
+  const state = location.state as { highlightQuery?: string; highlightText?: string } | null;
+  const highlightQuery = state?.highlightQuery;
+
   // ── File type detection ───────────────────────────────────────────────────
   const isImage =
     document.fileType === "Image" ||
@@ -37,8 +42,12 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
 
   // ── View mode (extracted text vs original vs prettify) ─────────────────────
   // Images and Excel have extracted/original toggle; Word/Excel/TextSnippet also get "prettify"
+  // Images and Excel have extracted/original toggle; Word/Excel/TextSnippet also get "prettify"
   const isSupportedForPrettify = isExcel || isWord || isTextSnippet;
-  const [viewMode, setViewMode] = useState<"extracted" | "original" | "prettify">("original");
+  
+  // If the user searches for a term inside an image, default to the Extracted OCR transcript
+  const defaultViewMode = (isImage && highlightQuery) ? "extracted" : "original";
+  const [viewMode, setViewMode] = useState<"extracted" | "original" | "prettify">(defaultViewMode);
 
   // ── Zoom ──────────────────────────────────────────────────────────────────
   const { zoomLevel, showPill, containerRef } = useZoom(1.0, 0.25, 3.0, 0.1);
@@ -81,13 +90,14 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
                 extractedText={document.extractedText}
                 zoomLevel={zoomLevel}
                 isExcel={false}
+                highlightQuery={highlightQuery}
               />
             )
 
           /* ── Excel interactive grid ── */
           ) : isExcel ? (
             <div className="flex-1 min-h-0 w-full h-full flex flex-col overflow-hidden">
-              <ExcelViewer extractedText={document.extractedText || ""} />
+              <ExcelViewer extractedText={document.extractedText || ""} highlightQuery={highlightQuery} />
             </div>
 
           /* ── TextSnippet (original = extracted, no file to load) ── */
@@ -96,6 +106,7 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
               extractedText={document.extractedText}
               zoomLevel={zoomLevel}
               isExcel={false}
+              highlightQuery={highlightQuery}
             />
 
           /* ── Word (.docx or legacy .doc) ── */
@@ -106,6 +117,7 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
                 documentTitle={document.title}
                 zoomLevel={zoomLevel}
                 isOldDoc={isOldDoc}
+                highlightQuery={highlightQuery}
               />
             </div>
 
@@ -119,7 +131,7 @@ export const DocumentViewer = ({ document, fileUrl }: DocumentViewerProps) => {
 
           /* ── PDF ── */
           ) : fileUrl ? (
-            <PdfViewer fileUrl={fileUrl} zoomLevel={zoomLevel} />
+            <PdfViewer fileUrl={fileUrl} zoomLevel={zoomLevel} highlightQuery={highlightQuery} />
 
           ) : (
             <div className="flex h-full items-center justify-center text-light-text/50 dark:text-white/40">

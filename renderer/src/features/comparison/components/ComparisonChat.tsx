@@ -118,9 +118,13 @@ export const ComparisonChat: React.FC<ComparisonChatProps> = ({
           <button
             onClick={() => submitMessage()}
             disabled={isChatting || !chatInput.trim()}
-            className="w-8 h-8 flex items-center justify-center bg-light-primary dark:bg-dark-primary text-white dark:text-black rounded-lg hover:opacity-90 disabled:opacity-40 transition-opacity shrink-0 shadow-sm m-0.5"
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all shrink-0 m-0.5 ${
+              isChatting || !chatInput.trim()
+                ? "bg-black/5 dark:bg-white/5 text-light-text/30 dark:text-white/30 cursor-not-allowed"
+                : "bg-light-primary dark:bg-dark-primary text-white dark:text-black hover:opacity-90 shadow-sm hover:scale-105 active:scale-95"
+            }`}
           >
-            <Icon name="arrow_upward" className="text-[16px]" />
+            <Icon name="arrow_upward" className="text-[18px]" />
           </button>
         </div>
         <div className="flex items-center gap-2 px-3 pt-2 pb-1 overflow-x-auto no-scrollbar mask-gradient">

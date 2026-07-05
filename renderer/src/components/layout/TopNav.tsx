@@ -267,9 +267,9 @@ export const TopNav = () => {
 
             <div className="flex flex-col items-start text-left hidden sm:flex pr-1">
               <span className="text-sm font-bold text-light-text dark:text-white truncate max-w-[120px] group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
-                {user ? `@${user.username}` : "System Admin"}
+                {user ? user.username : "System Admin"}
               </span>
-              <span className="text-[10px] font-mono font-medium text-light-text/80 dark:text-white/70 capitalize mt-0.5">
+              <span className="text-[10px] font-mono font-bold text-light-primary dark:text-dark-primary capitalize mt-0.5">
                 {user ? user.persona : "v1.0-beta"}
               </span>
             </div>

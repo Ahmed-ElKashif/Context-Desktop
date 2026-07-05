@@ -6,6 +6,7 @@ import {
   convertToDocx,
   convertToMarkdown,
   downloadBlob,
+  formatMarkdownAsPlainText,
 } from "../../../utils/prettify-converters";
 import { notify } from "../../../../../components/ui/feedback/ToastEngine";
 
@@ -75,10 +76,11 @@ export const usePrettifyDownloads = (
   const handleDownloadMarkdown = useCallback(() => {
     if (!result || result.type !== "document") return;
     const text = generateMarkdownString(result);
-    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const plainText = formatMarkdownAsPlainText(text);
+    const blob = new Blob([plainText], { type: "text/plain;charset=utf-8" });
     const title = document.title.replace(/\.[^/.]+$/, "");
-    downloadBlob(blob, `${title} — Prettified.md`);
-    notify("Markdown file downloaded.", "success");
+    downloadBlob(blob, `${title} — Prettified.txt`);
+    notify("Text file downloaded.", "success");
   }, [result, document.title, generateMarkdownString]);
 
   return {

@@ -3,6 +3,7 @@ import { Icon } from "../../../components/ui/core/Icons";
 import { DocumentData } from "../../../store/library/librarySlice";
 import { ComparisonResponse } from "../api/comparisonService";
 import { exportComparisonReport } from "../utils/comparisonUtils";
+import { useAppSelector } from "../../../store/hooks";
 
 interface ComparisonHeaderProps {
   baseDoc: DocumentData | null;
@@ -12,6 +13,10 @@ interface ComparisonHeaderProps {
 
 export function ComparisonHeader({ baseDoc, compareDoc, comparisonData }: ComparisonHeaderProps) {
   const navigate = useNavigate();
+  const { history, activeComparisonId } = useAppSelector((state) => state.comparison);
+
+  const activeRecord = history.find(h => h._id === activeComparisonId);
+  const reportName = activeRecord?.customTitle || `Comparison: ${baseDoc?.title} vs ${compareDoc?.title}`;
 
   return (
     <header className="h-16 border-b border-light-border dark:border-white/5 bg-light-surface dark:bg-dark-surface flex items-center justify-between px-8 shrink-0 z-10">
@@ -32,7 +37,7 @@ export function ComparisonHeader({ baseDoc, compareDoc, comparisonData }: Compar
       <div className="flex items-center gap-4">
         <button
           id="tour-compare-export"
-          onClick={() => exportComparisonReport(baseDoc, compareDoc, comparisonData)}
+          onClick={() => exportComparisonReport(baseDoc, compareDoc, comparisonData, reportName)}
           className="flex items-center gap-2 px-3 py-1.5 bg-light-bg dark:bg-white/5 border border-light-border dark:border-white/10 rounded-lg text-xs font-bold text-light-text/80 dark:text-white/80 hover:text-light-primary dark:hover:text-white transition-colors shadow-sm"
         >
           <Icon name="download" className="text-[16px]" />

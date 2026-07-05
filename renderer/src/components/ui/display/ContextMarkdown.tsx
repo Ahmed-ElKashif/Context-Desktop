@@ -6,27 +6,27 @@ import remarkGfm from "remark-gfm";
 // for use in PrettifyDocumentView.tsx
 export const MarkdownComponents: any = {
   table: ({ node, ...props }: any) => (
-    <div className="overflow-x-auto my-5 rounded-xl border border-light-border/40 dark:border-white/10 shadow-sm">
+    <div className="overflow-x-auto my-5 rounded-xl border border-gray-200 dark:border-white/10 shadow-md bg-white dark:bg-[#0A0A0C]">
       <table className="w-full text-sm text-left border-collapse" {...props} />
     </div>
   ),
   thead: ({ node, ...props }: any) => (
-    <thead className="bg-[#111827] dark:bg-[#18181B] text-white/90 font-mono text-[11px] uppercase tracking-widest" {...props} />
+    <thead className="bg-gray-100 dark:bg-[#18181B] text-gray-700 dark:text-white/90 font-mono text-[11px] uppercase tracking-widest border-b border-gray-200 dark:border-white/10" {...props} />
   ),
   th: ({ node, ...props }: any) => (
-    <th className="px-5 py-3 border-b border-white/10 font-semibold whitespace-nowrap" {...props} />
+    <th className="px-5 py-3 font-semibold whitespace-nowrap border-r border-gray-200 dark:border-white/5 last:border-r-0" {...props} />
   ),
   td: ({ node, ...props }: any) => (
-    <td className="px-5 py-3 border-b border-light-border/20 dark:border-white/5 last:border-b-0 text-light-text/90 dark:text-white/80" {...props} />
+    <td className="px-5 py-3 text-gray-800 dark:text-white/80 border-r border-gray-200 dark:border-white/5 last:border-r-0" {...props} />
   ),
   tr: ({ node, ...props }: any) => (
-    <tr className="bg-white dark:bg-[#0A0A0C] even:bg-[#F9FAFB] even:dark:bg-[#111113] hover:bg-violet-500/5 dark:hover:bg-violet-500/10 transition-colors" {...props} />
+    <tr className="border-b border-gray-200 dark:border-white/5 last:border-b-0 even:bg-gray-50/80 even:dark:bg-[#111113] hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors" {...props} />
   ),
   code: ({ node, inline, className, children, ...props }: any) => {
     const match = /language-(\w+)/.exec(className || "");
     if (!inline && match) {
       return (
-        <pre className="bg-light-border/20 dark:bg-white/5 p-4 rounded-xl border border-light-border/50 dark:border-white/10 font-mono text-sm overflow-x-auto text-light-text/90 dark:text-white/80 my-4 shadow-sm">
+        <pre className="bg-gray-100 dark:bg-white/5 p-4 rounded-xl border border-light-border/80 dark:border-white/10 font-mono text-sm overflow-x-auto text-light-text/90 dark:text-white/80 my-4 shadow-sm">
           <code className={className} {...props}>
             {children}
           </code>

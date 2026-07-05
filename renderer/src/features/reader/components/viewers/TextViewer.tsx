@@ -1,7 +1,10 @@
+import { useHighlighter } from "../hooks/useHighlighter";
+
 interface TextViewerProps {
   extractedText?: string;
   zoomLevel: number;
   isExcel?: boolean;
+  highlightQuery?: string;
 }
 
 /**
@@ -13,10 +16,14 @@ export const TextViewer = ({
   extractedText,
   zoomLevel,
   isExcel = false,
+  highlightQuery,
 }: TextViewerProps) => {
+  const { containerRef } = useHighlighter(extractedText, highlightQuery);
+
   return (
     <div className="flex-1 min-h-full w-full flex flex-col overflow-auto bg-white dark:bg-[#18181B] rounded-xl">
       <div
+        ref={containerRef}
         style={{
           fontSize: isExcel ? undefined : `${Math.round(zoomLevel * 100)}%`,
         }}
