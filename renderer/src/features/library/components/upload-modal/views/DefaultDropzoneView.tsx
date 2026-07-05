@@ -15,6 +15,7 @@ interface DefaultDropzoneViewProps {
   handleClose: () => void;
   dropzone: DropzoneState;
   handleNativeFolderSelect: () => void;
+  handleCreateNewFolder: () => void;
 }
 
 export const DefaultDropzoneView = ({
@@ -30,6 +31,7 @@ export const DefaultDropzoneView = ({
   handleClose,
   dropzone,
   handleNativeFolderSelect,
+  handleCreateNewFolder,
 }: DefaultDropzoneViewProps) => {
   const { getRootProps, getInputProps, isDragActive, open } = dropzone;
 
@@ -47,31 +49,41 @@ export const DefaultDropzoneView = ({
         <button
           onClick={handleClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-light-bg dark:hover:bg-white/10 transition-colors"
+          title="Close"
         >
           <Icon name="close" className="text-xl" />
         </button>
       </div>
 
-      <div className="flex px-6 pt-4 gap-6 border-b border-light-border dark:border-white/5">
+      <div className="flex px-6 pt-4 justify-between border-b border-light-border dark:border-white/5">
+        <div className="flex gap-6">
+          <button
+            onClick={() => setActiveTab("file")}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === "file"
+                ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
+                : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
+            }`}
+          >
+            File & Folder Upload
+          </button>
+          <button
+            onClick={() => setActiveTab("text")}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === "text"
+                ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
+                : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
+            }`}
+          >
+            Paste Text Snippet
+          </button>
+        </div>
         <button
-          onClick={() => setActiveTab("file")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
-            activeTab === "file"
-              ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
-              : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
-          }`}
+          onClick={handleCreateNewFolder}
+          className="pb-3 text-sm font-bold flex items-center gap-1.5 text-light-primary dark:text-dark-primary hover:opacity-80 transition-opacity"
         >
-          Folder Upload
-        </button>
-        <button
-          onClick={() => setActiveTab("text")}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
-            activeTab === "text"
-              ? "border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary"
-              : "border-transparent text-light-text/60 hover:text-light-text dark:text-white/60 dark:hover:text-white"
-          }`}
-        >
-          Paste Text Snippet
+          <Icon name="create_new_folder" className="text-lg" />
+          <span>New Folder</span>
         </button>
       </div>
 
@@ -84,13 +96,16 @@ export const DefaultDropzoneView = ({
             <input {...getInputProps()} />
 
             <div className="w-16 h-16 shadow-sm rounded-full flex items-center justify-center mb-4 bg-white dark:bg-dark-surface text-light-primary dark:text-dark-primary">
-              <Icon name="create_new_folder" className="text-3xl" />
+              <Icon name="cloud_upload" className="text-3xl" />
             </div>
             <h3 className="text-lg font-extrabold text-light-text dark:text-white mb-2 text-center">
               Drop your content here
             </h3>
-            <p className="text-xs font-semibold text-light-text/60 dark:text-white/60 mb-6 text-center max-w-[250px]">
+            <p className="text-sm font-semibold text-light-text/80 dark:text-white/80 mb-6 text-center max-w-[320px] leading-relaxed">
               Drag & drop files or folders directly into this zone. Max 5 items.
+              <span className="block mt-2 font-bold text-[11px] text-light-text/90 dark:text-white/90 uppercase tracking-wider">
+                Supports: PDF, Word, Excel, CSV & Images
+              </span>
             </p>
 
             <div className="flex gap-3 z-10">

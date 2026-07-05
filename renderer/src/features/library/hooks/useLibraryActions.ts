@@ -213,26 +213,7 @@ export const useLibraryActions = ({
   const executeAIOrganization = (targetFolderId?: string) => {
     const isTargetingSingleFolder = !!targetFolderId;
     if (!isTargetingSingleFolder && selectedDocs.length === 0 && selectedFolders.length === 0) return;
-
-    let hasOrganizedItems = false;
-
-    if (isTargetingSingleFolder) {
-      // We don't have the full FolderData of the target folder here easily unless we search for it.
-      // But typically targetFolderId is passed from context menu of a folder, which might be in selectedFolders or foldersList.
-      // Let's check selectedFolders first. If it's a single folder, we can check its isAIGenerated flag.
-      const target = selectedFolders.find(f => f._id === targetFolderId);
-      if (target?.isAIGenerated) {
-        hasOrganizedItems = true;
-      }
-    } else {
-      hasOrganizedItems = selectedDocs.some(d => d.isOrganized) || selectedFolders.some(f => f.isAIGenerated);
-    }
-
-    if (hasOrganizedItems) {
-      ui.reorganizeWarningModal.open(targetFolderId);
-    } else {
-      confirmAIOrganization(targetFolderId);
-    }
+    confirmAIOrganization(targetFolderId);
   };
   const synthesisPromiseRef = useRef<any>(null);
 

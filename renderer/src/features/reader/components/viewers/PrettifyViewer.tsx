@@ -226,7 +226,7 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
             Prettifying your document…
           </h3>
           <p className="text-sm text-light-text/50 dark:text-white/40">
-            AI is structuring your content. This usually takes 10–20 seconds.
+            AI is prettifying your content. This usually takes 10–20 seconds.
           </p>
         </div>
         <div className="flex gap-1.5">

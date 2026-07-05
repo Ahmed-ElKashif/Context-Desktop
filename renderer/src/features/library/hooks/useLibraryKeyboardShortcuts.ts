@@ -221,7 +221,7 @@ export const useLibraryKeyboardShortcuts = (
             if (singleSelected) {
               if (singleSelected.type === "folder") {
                 const folder = singleSelected.item as FolderData;
-                if (folder.isAIGenerated || folder.name.toLowerCase().startsWith("random files")) {
+                if (folder.name.toLowerCase().startsWith("random files")) {
                   return;
                 }
               }

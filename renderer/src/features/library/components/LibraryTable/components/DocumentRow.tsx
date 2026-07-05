@@ -79,9 +79,35 @@ export const DocumentRow = ({
       <td className="py-1 pr-2">
         <div className="flex items-center gap-1.5">
           {nativeIcon ? (
-            <img src={nativeIcon} alt={doc.fileType} className="w-5 h-5 object-contain" />
+            <div className="relative inline-block leading-none">
+              <img src={nativeIcon} alt={doc.fileType} className="w-5 h-5 object-contain" />
+              {doc.aiStatus === "Failed" && (
+                <div 
+                  className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+                  title="Analysis failed"
+                >
+                  <span className="material-symbols-rounded text-[10px] text-white font-bold">error</span>
+                </div>
+              )}
+              {(doc.aiStatus === "Processing" || doc.aiStatus === "Pending") && (
+                <div 
+                  className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+                  title="Analyzing..."
+                >
+                  <span className="material-symbols-rounded text-[10px] text-white animate-spin">sync</span>
+                </div>
+              )}
+              {(!doc.aiStatus || doc.aiStatus === "Analyzed") && doc.isOrganized && (
+                <div 
+                  className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+                  title="AI Organized"
+                >
+                  <span className="material-symbols-rounded text-[10px] text-white font-bold">account_tree</span>
+                </div>
+              )}
+            </div>
           ) : (
-            getFileIcon(doc.fileType)
+            getFileIcon(doc.fileType, doc.aiStatus, doc.isOrganized)
           )}
           <div className="truncate max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[350px]">
             <p 

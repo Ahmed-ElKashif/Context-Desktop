@@ -106,6 +106,7 @@ export const UploadModal = ({
         handleClose={uploadState.handleClose}
         dropzone={uploadState.dropzone}
         handleNativeFolderSelect={uploadState.handleNativeFolderSelect}
+        handleCreateNewFolder={uploadState.handleCreateNewFolder}
       />
     );
   }

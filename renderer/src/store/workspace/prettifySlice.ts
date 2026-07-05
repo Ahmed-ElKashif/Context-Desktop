@@ -7,7 +7,7 @@ import {
 import { updateDocumentPrettifyResult } from "../library/librarySlice";
 import { fetchSettings } from "../settings/settingsSlice";
 import { notify } from "../../components/ui/feedback/ToastEngine";
-import { addNotification } from "../ui/notificationSlice";
+
 
 interface PrettifyState {
   isPrettifying: boolean;
@@ -48,13 +48,7 @@ export const prettifyDocumentThunk = createAsyncThunk(
       dispatch(fetchSettings());
 
       // Notify the user via global toast & system notification
-      notify("Document Prettified Successfully!", "success", "prettify-success");
-      dispatch(
-        addNotification({
-          message: "Your document has been successfully structured.",
-          type: "success",
-        }),
-      );
+      notify("Your document has been successfully prettified.", "success", "prettify-success");
 
       return { documentId: payload.documentId, result };
     } catch (error: unknown) {

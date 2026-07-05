@@ -14,45 +14,91 @@ export const handleShareClick = (cloudinaryUrl?: string) => {
   notify("File link copied to clipboard!", "success");
 };
 
-export const getFileIcon = (fileType: string) => {
+export const getFileIcon = (fileType: string, aiStatus?: string, isOrganized?: boolean) => {
+  let iconElement;
   switch (fileType) {
     case "PDF":
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-red-600 dark:text-red-500 text-2xl">
           picture_as_pdf
         </span>
       );
+      break;
     case "Word":
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-blue-600 dark:text-blue-500 text-2xl">
           description
         </span>
       );
+      break;
     case "Image":
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-purple-600 dark:text-purple-500 text-2xl">
           image
         </span>
       );
+      break;
     case "TextSnippet":
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-amber-600 dark:text-amber-500 text-2xl">
           text_snippet
         </span>
       );
+      break;
     case "Excel":
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-emerald-600 dark:text-emerald-500 text-2xl">
           table_chart
         </span>
       );
+      break;
     default:
-      return (
+      iconElement = (
         <span className="material-symbols-rounded text-gray-500 text-2xl">
           draft
         </span>
       );
+      break;
   }
+
+  if (!aiStatus || aiStatus === "Analyzed") {
+    if (isOrganized) {
+      return (
+        <div className="relative inline-block leading-none">
+          {iconElement}
+          <div 
+            className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+            title="AI Organized"
+          >
+            <span className="material-symbols-rounded text-[10px] text-white font-bold">account_tree</span>
+          </div>
+        </div>
+      );
+    }
+    return iconElement;
+  }
+
+  return (
+    <div className="relative inline-block leading-none">
+      {iconElement}
+      {aiStatus === "Failed" && (
+        <div 
+          className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+          title="Analysis failed"
+        >
+          <span className="material-symbols-rounded text-[10px] text-white font-bold">error</span>
+        </div>
+      )}
+      {(aiStatus === "Processing" || aiStatus === "Pending") && (
+        <div 
+          className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+          title="Analyzing..."
+        >
+          <span className="material-symbols-rounded text-[10px] text-white animate-spin">sync</span>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const formatDate = (dateString?: string) => {

@@ -26,18 +26,6 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         isLoading={ui.loading.isDeleting}
       />
 
-      <ConfirmDialog
-        isOpen={ui.reorganizeWarningModal.isOpen}
-        title="Reorganize Already Organized Items?"
-        message="Some of the selected items have already been organized by AI. Reorganizing them will move them from their current folders and consume your token budget. Are you sure you want to proceed?"
-        onConfirm={() => {
-          ui.reorganizeWarningModal.close();
-          actions.confirmAIOrganization(ui.reorganizeWarningModal.targetFolderId);
-        }}
-        onClose={ui.reorganizeWarningModal.close}
-        confirmText="Yes, Reorganize"
-        isDestructive={false}
-      />
 
       <ConfirmDialog
         isOpen={!!ui.deleteModal.doc}
@@ -94,7 +82,10 @@ export const LibraryModals: React.FC<LibraryModalsProps> = ({ ui, actions, state
         externalFiles={dropzone.globalDroppedFiles}
         externalPaths={dropzone.globalDroppedPaths}
         targetFolderId={ui.uploadModal.targetFolderId}
-        forceReorganize={ui.reorganizeWarningModal.isForceReorganize}
+        onCreateNewFolder={(parentId) => {
+          ui.uploadModal.close();
+          ui.createFolderModal.open(parentId);
+        }}
         onClearExternal={() => {
           dropzone.setGlobalDroppedFiles([]);
           dropzone.setGlobalDroppedPaths([]);

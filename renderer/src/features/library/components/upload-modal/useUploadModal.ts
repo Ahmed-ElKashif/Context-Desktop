@@ -18,7 +18,7 @@ export interface UseUploadModalProps {
   onClearExternal?: () => void;
   onSuccess?: () => void;
   targetFolderId?: string | null;
-  forceReorganize?: boolean;
+  onCreateNewFolder?: (targetFolderId?: string | null) => void;
 }
 
 export const useUploadModal = ({
@@ -28,7 +28,7 @@ export const useUploadModal = ({
   onClearExternal,
   onSuccess,
   targetFolderId,
-  forceReorganize = false,
+  onCreateNewFolder,
 }: UseUploadModalProps) => {
   const dispatch = useAppDispatch();
   const {
@@ -197,7 +197,7 @@ export const useUploadModal = ({
     notify("Applying new structure...", "info", toastId);
 
     try {
-      await dispatch(applySemanticFolders({ updates: proposedFolderUpdates, force: forceReorganize })).unwrap();
+      await dispatch(applySemanticFolders({ updates: proposedFolderUpdates, force: true })).unwrap();
       notify("Inbox Organized!", "success", toastId);
       onSuccess?.();
       handleClose();
@@ -340,6 +340,7 @@ export const useUploadModal = ({
     handleAcceptLocal,
     handleManualFolderSelect,
     handleNativeFolderSelect,
+    handleCreateNewFolder: () => onCreateNewFolder?.(targetFolderId),
     determineFileType,
 
     // Refs
