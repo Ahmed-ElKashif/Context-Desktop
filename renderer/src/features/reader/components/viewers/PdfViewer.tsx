@@ -10,6 +10,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 interface PdfViewerProps {
   fileUrl: string;
   zoomLevel: number;
+  highlightQuery?: string;
 }
 
 /**
@@ -18,7 +19,7 @@ interface PdfViewerProps {
  *  - Scrollable main canvas with per-page containers for scroll tracking
  *  - Sticky right-side thumbnail panel for quick page navigation
  */
-export const PdfViewer = memo(({ fileUrl, zoomLevel }: PdfViewerProps) => {
+export const PdfViewer = memo(({ fileUrl, zoomLevel, highlightQuery }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [activePage, setActivePage] = useState<number>(1);
   const pdfScrollRef = useRef<HTMLDivElement>(null);
@@ -92,7 +93,11 @@ export const PdfViewer = memo(({ fileUrl, zoomLevel }: PdfViewerProps) => {
               id={`pdf-page-${index + 1}`}
               className="shadow-lg rounded overflow-hidden bg-white shrink-0 pdf-page-container transition-all"
             >
-              <LazyPage pageNumber={index + 1} zoomLevel={zoomLevel} />
+              <LazyPage 
+                pageNumber={index + 1} 
+                zoomLevel={zoomLevel}
+                highlightQuery={highlightQuery}
+              />
             </div>
           ))}
         </Document>

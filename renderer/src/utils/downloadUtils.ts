@@ -9,6 +9,7 @@
  */
 
 import { DocumentData } from "../store/library/librarySlice";
+import { formatMarkdownAsPlainText } from "../features/reader/utils/converter-helpers";
 
 /**
  * Downloads a plain-text string as a .txt file.
@@ -51,9 +52,10 @@ export const generateRawMarkdownString = (document: DocumentData): string => {
 
 export const downloadMarkdownAsFile = (text: string, title: string): void => {
   const safeTitle = title.replace(/[/\\:*?"<>|]/g, "_").trim() || "snippet";
-  const filename = `${safeTitle}.md`;
+  const filename = `${safeTitle}.txt`;
 
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+  const plainText = formatMarkdownAsPlainText(text);
+  const blob = new Blob([plainText], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   const link = window.document.createElement("a");

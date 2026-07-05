@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import mammoth from "mammoth";
 import DOMPurify from "dompurify";
 import { Icon } from "../../../../components/ui/core/Icons";
@@ -9,6 +9,7 @@ interface WordViewerProps {
   documentTitle: string;
   zoomLevel: number;
   isOldDoc: boolean;
+  highlightQuery?: string;
 }
 
 /**
@@ -20,6 +21,7 @@ export const WordViewer = ({
   documentTitle,
   zoomLevel,
   isOldDoc,
+  highlightQuery,
 }: WordViewerProps) => {
   // ── Legacy .doc fallback ──────────────────────────────────────────
   if (isOldDoc) {
@@ -47,7 +49,7 @@ export const WordViewer = ({
   }
 
   // ── .docx mammoth renderer ────────────────────────────────────────
-  return <DocxPreview fileUrl={fileUrl} zoomLevel={zoomLevel} />;
+  return <DocxPreview fileUrl={fileUrl} zoomLevel={zoomLevel} highlightQuery={highlightQuery} />;
 };
 
 // ─── Internal component ───────────────────────────────────────────────────────
@@ -55,11 +57,13 @@ export const WordViewer = ({
 interface DocxPreviewProps {
   fileUrl: string | null;
   zoomLevel: number;
+  highlightQuery?: string;
 }
 
-const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
+const DocxPreview = ({ fileUrl, zoomLevel, highlightQuery }: DocxPreviewProps) => {
   const [html, setHtml] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadWord = async () => {
@@ -70,7 +74,59 @@ const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
         const arrayBuffer = await response.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer });
         const cleanHtml = DOMPurify.sanitize(result.value);
-        setHtml(cleanHtml);
+        
+        let finalHtml = cleanHtml;
+        if (highlightQuery) {
+          const query = highlightQuery.trim().toLowerCase();
+          if (query) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(cleanHtml, 'text/html');
+            const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null);
+            let firstMark: HTMLElement | null = null;
+
+            const nodesToReplace: Text[] = [];
+            let node;
+            while ((node = walker.nextNode())) {
+              const textNode = node as Text;
+              if (textNode.nodeValue?.toLowerCase().includes(query)) {
+                nodesToReplace.push(textNode);
+              }
+            }
+
+            for (const textNode of nodesToReplace) {
+              const textContent = textNode.nodeValue || '';
+              const regex = new RegExp(`(${query})`, 'gi');
+              const parts = textContent.split(regex);
+
+              if (parts.length <= 1) continue;
+
+              const fragment = doc.createDocumentFragment();
+
+              parts.forEach((part) => {
+                if (part.toLowerCase() === query) {
+                  const mark = doc.createElement('mark');
+                  mark.id = !firstMark ? "word-highlight" : "";
+                  mark.className = "search-highlight";
+                  mark.textContent = part;
+                  
+                  fragment.appendChild(mark);
+                  
+                  if (!firstMark) firstMark = mark;
+                } else if (part) {
+                  fragment.appendChild(doc.createTextNode(part));
+                }
+              });
+
+              const parent = textNode.parentNode;
+              if (parent) {
+                parent.replaceChild(fragment, textNode);
+              }
+            }
+            finalHtml = doc.body.innerHTML;
+          }
+        }
+        
+        setHtml(finalHtml);
       } catch (err) {
         console.error("Failed to parse Word doc:", err);
         setHtml(
@@ -81,7 +137,19 @@ const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
       }
     };
     loadWord();
-  }, [fileUrl]);
+  }, [fileUrl, highlightQuery]);
+
+  // ── Auto-scroll to highlight ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!loading && html) {
+      const el = document.getElementById("word-highlight");
+      if (el && containerRef.current) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  }, [loading, html]);
 
   if (loading) {
     return (
@@ -100,6 +168,7 @@ const DocxPreview = ({ fileUrl, zoomLevel }: DocxPreviewProps) => {
   return (
     <div className="flex-1 min-h-full w-full overflow-auto bg-white dark:bg-[#18181B] rounded-xl shadow-sm border border-light-border dark:border-white/10">
       <div
+        ref={containerRef}
         style={{ fontSize: `${Math.round(zoomLevel * 100)}%` }}
         className="w-full min-h-full p-4 md:p-10 text-light-text dark:text-white/90 leading-relaxed text-justify break-words transition-all duration-200
                    [&>*]:[content-visibility:auto] [&>*]:[contain-intrinsic-size:auto_100px]

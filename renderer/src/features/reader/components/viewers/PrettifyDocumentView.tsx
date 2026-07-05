@@ -2,7 +2,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Icon } from "../../../../components/ui/core/Icons";
 import { MarkdownComponents } from "../../../../components/ui/display/ContextMarkdown";
-import { getListItems } from "../../utils/prettify-converters";
+// Removed legacy regex parsers
 import type { DocumentPrettifyResult } from "../../../../services/prettify.service";
 
 interface PrettifyDocumentViewProps {
@@ -33,8 +33,11 @@ export const PrettifyDocumentView = ({
       {/* Action bar */}
       <div className="flex items-center justify-between px-5 py-3 shrink-0 border-b border-light-border dark:border-white/5 bg-white dark:bg-[#18181B]">
         <div className="flex items-center gap-2 text-xs font-bold gradient-text">
-          <Icon name="auto_awesome" className="text-[14px] text-light-primary dark:text-dark-primary" />
-          Prettified — {result.sections.length} sections
+          <Icon
+            name="auto_awesome"
+            className="text-[14px] text-light-primary dark:text-dark-primary"
+          />
+          Prettified — {result.blocks?.length || 0} blocks
           {/* Language badge */}
           {result.language && (
             <span className="ml-2 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-widest">
@@ -87,7 +90,7 @@ export const PrettifyDocumentView = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all cursor-pointer"
               >
                 <Icon name="download" className="text-[14px]" />
-                Download .md
+                Download .txt
               </button>
             </>
           ) : (
@@ -113,84 +116,182 @@ export const PrettifyDocumentView = ({
           dir={isRtl ? "rtl" : "ltr"}
         >
           <div className="max-w-none">
-            {result.sections.map((section, si) => {
-              const listData = getListItems(section);
+            {(() => {
+              // Pre-pass to compute numbering for numbered_list_items
+              const listNumbers: number[] = [];
+              let currentNum = 0;
+              (result.blocks || []).forEach((block) => {
+                if (
+                  block.type === "heading" ||
+                  block.type === "divider" ||
+                  block.type === "table"
+                ) {
+                  currentNum = 0;
+                } else if (block.type === "numbered_list_item") {
+                  currentNum++;
+                }
+                listNumbers.push(currentNum);
+              });
 
-              // Heading element based on level
-              const HeadingTag = `h${Math.min(section.level, 6)}` as any;
+              return (result.blocks || []).map((block, bi) => {
+                if (block.type === "heading") {
+                  const HeadingTag = `h${Math.min(block.level, 6)}` as any;
+                  const headingClasses: Record<number, string> = {
+                    1: "text-3xl font-extrabold tracking-tight text-light-text dark:text-white mb-6 mt-8 first:mt-0 pb-3 border-b-2 border-light-border dark:border-white/15",
+                    2: "text-xl font-extrabold tracking-tight text-light-text dark:text-white/95 mb-5 mt-12 pt-8 border-t-4 border-light-border dark:border-white/20 first:mt-0 first:border-t-0 first:pt-0",
+                    3: "text-lg font-bold text-light-text dark:text-white/90 mb-3 mt-8 pt-6 border-t-[1.5px] border-light-border/60 dark:border-white/15 first:mt-0 first:border-t-0 first:pt-0",
+                    4: "text-base font-semibold text-light-text/90 dark:text-white/80 mb-2 mt-4",
+                    5: "text-sm font-semibold text-light-text/80 dark:text-white/70 mb-1.5 mt-3 uppercase tracking-wide",
+                    6: "text-xs font-semibold text-light-text/80 dark:text-white/70 mb-1 mt-2 uppercase tracking-wide",
+                  };
 
-              // Heading style classes per level
-              const headingClasses: Record<number, string> = {
-                1: "text-3xl font-extrabold tracking-tight text-light-text dark:text-white mb-6 mt-8 first:mt-0 pb-3 border-b-2 border-light-border dark:border-white/15",
-                2: "text-xl font-extrabold tracking-tight text-light-text dark:text-white/95 mb-5 mt-12 pt-8 border-t-4 border-light-border dark:border-white/20 first:mt-0 first:border-t-0 first:pt-0",
-                3: "text-lg font-bold text-light-text dark:text-white/90 mb-3 mt-8 pt-6 border-t-[1.5px] border-light-border/60 dark:border-white/15 first:mt-0 first:border-t-0 first:pt-0",
-                4: "text-base font-semibold text-light-text/90 dark:text-white/80 mb-2 mt-4",
-                5: "text-sm font-semibold text-light-text/80 dark:text-white/70 mb-1.5 mt-3 uppercase tracking-wide",
-              };
-
-              return (
-                <div key={si} className="mb-4">
-                  {/* Heading */}
-                  <HeadingTag
-                    className={
-                      headingClasses[section.level] || headingClasses[3]
-                    }
-                  >
-                    {section.heading}
-                  </HeadingTag>
-
-                  {/* Content paragraph using ReactMarkdown */}
-                  {section.content && (
-                    <div
-                      className={`leading-relaxed mb-4 ${
-                        section.level === 3
-                          ? "text-lg sm:text-xl font-bold text-light-text/95 dark:text-white/90"
-                          : "text-sm sm:text-base text-light-text/80 dark:text-white/70"
-                      }`}
+                  return (
+                    <HeadingTag
+                      key={bi}
+                      className={
+                        headingClasses[block.level] || headingClasses[3]
+                      }
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-                        {section.content}
+                      {block.text}
+                    </HeadingTag>
+                  );
+                }
+
+                if (block.type === "paragraph") {
+                  return (
+                    <div
+                      key={bi}
+                      className="leading-relaxed mb-4 text-sm sm:text-base text-light-text/80 dark:text-white/70"
+                    >
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={MarkdownComponents}
+                      >
+                        {block.text}
                       </ReactMarkdown>
                     </div>
-                  )}
+                  );
+                }
 
-                  {/* Bullet items (unordered list) */}
-                  {listData && listData.type === "bullet" && (
-                    <ul
-                      className={`${isRtl ? "pr-5" : "pl-5"} space-y-1 mb-3 ${
-                        listData.items.length > 0 &&
-                        /^(?:\*\*.*?\*\*|#)?\s*[A-Z][.)]/i.test(listData.items[0].trim())
-                          ? "list-none"
-                          : "list-disc"
-                      }`}
+                if (block.type === "quote") {
+                  return (
+                    <blockquote
+                      key={bi}
+                      className="border-l-4 border-light-border dark:border-white/20 pl-4 py-1 mb-4 italic text-light-text/70 dark:text-white/60"
                     >
-                      {listData.items.map((item, ii) => (
-                        <li key={ii} className="text-light-text/80 dark:text-white/70 text-sm sm:text-base leading-relaxed">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-                            {item}
-                          </ReactMarkdown>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={MarkdownComponents}
+                      >
+                        {block.text}
+                      </ReactMarkdown>
+                    </blockquote>
+                  );
+                }
 
-                  {/* Numbered items (ordered list) */}
-                  {listData && listData.type === "numbered" && (
-                    <ol
-                      className={`${isRtl ? "pr-5" : "pl-5"} space-y-1 mb-3 list-none`}
+                if (block.type === "code") {
+                  return (
+                    <div key={bi} className="mb-4">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={MarkdownComponents}
+                      >
+                        {`\`\`\`${block.language || ""}\n${block.text}\n\`\`\``}
+                      </ReactMarkdown>
+                    </div>
+                  );
+                }
+
+                if (block.type === "bullet_list_item") {
+                  return (
+                    <div
+                      key={bi}
+                      className="flex gap-2 mb-2 ml-4 text-sm sm:text-base text-light-text/80 dark:text-white/70"
                     >
-                      {listData.items.map((item, ii) => (
-                        <li key={ii} className="text-light-text/80 dark:text-white/70 text-sm sm:text-base leading-relaxed">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
-                            {item}
-                          </ReactMarkdown>
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
-              );
-            })}
+                      <span className="text-light-text/50 dark:text-white/40">
+                        •
+                      </span>
+                      <div>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={MarkdownComponents}
+                        >
+                          {block.text}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (block.type === "numbered_list_item") {
+                  const num = listNumbers[bi];
+                  return (
+                    <div
+                      key={bi}
+                      className="flex gap-2 mb-2 ml-4 text-sm sm:text-base text-light-text/80 dark:text-white/70"
+                    >
+                      <span className="font-bold min-w-[24px] text-light-text/90 dark:text-white/80">
+                        {num}.
+                      </span>
+                      <div>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={MarkdownComponents}
+                        >
+                          {block.text}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (block.type === "mcq_option") {
+                  return (
+                    <div
+                      key={bi}
+                      className="flex gap-2 mb-2 ml-6 text-sm sm:text-base text-light-text/80 dark:text-white/70"
+                    >
+                      <span className="font-bold min-w-[24px] text-light-text/90 dark:text-white/80">
+                        {block.letter})
+                      </span>
+                      <div>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={MarkdownComponents}
+                        >
+                          {block.text}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (block.type === "table") {
+                  const mdTable = `| ${block.headers.join(" | ")} |\n| ${block.headers.map(() => "---").join(" | ")} |\n${block.rows.map((row) => `| ${row.join(" | ")} |`).join("\n")}`;
+                  return (
+                    <div key={bi} className="mb-4 overflow-x-auto">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={MarkdownComponents}
+                      >
+                        {mdTable}
+                      </ReactMarkdown>
+                    </div>
+                  );
+                }
+
+                if (block.type === "divider") {
+                  return (
+                    <hr
+                      key={bi}
+                      className="my-8 border-light-border dark:border-white/10"
+                    />
+                  );
+                }
+
+                return null;
+              });
+            })()}
           </div>
         </div>
       </div>

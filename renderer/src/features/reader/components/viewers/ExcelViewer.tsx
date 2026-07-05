@@ -24,9 +24,10 @@ import { ExcelToolbar } from "./components/ExcelToolbar";
 
 interface ExcelViewerProps {
   extractedText: string;
+  highlightQuery?: string;
 }
 
-export const ExcelViewer = ({ extractedText }: ExcelViewerProps) => {
+export const ExcelViewer = ({ extractedText, highlightQuery }: ExcelViewerProps) => {
   const [activeTab, setActiveTab] = useState<"grid" | "chart">("grid");
   const [chartType, setChartType] = useState<ChartType>("bar");
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -42,7 +43,7 @@ export const ExcelViewer = ({ extractedText }: ExcelViewerProps) => {
     setXAxisKey,
     yAxisKey,
     setYAxisKey,
-  } = useExcelData(extractedText);
+  } = useExcelData(extractedText, highlightQuery);
 
   const { yIsDate, chartData, pieData, numericColumns } = useChartData(
     rowData,
@@ -93,6 +94,43 @@ export const ExcelViewer = ({ extractedText }: ExcelViewerProps) => {
             enableCellTextSelection
             domLayout="normal"
             theme="legacy"
+            onGridReady={(params) => {
+              const gridApi = params.api;
+              if (highlightQuery && rowData.length > 0) {
+                const query = highlightQuery.toLowerCase();
+                let rowIndex = -1;
+                let colId: string | null = null;
+                
+                for (let i = 0; i < rowData.length; i++) {
+                  const row = rowData[i];
+                  for (const key of Object.keys(row)) {
+                    if (row[key] && row[key].toString().toLowerCase().includes(query)) {
+                      rowIndex = i;
+                      colId = key;
+                      break;
+                    }
+                  }
+                  if (rowIndex !== -1) break;
+                }
+                
+                if (rowIndex !== -1) {
+                  setTimeout(() => {
+                    const pageSize = gridApi.paginationGetPageSize();
+                    if (pageSize > 0) {
+                      const targetPage = Math.floor(rowIndex / pageSize);
+                      if (gridApi.paginationGetCurrentPage() !== targetPage) {
+                        gridApi.paginationGoToPage(targetPage);
+                      }
+                    }
+
+                    setTimeout(() => {
+                      gridApi.ensureIndexVisible(rowIndex, 'middle');
+                      if (colId) gridApi.ensureColumnVisible(colId, 'middle');
+                    }, 100);
+                  }, 500);
+                }
+              }
+            }}
           />
         </div>
       ) : (
