@@ -184,7 +184,7 @@ export const LibraryHeader = ({
 
         <div className="flex items-center">
           <button
-            onClick={onOpenUpload}
+            onClick={() => onOpenUpload()}
             className="flex items-center gap-2 px-3 h-9 bg-light-primary dark:bg-dark-primary text-white dark:text-black text-sm font-bold rounded-r-lg rounded-l-none shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             <Icon name="add" className="text-lg" />
