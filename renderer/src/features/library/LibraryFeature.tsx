@@ -35,7 +35,11 @@ export const LibraryFeature = () => {
           onTagSelect={ui.filters.handleTagSelect}
           isMobileOpen={state.isMobileMenuOpen}
           onCloseMobile={() => actions.setIsMobileMenuOpen(false)}
-          onContextMenu={(e: React.MouseEvent, folder: any, type: any) => contextMenu.openMenu(e, { type: "folder", item: folder }, type)}
+          onContextMenu={(e: React.MouseEvent, folder: any, type: any) => {
+            const isSelected = state.selectedFolderIds.includes(folder._id);
+            if (!isSelected) actions.selectSingle(folder, type);
+            contextMenu.openMenu(e, { type: "folder", item: folder }, type);
+          }}
         />
       </div>
 

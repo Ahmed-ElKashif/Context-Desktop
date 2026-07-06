@@ -69,10 +69,10 @@ export const FolderRow = ({
             </span>
             {folder.isAIGenerated && (
               <div 
-                className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+                className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
                 title="AI Generated"
               >
-                <span className="material-symbols-rounded text-[10px] text-white font-bold">account_tree</span>
+                <span className="material-symbols-rounded text-white font-bold" style={{ fontSize: '9px' }}>account_tree</span>
               </div>
             )}
           </div>
