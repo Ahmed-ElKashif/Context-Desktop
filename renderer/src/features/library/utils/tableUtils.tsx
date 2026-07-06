@@ -67,10 +67,10 @@ export const getFileIcon = (fileType: string, aiStatus?: string, isOrganized?: b
         <div className="relative inline-block leading-none">
           {iconElement}
           <div 
-            className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+            className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
             title="AI Organized"
           >
-            <span className="material-symbols-rounded text-[10px] text-white font-bold">account_tree</span>
+            <span className="material-symbols-rounded text-white font-bold" style={{ fontSize: '9px' }}>account_tree</span>
           </div>
         </div>
       );
@@ -83,18 +83,18 @@ export const getFileIcon = (fileType: string, aiStatus?: string, isOrganized?: b
       {iconElement}
       {aiStatus === "Failed" && (
         <div 
-          className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+          className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
           title="Analysis failed"
         >
-          <span className="material-symbols-rounded text-[10px] text-white font-bold">error</span>
+          <span className="material-symbols-rounded text-white font-bold" style={{ fontSize: '8px' }}>priority_high</span>
         </div>
       )}
       {(aiStatus === "Processing" || aiStatus === "Pending") && (
         <div 
-          className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full w-3.5 h-3.5 flex items-center justify-center ring-2 ring-white dark:ring-[#121214]" 
+          className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
           title="Analyzing..."
         >
-          <span className="material-symbols-rounded text-[10px] text-white animate-spin">sync</span>
+          <span className="material-symbols-rounded text-white animate-spin" style={{ fontSize: '9px' }}>sync</span>
         </div>
       )}
     </div>
