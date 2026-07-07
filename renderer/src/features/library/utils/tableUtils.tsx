@@ -89,7 +89,15 @@ export const getFileIcon = (fileType: string, aiStatus?: string, isOrganized?: b
           <span className="material-symbols-rounded text-white font-bold" style={{ fontSize: '8px' }}>priority_high</span>
         </div>
       )}
-      {(aiStatus === "Processing" || aiStatus === "Pending") && (
+      {aiStatus === "Pending" && (
+        <div 
+          className="absolute -bottom-0.5 -right-0.5 bg-amber-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
+          title="Analysis pending"
+        >
+          <span className="material-symbols-rounded text-white font-bold" style={{ fontSize: '8px' }}>schedule</span>
+        </div>
+      )}
+      {aiStatus === "Processing" && (
         <div 
           className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full w-[12px] h-[12px] flex items-center justify-center ring-[1.5px] ring-white dark:ring-[#121214]" 
           title="Analyzing..."

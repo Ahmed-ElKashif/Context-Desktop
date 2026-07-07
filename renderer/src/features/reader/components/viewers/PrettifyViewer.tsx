@@ -44,6 +44,16 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
   );
   const abortControllerRef = useRef<AbortController | null>(null);
   const [activeSheet, setActiveSheet] = useState(0);
+  const [showLoader, setShowLoader] = useState(false);
+
+  useEffect(() => {
+    if (state === "loading") {
+      const t = setTimeout(() => setShowLoader(true), 400);
+      return () => clearTimeout(t);
+    } else {
+      setShowLoader(false);
+    }
+  }, [state]);
 
   // Sync Redux states to local component state
   useEffect(() => {
@@ -213,6 +223,9 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
   // RENDER: Loading
   // ═══════════════════════════════════════════════════════════════════════════
   if (state === "loading") {
+    if (!showLoader) {
+      return <div className="flex-1 min-h-0 w-full h-full" />;
+    }
     return (
       <div className="flex-1 min-h-0 w-full h-full flex flex-col items-center justify-center gap-6 p-8">
         <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-light-primary/10 to-light-accent/10 dark:from-dark-primary/10 dark:to-dark-secondary/10 flex items-center justify-center shadow-lg border border-light-primary/20 dark:border-dark-primary/20 animate-pulse">

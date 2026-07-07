@@ -62,14 +62,24 @@ interface DocxPreviewProps {
 
 const DocxPreview = ({ fileUrl, zoomLevel, highlightQuery }: DocxPreviewProps) => {
   const [html, setHtml] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [parsing, setParsing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showLoader, setShowLoader] = useState(false);
+
+  useEffect(() => {
+    if (parsing) {
+      const t = setTimeout(() => setShowLoader(true), 400);
+      return () => clearTimeout(t);
+    } else {
+      setShowLoader(false);
+    }
+  }, [parsing]);
 
   useEffect(() => {
     const loadWord = async () => {
       if (!fileUrl) return;
       try {
-        setLoading(true);
+        setParsing(true);
         const response = await fetch(fileUrl);
         const arrayBuffer = await response.arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer });
@@ -133,7 +143,7 @@ const DocxPreview = ({ fileUrl, zoomLevel, highlightQuery }: DocxPreviewProps) =
           "<p class='text-red-500 font-bold'>Failed to render document preview. The file might be corrupted or unsupported.</p>",
         );
       } finally {
-        setLoading(false);
+        setParsing(false);
       }
     };
     loadWord();
@@ -141,7 +151,7 @@ const DocxPreview = ({ fileUrl, zoomLevel, highlightQuery }: DocxPreviewProps) =
 
   // ── Auto-scroll to highlight ──────────────────────────────────────────────
   useEffect(() => {
-    if (!loading && html) {
+    if (!parsing && html) {
       const el = document.getElementById("word-highlight");
       if (el && containerRef.current) {
         setTimeout(() => {
@@ -149,9 +159,12 @@ const DocxPreview = ({ fileUrl, zoomLevel, highlightQuery }: DocxPreviewProps) =
         }, 100);
       }
     }
-  }, [loading, html]);
+  }, [parsing, html]);
 
-  if (loading) {
+  if (parsing) {
+    if (!showLoader) {
+      return <div className="flex flex-col items-center justify-center py-20 w-full text-center" />;
+    }
     return (
       <div className="flex flex-col items-center justify-center py-20 w-full text-center">
         <Icon

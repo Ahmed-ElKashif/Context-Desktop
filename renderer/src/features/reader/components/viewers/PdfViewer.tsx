@@ -23,6 +23,12 @@ export const PdfViewer = memo(({ fileUrl, zoomLevel, highlightQuery }: PdfViewer
   const [numPages, setNumPages] = useState<number>(0);
   const [activePage, setActivePage] = useState<number>(1);
   const pdfScrollRef = useRef<HTMLDivElement>(null);
+  const [showLoader, setShowLoader] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowLoader(true), 400);
+    return () => clearTimeout(t);
+  }, []);
 
   // ── Active page detection on scroll ──────────────────────────────────────
   useEffect(() => {
@@ -75,15 +81,17 @@ export const PdfViewer = memo(({ fileUrl, zoomLevel, highlightQuery }: PdfViewer
           file={fileUrl}
           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
           loading={
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <Icon
-                name="sync"
-                className="animate-spin text-4xl text-light-primary/50 dark:text-dark-primary/50"
-              />
-              <p className="text-light-text/60 dark:text-white/50 font-medium">
-                Loading PDF Engine...
-              </p>
-            </div>
+            showLoader ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <Icon
+                  name="sync"
+                  className="animate-spin text-4xl text-light-primary/50 dark:text-dark-primary/50"
+                />
+                <p className="text-light-text/60 dark:text-white/50 font-medium">
+                  Loading PDF Engine...
+                </p>
+              </div>
+            ) : <div className="py-20" />
           }
           className="flex flex-col items-center gap-6"
         >
