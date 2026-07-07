@@ -39,7 +39,7 @@ const VerifyEmail = () => {
     <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text antialiased font-sans h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-light-surface/50 to-light-bg dark:from-transparent dark:via-dark-bg/80 dark:to-dark-bg" />
+
         <NeuralBackground />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-light-primary/10 dark:bg-dark-primary/10 blur-[100px] rounded-full animate-pulse-slow" />
       </div>
