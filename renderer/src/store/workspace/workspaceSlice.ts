@@ -43,6 +43,11 @@ const workspaceSlice = createSlice({
           state.activeDocument = action.payload.data[0];
         }
       })
+      .addCase(reanalyzeDocumentThunk.pending, (state, action) => {
+        if (state.activeDocument && state.activeDocument._id === action.meta.arg) {
+          state.activeDocument.aiStatus = "Processing";
+        }
+      })
       .addCase(reanalyzeDocumentThunk.fulfilled, (state, action) => {
         if (state.activeDocument?._id === action.payload._id) {
           state.activeDocument = action.payload;

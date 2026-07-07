@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
 import { setActiveDocument } from "../../../store/workspace/workspaceSlice";
 import { fetchFolderContents, fetchFolderTree } from "../../../store/library/thunks/folderThunks";
+import { reanalyzeDocumentThunk } from "../../../store/library/thunks/documentThunks";
 import { clearSelection, selectSingle } from "../../../store/library/selectionSlice";
 import { useLibraryUI } from "./useLibraryUI";
 
@@ -108,6 +109,15 @@ export const useLibraryFacade = () => {
   const { openMenu } = useContextMenu({
     onOpenDocReader: (doc: any) => handleOpenReader(doc),
     onOpenDocWorkspace: (doc: any) => handleOpenWorkspace(doc),
+    onReanalyzeDoc: async (doc: any) => {
+      try {
+        notify("Re-analyzing document...", "info");
+        await dispatch(reanalyzeDocumentThunk(doc._id)).unwrap();
+        notify("Document analysis triggered successfully.", "success");
+      } catch (error: any) {
+        notify(error instanceof Error ? error.message : "Failed to trigger analysis.", "error");
+      }
+    },
     onOpenFolder: (folder: any) => {
       dispatch(fetchFolderContents({ folderId: folder._id || undefined, page: 1 }));
       dispatch(clearSelection());
@@ -210,6 +220,7 @@ export const useLibraryFacade = () => {
     onSelectAll: () => handleSelectAll(documentsList, foldersList),
     selectedDocIds,
     selectedFolderIds,
+    selectedDocs,
   });
 
   // 10. Data Fetching

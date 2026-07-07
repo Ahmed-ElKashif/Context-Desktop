@@ -260,7 +260,7 @@ export function SettingsFeature() {
         </div>
 
         <p className="pb-8 text-center text-xs font-bold text-light-text/70 dark:text-dark-text/70 font-mono tracking-widest">
-          CONTEXT SYSTEM VERSION 1.0.0-BETA
+          CONTEXT SYSTEM VERSION 1.0.0
         </p>
       </div>
     </div>

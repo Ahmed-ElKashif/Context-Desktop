@@ -115,8 +115,13 @@ export const ALL_ACTIONS: MenuAction[] = [
     iconColor: "text-green-500",
     group: 'ai',
     isVisible: (ctx) => {
-      if (isSingleDoc(ctx)) return true;
-      if (isMultiSelect(ctx) && ctx.selectedDocIds.length > 0) return true; // Docs only or Mixed
+      if (isSingleDoc(ctx)) {
+        const doc = ctx.clickedItem!.item as DocumentData;
+        return doc.aiStatus !== "Failed";
+      }
+      if (isMultiSelect(ctx) && ctx.selectedDocIds.length > 0) {
+        return !ctx.selectedDocs.some(d => d.aiStatus === "Failed");
+      }
       if (isSingleFolder(ctx)) return true;
       return false;
     },
@@ -136,7 +141,9 @@ export const ALL_ACTIONS: MenuAction[] = [
     group: 'ai',
     isVisible: (ctx) => {
       if (isSingleFolder(ctx)) return true;
-      if (isMultiSelect(ctx) && ctx.selectedDocIds.length > 0) return true; // Docs only or Mixed
+      if (isMultiSelect(ctx) && ctx.selectedDocIds.length > 0) {
+        return !ctx.selectedDocs.some(d => d.aiStatus === "Failed");
+      }
       return false;
     },
     execute: (ctx) => {
@@ -145,6 +152,23 @@ export const ALL_ACTIONS: MenuAction[] = [
       } else {
         ctx.handlers.onSynthesizeAI();
       }
+    },
+  },
+  {
+    id: 'reanalyze_ai',
+    label: () => "Regenerate Analysis",
+    icon: "refresh",
+    iconColor: "text-red-500",
+    group: 'ai',
+    isVisible: (ctx) => {
+      if (isSingleDoc(ctx)) {
+        const doc = ctx.clickedItem!.item as DocumentData;
+        return doc.aiStatus === "Failed";
+      }
+      return false;
+    },
+    execute: (ctx) => {
+      ctx.handlers.onReanalyzeDoc(ctx.clickedItem!.item as DocumentData);
     },
   },
 

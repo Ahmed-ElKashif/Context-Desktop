@@ -78,7 +78,7 @@ export function ReaderFeature() {
   };
   if (error || (!id && !isLoading)) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-light-bg dark:bg-[#0A0A0C]">
+      <div className="h-screen flex flex-col items-center justify-center p-8 text-center bg-light-bg dark:bg-[#0A0A0C]">
         <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-4">
           <Icon name="error" className="text-red-500 text-[32px]" />
         </div>
@@ -93,10 +93,10 @@ export function ReaderFeature() {
 
   if (isLoading || !activeDocument) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-light-bg dark:bg-[#0A0A0C]">
+      <div className="h-screen flex flex-col items-center justify-center bg-light-bg dark:bg-[#0A0A0C]">
         <Icon name="sync" className="text-light-primary dark:text-dark-primary text-[40px] animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-light-text dark:text-white">Decrypting File...</h2>
-        <p className="text-sm text-light-text/70 dark:text-white/60 mt-2">Loading secure reading environment</p>
+        <h2 className="text-xl font-bold text-light-text dark:text-white">Loading document...</h2>
+        <p className="text-sm text-light-text/70 dark:text-white/60 mt-2">Preparing reading environment</p>
       </div>
     );
   }

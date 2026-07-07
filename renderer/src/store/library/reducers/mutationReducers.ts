@@ -79,6 +79,13 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
     })
 
     // --- Reanalyze & Reload Document ---
+    .addCase(reanalyzeDocumentThunk.pending, (state, action) => {
+      const documentId = action.meta.arg;
+      const index = state.documentsList.findIndex(d => d._id === documentId);
+      if (index !== -1) {
+        state.documentsList[index].aiStatus = "Processing";
+      }
+    })
     .addCase(reanalyzeDocumentThunk.fulfilled, (state, action) => {
       const index = state.documentsList.findIndex(d => d._id === action.payload._id);
       if (index !== -1) {

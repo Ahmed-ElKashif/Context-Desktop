@@ -3,6 +3,7 @@ import { DocumentData, FolderData } from "../../../../store/library/librarySlice
 export interface UseContextMenuOptions {
   onOpenDocReader: (doc: DocumentData) => void;
   onOpenDocWorkspace: (doc: DocumentData) => void;
+  onReanalyzeDoc: (doc: DocumentData) => void;
   onOpenFolder: (folder: FolderData) => void;
   onRenameDoc: (doc: DocumentData) => void;
   onRenameFolder: (folder: FolderData) => void;
@@ -16,6 +17,7 @@ export interface UseContextMenuOptions {
   onSelectAll: () => void;
   selectedDocIds: string[];
   selectedFolderIds: string[];
+  selectedDocs: DocumentData[];
   onCreateFolder: () => void;
   onUploadFilesInCurrentDir: () => void;
   onUploadFolderInCurrentDir: () => void;
@@ -34,6 +36,7 @@ export interface ActionContext {
   totalSelected: number;
   selectedDocIds: string[];
   selectedFolderIds: string[];
+  selectedDocs: DocumentData[];
   handlers: UseContextMenuOptions;
 }
 

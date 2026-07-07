@@ -24,6 +24,7 @@ export const useContextMenu = (handlers: UseContextMenuOptions) => {
       totalSelected: handlers.selectedDocIds.length + handlers.selectedFolderIds.length,
       selectedDocIds: handlers.selectedDocIds,
       selectedFolderIds: handlers.selectedFolderIds,
+      selectedDocs: handlers.selectedDocs,
       handlers,
     };
 
