@@ -132,26 +132,28 @@ export const DropzoneArea = ({
         </div>
 
         {/* 🛠️ THE FIX 4: Explicit UI Buttons to solve the OS limitation */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-lg mx-auto">
           <Button
             onClick={(e) => {
               e.preventDefault();
               open(); // Opens standard File Picker
             }}
             disabled={isUploading}
-            className="bg-light-primary dark:bg-dark-primary text-white dark:text-black px-6 h-auto py-3.5 rounded-xl font-bold hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 hover:opacity-90 active:scale-95 transition-all shadow-md dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
+            className="flex-1 bg-light-primary dark:bg-dark-primary text-white dark:text-black h-auto py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 hover:opacity-90 active:scale-95 transition-all shadow-md dark:shadow-[0_4px_14px_rgba(139,92,246,0.15)] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
           >
+            <Icon name="upload_file" className="text-[18px]" />
             {isUploading ? "Processing..." : "Browse Files"}
           </Button>
           <Button
+            type="button"
             onClick={(e) => {
               e.preventDefault();
-              handleNativeFolderSelect(); // Use native OS dialog securely
+              handleNativeFolderSelect();
             }}
             disabled={isUploading}
-            variant="outline"
-            className="px-6 h-auto py-3.5 rounded-xl font-bold hover:bg-light-bg dark:hover:bg-white/5 active:scale-95 transition-all disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer bg-white dark:bg-[#1E1E22] border-light-border dark:border-white/10"
+            className="flex-1 bg-white dark:bg-[#18181B] text-light-text dark:text-white border border-light-border dark:border-white/10 h-auto py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-light-bg dark:hover:bg-white/5 active:scale-95 transition-all shadow-sm disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer"
           >
+            <Icon name="folder_open" className="text-[18px]" />
             {isUploading ? "Processing..." : "Browse Folders"}
           </Button>
         </div>

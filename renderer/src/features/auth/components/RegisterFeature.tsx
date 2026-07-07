@@ -11,7 +11,7 @@ export function RegisterFeature() {
       {/* Shared Backgrounds */}
 
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-light-surface/50 to-light-bg dark:from-transparent dark:via-dark-bg/80 dark:to-dark-bg"></div>
+
 
         <NeuralBackground />
 

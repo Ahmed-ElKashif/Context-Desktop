@@ -5,6 +5,9 @@ export interface SettingsState extends UserSettings {
     tokensUsed: number;
     dailyLimit: number;
     remaining: number;
+    resetAt?: string;
+    dailyTotalUsed?: number;
+    dailyTotalLimit?: number;
     monthlyUsed?: number;
     monthlyLimit?: number;
   } | null;

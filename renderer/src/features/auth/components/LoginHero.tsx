@@ -55,7 +55,7 @@ export const LoginHero = () => {
           </span>
         </div>
         <h1 className="text-6xl font-black text-light-text dark:text-white leading-tight mb-4 tracking-tight">
-          <span className="relative block w-fit text-light-text/50 dark:text-white/40 cursor-default group transition-colors duration-300 hover:text-light-text/30 dark:hover:text-white/20">
+          <span className="relative block w-fit text-light-text dark:text-white cursor-default group transition-colors duration-300 hover:text-light-text/70 dark:hover:text-white/70">
             Stop organizing.
             <span className="absolute left-0 top-[55%] -translate-y-1/2 w-0 h-2 md:h-2.5 bg-light-primary dark:bg-dark-primary group-hover:w-full transition-all duration-300 ease-out rounded-full opacity-90"></span>
           </span>
