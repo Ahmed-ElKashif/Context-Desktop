@@ -16,8 +16,12 @@ import {
 } from "../thunks/folderThunks";
 
 const invalidateFolderCache = (state: LibraryState, folderId?: string | null) => {
-  const key = folderId || "root";
-  delete state.folderCache[key];
+  const prefix = folderId || "root";
+  Object.keys(state.folderCache).forEach(key => {
+    if (key.startsWith(prefix + "|")) {
+      delete state.folderCache[key];
+    }
+  });
 };
 
 export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibraryState>) => {
@@ -138,6 +142,9 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
       const { id, newName } = action.meta.arg;
       const folder = state.foldersList.find(f => f._id === id);
       if (folder) folder.name = newName;
+      if (state.currentFolder && state.currentFolder._id === id) {
+        state.currentFolder.name = newName;
+      }
     })
     .addCase(renameFolderThunk.fulfilled, (state) => {
       invalidateFolderCache(state, state.currentFolder?._id);
