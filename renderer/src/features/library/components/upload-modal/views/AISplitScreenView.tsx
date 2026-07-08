@@ -119,7 +119,7 @@ export const AISplitScreenView = ({
             <Button
               onClick={handleAcceptLocal}
               disabled={isApplyingFolders}
-              className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-none shadow-lg hover:shadow-purple-500/25 font-bold flex items-center gap-2 transition-all"
+              className="bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-secondary text-white border-none shadow-lg shadow-light-primary/25 hover:shadow-light-primary/40 dark:shadow-dark-primary/25 dark:hover:shadow-dark-primary/40 font-bold flex items-center gap-2 transition-all"
             >
               <Icon name="save_alt" className="text-[18px]" />
               Export Local

@@ -8,6 +8,9 @@ export interface UserSettings {
     tokensUsed: number;
     dailyLimit: number;
     remaining: number;
+    dailyTotalUsed?: number;
+    dailyTotalLimit?: number;
+    resetAt?: string;
     monthlyUsed?: number;
     monthlyLimit?: number;
   } | null;
@@ -24,6 +27,8 @@ export interface TokenBudgetData {
     tokensUsed: number;
     dailyLimit: number;
     remaining: number;
+    dailyTotalUsed?: number;
+    dailyTotalLimit?: number;
     resetAt: string;
   };
   monthlyUsage: {

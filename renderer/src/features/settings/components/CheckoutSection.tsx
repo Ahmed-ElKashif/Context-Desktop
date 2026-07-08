@@ -2,6 +2,7 @@ import { useState } from "react";
 import { paymentService } from "../api/paymentService";
 import { CheckoutSuccess } from "./CheckoutSuccess";
 import { ImageDropzone } from "../../../components/ui/forms/ImageDropzone";
+import { getPlanDetails, PlanId } from "../../billing/constants/plans";
 
 const INSTAPAY_LINK = "https://ipn.eg/S/marioemadbenjamin/instapay/1NMaw3";
 
@@ -48,41 +49,26 @@ export const CheckoutSection = ({
   let annualPriceMonthly = 0;
   let planName = "";
 
-  switch (planId) {
-    case "sandbox":
-      monthlyPrice = 0;
-      annualPriceMonthly = 0;
-      planName = "Sandbox";
-      break;
-    case "startup":
-      monthlyPrice = 1900;
-      annualPriceMonthly = 1520;
-      planName = "Startup";
-      break;
-    case "growth":
-      monthlyPrice = 4800;
-      annualPriceMonthly = 3600;
-      planName = "Growth";
-      break;
-    case "embed":
-      monthlyPrice = 0;
-      annualPriceMonthly = 0;
-      planName = "Enterprise";
-      break;
-    case "extra_docs":
-      monthlyPrice = 500;
-      annualPriceMonthly = 500;
-      planName = "Extra Documents Add-on";
-      break;
-    case "extra_tokens":
-      monthlyPrice = 700;
-      annualPriceMonthly = 700;
-      planName = "Extra Tokens Add-on";
-      break;
-    default:
-      monthlyPrice = 1900;
-      annualPriceMonthly = 1520;
-      planName = "Startup";
+  if (planId === "extra_docs") {
+    monthlyPrice = 500;
+    annualPriceMonthly = 500;
+    planName = "Extra Documents Add-on";
+  } else if (planId === "extra_tokens") {
+    monthlyPrice = 700;
+    annualPriceMonthly = 700;
+    planName = "Extra Tokens Add-on";
+  } else {
+    // Dynamic logic for standard plans
+    planName = planId === "embed" ? "Enterprise" : planId.charAt(0).toUpperCase() + planId.slice(1);
+    
+    // Ensure planId is valid before calling getPlanDetails, default to startup if unknown
+    const validPlanId = ["sandbox", "startup", "growth", "embed"].includes(planId) ? (planId as PlanId) : "startup";
+    
+    const planMonthly = getPlanDetails(validPlanId, "monthly");
+    const planAnnual = getPlanDetails(validPlanId, "annual");
+    
+    monthlyPrice = typeof planMonthly.price === "number" ? planMonthly.price : 0;
+    annualPriceMonthly = typeof planAnnual.price === "number" ? planAnnual.price : 0;
   }
 
   const annualPriceTotal = annualPriceMonthly * 12;

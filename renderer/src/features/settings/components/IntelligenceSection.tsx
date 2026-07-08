@@ -5,21 +5,21 @@ export const IntelligenceSection = () => {
   const { aiUsage } = useAppSelector((state) => state.settings);
 
   // --- Daily 8-Hour Block Math ---
-  const dailyLimit = aiUsage?.dailyLimit || 50000;
+  const dailyLimit = aiUsage?.dailyLimit || 100000;
   const dailyUsed = aiUsage?.tokensUsed || 0;
   const dailyRemaining = Math.max(0, dailyLimit - dailyUsed);
   const dailyPercent = Math.min(100, Math.round((dailyUsed / dailyLimit) * 100));
   const isDailyLimitReached = dailyUsed >= dailyLimit;
 
   // --- Daily Total Math ---
-  const dailyTotalLimit = aiUsage?.dailyTotalLimit || 150000;
+  const dailyTotalLimit = aiUsage?.dailyTotalLimit || 300000;
   const dailyTotalUsed = aiUsage?.dailyTotalUsed || 0;
   const dailyTotalRemaining = Math.max(0, dailyTotalLimit - dailyTotalUsed);
   const dailyTotalPercent = Math.min(100, Math.round((dailyTotalUsed / dailyTotalLimit) * 100));
   const isDailyTotalLimitReached = dailyTotalUsed >= dailyTotalLimit;
 
   // --- Monthly Math ---
-  const monthlyLimit = aiUsage?.monthlyLimit || 1500000;
+  const monthlyLimit = aiUsage?.monthlyLimit || 9000000;
   const monthlyUsed = aiUsage?.monthlyUsed || 0;
   const monthlyRemaining = Math.max(0, monthlyLimit - monthlyUsed);
   const monthlyPercent = Math.min(100, Math.round((monthlyUsed / monthlyLimit) * 100));

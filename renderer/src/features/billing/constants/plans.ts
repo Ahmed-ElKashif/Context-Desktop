@@ -19,8 +19,8 @@ export const getPlanDetails = (
     case "sandbox":
       return {
         price: 0,
-        baseDocs: 50,
-        baseTokens: 30000,
+        baseDocs: 100,
+        baseTokens: 100000,
         docRate: 3,
         tokenRatePer100k: 12,
         hasDocOverage: true,
@@ -28,11 +28,11 @@ export const getPlanDetails = (
       };
     case "growth":
       return {
-        price: cycle === "annual" ? 3600 : 4800,
+        price: cycle === "annual" ? 1490 : 1990,
         baseDocs: Infinity,
-        baseTokens: 450000,
-        docRate: 2.1,
-        tokenRatePer100k: 8.4,
+        baseTokens: 2500000,
+        docRate: 0,
+        tokenRatePer100k: 5,
         hasDocOverage: false,
         hasTokenOverage: true,
       };
@@ -49,12 +49,12 @@ export const getPlanDetails = (
     case "startup":
     default:
       return {
-        price: cycle === "annual" ? 1520 : 1900,
-        baseDocs: 500,
-        baseTokens: 150000,
-        docRate: 3,
-        tokenRatePer100k: 12,
-        hasDocOverage: true,
+        price: cycle === "annual" ? 599 : 799,
+        baseDocs: Infinity,
+        baseTokens: 500000,
+        docRate: 0,
+        tokenRatePer100k: 8,
+        hasDocOverage: false,
         hasTokenOverage: true,
       };
   }
