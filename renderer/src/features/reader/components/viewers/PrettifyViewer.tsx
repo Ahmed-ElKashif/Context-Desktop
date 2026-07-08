@@ -31,6 +31,7 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
     isPrettifying,
     error: reduxError,
     limitError: reduxLimitError,
+    activeDocumentId,
   } = useAppSelector((state) => state.prettify);
 
   const hasCachedResult = doc.prettifiedJson && typeof doc.prettifiedJson === "object";
@@ -57,16 +58,19 @@ export const PrettifyViewer = ({ document: doc }: PrettifyViewerProps) => {
 
   // Sync Redux states to local component state
   useEffect(() => {
-    if (isPrettifying) {
+    const isThisDocPrettifying = isPrettifying && activeDocumentId === doc._id;
+    const isThisDocError = (reduxLimitError || reduxError) && activeDocumentId === doc._id;
+
+    if (isThisDocPrettifying) {
         setState("loading");
-    } else if (reduxLimitError || reduxError) {
+    } else if (isThisDocError) {
         setState("error");
     } else if (result) {
         setState("result");
     } else {
         setState("initial");
     }
-  }, [isPrettifying, reduxLimitError, reduxError, result]);
+  }, [isPrettifying, reduxLimitError, reduxError, result, activeDocumentId, doc._id]);
 
   // Capacity check
   const capacity = useMemo(() => computeCapacity(doc), [doc]);

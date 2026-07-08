@@ -93,7 +93,7 @@ const prettifySlice = createSlice({
       })
       .addCase(prettifyDocumentThunk.rejected, (state, action) => {
         state.isPrettifying = false;
-        state.activeDocumentId = null;
+        state.activeDocumentId = action.meta.arg.documentId;
         const msg = action.error.message || "An unexpected error occurred";
         if (msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("upgrade")) {
           state.limitError = { 
