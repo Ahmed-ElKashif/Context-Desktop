@@ -93,20 +93,29 @@ export async function customGetFilesFromEvent(
       }
     };
 
+    const entries: any[] = [];
     for (const item of items) {
-      if (validCount >= MAX_VALID_FILES || iterationCount > MAX_ITERATIONS) break;
       if (item.kind === "file") {
         const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
         if (entry) {
-          await readEntry(entry);
+          entries.push({ type: 'entry', data: entry });
         } else {
-          // Fallback if webkitGetAsEntry is not supported
           const file = item.getAsFile();
-          if (file && isValidExtension(file.name)) {
-            files.push(file);
-            validCount++;
-          }
+          if (file) entries.push({ type: 'file', data: file });
         }
+      }
+    }
+
+    for (const entryObj of entries) {
+      if (validCount >= MAX_VALID_FILES || iterationCount > MAX_ITERATIONS) break;
+      if (entryObj.type === 'file') {
+        const file = entryObj.data as File;
+        if (isValidExtension(file.name)) {
+          files.push(file);
+          validCount++;
+        }
+      } else {
+        await readEntry(entryObj.data);
       }
     }
   } else if (event.dataTransfer && event.dataTransfer.files) {

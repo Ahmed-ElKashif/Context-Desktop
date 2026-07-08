@@ -69,20 +69,9 @@ export const createFolderThunk = createAppAsyncThunk(
 
 export const renameFolderThunk = createAppAsyncThunk(
   "document/renameFolder",
-  async (payload: { id: string; newName: string }, { dispatch, getState }) => {
+  async (payload: { id: string; newName: string }, { dispatch }) => {
     const response = await folderService.renameFolder(payload.id, payload.newName);
     dispatch(fetchFolderTree());
-    const state: any = getState();
-    const p = state.library.lastFetchParams;
-    dispatch(fetchFolderContents({
-      folderId: p.folderId,
-      page: 1,
-      limit: p.limit || 50,
-      sortBy: p.sortBy,
-      sortOrder: p.sortOrder,
-      search: p.search,
-      tags: p.tags,
-    }));
     return response;
   }
 );
