@@ -231,6 +231,43 @@ export const bulkDeleteDocumentsThunk = createAppAsyncThunk(
   ) => {
     const { documentIds, folderIds } = payload;
 
+    const state: any = getState();
+    const lastDocId = state.auth?.user?.lastActiveDocumentId;
+
+    // 1. Clear lastActiveDocumentId if the active document is being directly deleted
+    if (lastDocId && documentIds.includes(lastDocId)) {
+      dispatch(updateUserLocalState({ lastActiveDocumentId: null }));
+      dispatch(updateProfile({ lastActiveDocumentId: null }));
+    }
+
+    // 2. Clear workspace if the active document is inside a folder being deleted
+    if (lastDocId && !documentIds.includes(lastDocId) && folderIds.length > 0) {
+      const activeDoc =
+        state.library.globalDocumentsList?.find((d: any) => d._id === lastDocId) ||
+        state.workspace.activeDocument;
+      if (activeDoc?.folder) {
+        const allAffectedFolderIds = new Set<string>();
+        for (const fId of folderIds) {
+          const queue = [fId];
+          allAffectedFolderIds.add(fId);
+          while (queue.length > 0) {
+            const current = queue.shift()!;
+            for (const folder of state.library.globalFolderTree || []) {
+              if (folder.parentFolder === current && !allAffectedFolderIds.has(folder._id)) {
+                allAffectedFolderIds.add(folder._id);
+                queue.push(folder._id);
+              }
+            }
+          }
+        }
+        if (allAffectedFolderIds.has(activeDoc.folder)) {
+          dispatch({ type: "workspace/clearActiveDocument" });
+          dispatch(updateUserLocalState({ lastActiveDocumentId: null }));
+          dispatch(updateProfile({ lastActiveDocumentId: null }));
+        }
+      }
+    }
+
     if (documentIds.length > 0) {
       await documentService.bulkDeleteDocuments(documentIds);
     }
@@ -243,8 +280,8 @@ export const bulkDeleteDocumentsThunk = createAppAsyncThunk(
 
     // Refresh sidebar and background data
     dispatch(fetchFolderTree());
-    const state = getState();
-    const p = state.library.lastFetchParams;
+    const currentState: any = getState();
+    const p = currentState.library.lastFetchParams;
     dispatch(
       fetchFolderContents({
         folderId: p.folderId,

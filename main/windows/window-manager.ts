@@ -131,18 +131,18 @@ export async function createWindow() {
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const scriptSrc = isDev 
-      ? "'self' 'unsafe-inline' 'unsafe-eval'" 
-      : "'self'";
+      ? "'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com" 
+      : "'self' https://unpkg.com";
 
     const connectSrc = isDev
-      ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com"
-      : "'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com";
+      ? "'self' http://localhost:5000 ws://localhost:5000 https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com https://unpkg.com"
+      : "'self' https://context-sfs.up.railway.app wss://context-sfs.up.railway.app https://context-ai.up.railway.app wss://context-ai.up.railway.app https://res.cloudinary.com https://unpkg.com";
       
     callback({
       responseHeaders: {
         ...details.responseHeaders,
         "Content-Security-Policy": [
-          `default-src 'self'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src ${scriptSrc}; img-src 'self' data: *; connect-src ${connectSrc}`,
+          `default-src 'self'; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src ${scriptSrc}; img-src 'self' data: *; connect-src ${connectSrc}; worker-src 'self' blob:;`,
         ],
       },
     });

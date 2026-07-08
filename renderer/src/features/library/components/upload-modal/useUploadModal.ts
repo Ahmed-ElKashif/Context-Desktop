@@ -10,6 +10,7 @@ import {
 } from "../../../../store/library/librarySlice";
 import { resolveUniqueName } from "../../utils/tableUtils";
 import { getDesktopFilesFromEvent, handleDesktopFolderSelect } from "@/lib/desktop-dropzone";
+import { documentService } from "../../api/documentService";
 
 export interface UseUploadModalProps {
   onClose: () => void;
@@ -222,13 +223,24 @@ export const useUploadModal = ({
       }
 
       const toastId = "ai-export-flow";
-      notify("Exporting organized files to your PC...", "info", toastId);
+      notify("Preparing files for export...", "info", toastId);
 
-      // We only have documentIds in proposedFolderUpdates, so we need to fetch their URLs
-      // In the new API structure, the backend doesn't have an endpoint for this, we just map them from documentsList
-      const rawFiles = proposedFolderUpdates.map((update: any) => {
+      // Build the file list, fetching missing docs from the API as needed.
+      // documentsList only contains the current paginated view, so documents
+      // referenced by proposedFolderUpdates may not be present locally.
+      const rawFiles = await Promise.all(
+        proposedFolderUpdates.map(async (update: any) => {
           let doc = documentsList.find((d: any) => d._id === update.documentId);
-          
+
+          // If not in the local store, fetch from the API
+          if (!doc || !doc.cloudinaryUrl) {
+            try {
+              doc = await documentService.getDocument(update.documentId);
+            } catch {
+              // Document may have been deleted; skip it
+            }
+          }
+
           const title = update.title || doc?.title || `File_${update.documentId}`;
           const relativePath = update.newPath && update.newPath !== "/"
               ? `${update.newPath}/${title}`
@@ -239,7 +251,8 @@ export const useUploadModal = ({
             relativePath,
             localSourcePath: doc?.originalClientPath,
           };
-      });
+        })
+      );
 
       const filesToExport = rawFiles.filter((f: any) => f.url || f.localSourcePath);
 
@@ -247,6 +260,8 @@ export const useUploadModal = ({
         notify("No files found to export.", "error", toastId);
         return;
       }
+
+      notify(`Exporting ${filesToExport.length} files to your PC...`, "info", toastId);
 
       const result = await electronAPI.localFiles.exportOrganizedFiles(
         filesToExport,

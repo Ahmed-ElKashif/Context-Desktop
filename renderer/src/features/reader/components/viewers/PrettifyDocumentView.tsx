@@ -215,6 +215,8 @@ export const PrettifyDocumentView = ({
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={MarkdownComponents}
+                          allowedElements={['strong', 'em', 'code', 'a', 'del', 's', 'br', 'p']}
+                          unwrapDisallowed={true}
                         >
                           {block.text}
                         </ReactMarkdown>
@@ -237,6 +239,8 @@ export const PrettifyDocumentView = ({
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={MarkdownComponents}
+                          allowedElements={['strong', 'em', 'code', 'a', 'del', 's', 'br', 'p']}
+                          unwrapDisallowed={true}
                         >
                           {block.text}
                         </ReactMarkdown>
@@ -258,6 +262,8 @@ export const PrettifyDocumentView = ({
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={MarkdownComponents}
+                          allowedElements={['strong', 'em', 'code', 'a', 'del', 's', 'br', 'p']}
+                          unwrapDisallowed={true}
                         >
                           {block.text}
                         </ReactMarkdown>

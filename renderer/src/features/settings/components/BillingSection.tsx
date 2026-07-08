@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlanId, BillingCycle } from "../../billing/constants/plans";
+import { PlanId, BillingCycle, getPlanDetails } from "../../billing/constants/plans";
 import { UsageEstimator } from "../../billing/components/UsageEstimator";
 import { AddonCard } from "./AddonCard";
 
@@ -10,6 +10,12 @@ interface BillingSectionProps {
 export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("sandbox");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+
+  const startupMonthly = getPlanDetails("startup", "monthly").price;
+  const startupCurrent = getPlanDetails("startup", billingCycle).price;
+  
+  const growthMonthly = getPlanDetails("growth", "monthly").price;
+  const growthCurrent = getPlanDetails("growth", billingCycle).price;
 
   const handleOpenCheckout = (planId: PlanId) => {
     onCheckout(planId, billingCycle);
@@ -168,12 +174,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <div className="mb-2 h-14 flex flex-col justify-center">
             {billingCycle === "annual" && (
               <span className="text-xs font-semibold text-light-text/60 dark:text-dark-text/60 line-through mb-0.5">
-                Was 1,900 EGP / mo
+                Was {startupMonthly} EGP / mo
               </span>
             )}
             <div>
               <span className="text-3xl font-black text-light-text dark:text-white tracking-tighter">
-                {billingCycle === "annual" ? "1,520" : "1,900"} EGP
+                {startupCurrent} EGP
               </span>
               <span className="text-sm font-semibold text-light-text/70 dark:text-dark-text/70 ml-1">
                 / mo
@@ -181,7 +187,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
             </div>
           </div>
           <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
-            Up to 10 seats &middot;{" "}
+            1 seat &middot;{" "}
             {billingCycle === "annual" ? "billed annually" : "billed monthly"}
           </p>
 
@@ -232,12 +238,12 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
           <div className="mb-2 h-14 flex flex-col justify-center">
             {billingCycle === "annual" && (
               <span className="text-xs font-semibold text-light-text/60 dark:text-dark-text/60 line-through mb-0.5">
-                Was 4,800 EGP / mo
+                Was {growthMonthly} EGP / mo
               </span>
             )}
             <div>
               <span className="text-3xl font-black text-light-text dark:text-white tracking-tighter">
-                {billingCycle === "annual" ? "3,600" : "4,800"} EGP
+                {growthCurrent} EGP
               </span>
               <span className="text-sm font-semibold text-light-text/70 dark:text-dark-text/70 ml-1">
                 / mo
@@ -245,7 +251,7 @@ export const BillingSection = ({ onCheckout }: BillingSectionProps) => {
             </div>
           </div>
           <p className="text-[11px] font-medium text-light-text/70 dark:text-dark-text/70 mb-6 h-8">
-            Up to 30 seats &middot;{" "}
+            Up to 5 seats &middot;{" "}
             {billingCycle === "annual" ? "billed annually" : "billed monthly"}
           </p>
 

@@ -35,7 +35,7 @@ export const notify = (
 ) => {
   // Dispatch globally to sync with Notification Center
   if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("app-notify", { detail: { message, type } }));
+    window.dispatchEvent(new CustomEvent("app-notify", { detail: { message, type, systemNotify: type !== "info" } }));
   }
 
   const config = {

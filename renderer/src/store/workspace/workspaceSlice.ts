@@ -9,6 +9,7 @@ import {
   deleteDocumentThunk,
   bulkDeleteDocumentsThunk,
 } from "../library/thunks/documentThunks";
+import { deleteFolderThunk } from "../library/thunks/folderThunks";
 
 export interface WorkspaceState {
   activeDocument: DocumentData | null;
@@ -71,8 +72,18 @@ const workspaceSlice = createSlice({
         }
       })
       .addCase(bulkDeleteDocumentsThunk.pending, (state, action) => {
-        const { documentIds } = action.meta.arg;
+        const { documentIds, folderIds } = action.meta.arg;
         if (documentIds && state.activeDocument && documentIds.includes(state.activeDocument._id)) {
+          state.activeDocument = null;
+        }
+        // Also clear if the active document is directly inside a deleted folder
+        if (folderIds && state.activeDocument?.folder && folderIds.includes(state.activeDocument.folder)) {
+          state.activeDocument = null;
+        }
+      })
+      .addCase(deleteFolderThunk.pending, (state, action) => {
+        const folderId = action.meta.arg;
+        if (state.activeDocument?.folder === folderId) {
           state.activeDocument = null;
         }
       })
