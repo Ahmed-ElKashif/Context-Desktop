@@ -135,8 +135,8 @@ export const buildMutationReducers = (builder: ActionReducerMapBuilder<LibrarySt
       invalidateFolderCache(state, state.currentFolder?._id);
     })
     .addCase(renameFolderThunk.pending, (state, action) => {
-      const { path, newName } = action.meta.arg;
-      const folder = state.foldersList.find(f => f.path === path);
+      const { id, newName } = action.meta.arg;
+      const folder = state.foldersList.find(f => f._id === id);
       if (folder) folder.name = newName;
     })
     .addCase(renameFolderThunk.fulfilled, (state) => {
