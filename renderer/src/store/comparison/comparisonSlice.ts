@@ -274,6 +274,13 @@ const comparisonSlice = createSlice({
       // Delete Record
       .addCase(deleteComparisonRecord.fulfilled, (state, action) => {
         state.history = state.history.filter(i => i._id !== action.payload);
+        if (state.activeComparisonId === action.payload) {
+          state.baseDoc = null;
+          state.compareDoc = null;
+          state.comparisonData = null;
+          state.chatHistory = [];
+          state.activeComparisonId = null;
+        }
       })
       // Sync document updates from library (e.g. SSE status changes)
       .addCase(reloadDocumentThunk.fulfilled, (state, action) => {
