@@ -40,7 +40,9 @@ export const aiService = {
   },
 
   askQuestionStream: async (documentId: string, message: string, onChunk: (text: string) => void) => {
-    const token = localStorage.getItem("context_token");
+    // Read from Electron's secure store — the same place the axios interceptor reads from.
+    // Do NOT use localStorage; the desktop app never writes the token there.
+    const token = await (window as any).electronAPI.store.get("context_token");
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest"
