@@ -3,6 +3,27 @@ import { Icon } from "../../../components/ui/core/Icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { searchService, SemanticSearchResult } from "../index";
 
+const HighlightMatch = ({ text, query }: { text: string; query: string }) => {
+  if (!query.trim()) return <>{text}</>;
+  // Escape query for safe regex
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-light-primary/20 dark:bg-dark-primary/30 text-light-primary dark:text-dark-primary font-bold rounded px-0.5 bg-transparent">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
 export const GlobalSearch = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -135,8 +156,8 @@ export const GlobalSearch = () => {
                       </div>
                       <div className="overflow-hidden flex-1">
                         <h4 className="text-sm font-bold text-light-text dark:text-white truncate group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">{chunk.documentTitle}</h4>
-                        <p className="text-xs text-light-text/70 dark:text-white/70 line-clamp-2 mt-1 font-serif bg-light-surface/50 dark:bg-black/20 p-1.5 rounded border border-light-border/50 dark:border-white/5 italic">
-                          "{chunk.text}"
+                        <p className="text-sm text-light-text/90 dark:text-white/90 leading-relaxed line-clamp-2 mt-1.5 font-cairo bg-light-surface/50 dark:bg-black/20 p-2 rounded-md border border-light-border/50 dark:border-white/10 italic">
+                          "<HighlightMatch text={chunk.text} query={searchQuery} />"
                         </p>
                         <div className="flex items-center gap-2 mt-1.5 text-[11px] font-semibold text-light-text/70 dark:text-white/60">
                           <span>Chunk #{chunk.chunkIndex + 1}</span>
