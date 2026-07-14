@@ -30,6 +30,7 @@
   --font-display: "Rajdhani", sans-serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: "Fira Code", monospace;
+  --font-cairo: "Cairo", sans-serif;
 
   --animate-shrink: shrink 2s linear forwards;
   --animate-enter: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
